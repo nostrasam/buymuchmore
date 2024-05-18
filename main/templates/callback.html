@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block header %} {% include 'header.html' %} {% endblock header %}
+{% block banner %} {% include 'banner.html' %} {% endblock banner %}
+{% block content %}
+<div class="container">
+    <div class="row">
+      <h1 class="text-center title mt-5 mb-5">your profile dashboard</h1>
+      <div class="col-12 col-md-3 pavatar">
+        <img src="{{userprof.pix.url}}" alt="">
+        <h5>{{userprof.user}}</h5>
+      </div>
+      <div class="col-12 col-md-6 pform">
+        <form>
+          <div class="mb-3">
+            <p>Dear <span>{{userprof.user}}</span> your order has been receieved and payment confirmed 
+              we will contact you shortly! you have 10 working days to contact us if you require a refund based on our return policy! <b> Thanks for your patronage!</b></p>
+          </div>
+        </form>
+      </div>
+      <div class="col-12 col-md-3 plink">
+        <h2 class="text-center">quick links</h2>
+        <ul class="list-unstyled pt-3">
+          <li><a href="{% url 'profile' %}"><i class="bi bi-caret-right-fill"></i> profile</a></li>
+          <li><a href="{% url 'profile_update' %}"><i class="bi bi-caret-right-fill"></i> profile update</a></li>
+          <li><a href="{% url 'password_update' %}"><i class="bi bi-caret-right-fill"></i> password update</a></li>
+          <li><a href="{% url 'home' %}"><i class="bi bi-caret-right-fill"></i> home</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}

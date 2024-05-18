@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block header %} {% include 'header.html' %} {% endblock header %}
+{% block banner %} {% include 'banner.html' %} {% endblock banner %}
+{% block content %}
+<div class="card container mb-5 mt-5 detail">
+  <div class="row g-0 detrow">
+    <div class="col-12 col-md-7 det">
+      <img src="{{merchant_det1.carimg.url}}" class="img-fluid rounded-start" alt="...">
+    </div>
+    <div class="col-12 col-md-5 detinfo">
+      <div class="card-body">
+        <h5 class="card-title text-center pb-2 pt-1 text-warning bg-dark">{{merchant_det1.type|title}}</h5>
+        <p class="card-text"><span>model:</span> {{merchant_det1.model}}</p>
+        <p class="card-text"><span>description:</span> {{merchant_det1.description}}</p>
+        <p class="card-text"><span>condition:</span> {{merchant_det1.condition}}</p>
+        <p class="card-text"><span>availability:</span> {{merchant_det1.availability}}</p>
+        <p class="card-text"><span>seller address:</span> {{merchant_det1.address}}</p>
+        <p class="card-text"><span>seller telephone1:</span> {{merchant_det1.telephone1}}</p>
+        <p class="card-text"><span>seller telephone2:</span> {{merchant_det1.telephone2}}</p>
+        <p class="card-text"><span>postcode:</span> {{merchant_det1.postcode}}</p>
+        <p class="card-text"><span>seller name:</span> {{merchant_det1.seller_name}}</p>
+        <p class="card-text"><span>promo price:</span> ₦{{merchant_det1.promo_price}}</p>
+        <div class="text-center but">
+          <p>₦{{merchant_det1.price}}</p>
+          <form action="{% url 'add_to_cart' %}" method="POST"> 
+            {% csrf_token %}
+            <input type="hidden" name="quantity" value="1">
+            <input type="hidden" name="itemsid" value="{{merchant_det1.id}}">
+            <button type="submit" class="btn btn-warning">Buy Now</button>
+          </form>
+        </div>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock content %}
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}

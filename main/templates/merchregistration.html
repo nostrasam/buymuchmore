@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block header %} {% include 'header.html' %} {% endblock header %}
+{% block banner %} {% include 'banner.html' %} {% endblock banner %}
+{% block content %}
+<div class="container mt-5 mb-5">
+  <div class="row">
+    <div>
+    <i class="bi bi-info-circle-fill"><h4>Instruction to Register as a seller on the platform</h4></i>
+    <p><b>1.</b> Create an account by filling the <b>Registration form</b> below.</p>
+    <p><b>2.</b> Login and upload your document through the <b>KYC Verify page by clicking the KYC button for document verification</b></p>
+    <p><b>3.</b> Make payment using the below account details base on your preferred <B>Subscription</B> plan</p> 
+       <p> <b>(1 month subscription : N6,000)
+        (3 month subscription : N11,000)
+        (6 month subscription : N20,500)
+        (12 month subscription : N40,000) 
+      <p>Bank Name: GTB 
+      Bank Account Number: 0000000
+      Bank Account Name: Buy Much More </p></b></p>
+   <p><b>4.</b> Please wait <b>24 to 48 hours</b> for your account to be validated once your KYC verification is complete.</p> 
+   <p><b>5.</b> Already registered, use this link to <b>Signin</b> : <a class="btn btn-warning" href="{% url 'merchsignin' %}">Merchant Log in</a></p>   
+    </p>
+  </div>
+    <h1 class="text-center title">Merchant registration</h1>
+    <div class="col-12 register">
+      <form action="{% url 'merchregistration' %}" method="POST"> 
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">First Name</label>
+          <input type="text" name="first_name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Last Name</label>
+          <input type="text" name="last_name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Username</label>
+          <input type="text" name="username" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Phone</label>
+          <input type="text" name="phone" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Company name</label>
+          <input type="text" name="company_name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Company regitration number</label>
+          <input type="text" name="company_registration" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Address</label>
+          <input type="text" name="address" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <input type="hidden" name="pix" value="customer/Avatar pic.png" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Password</label>
+          <input type="password" name="password1" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Confirm Password</label>
+          <input type="password" name="password2" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <button type="submit" class="btn btn-warning">Merchant Sign up</button>
+      </form>
+    </div>
+    <div class="col-12 col-md-6">
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}

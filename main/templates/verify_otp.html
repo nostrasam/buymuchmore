@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block header %} {% include 'header.html' %} {% endblock header %}
+{% block banner %} {% include 'banner.html' %} {% endblock banner %}
+{% block content %}
+<div class="container mt-5 mb-5">
+  <div class="row home2">
+    <h1 class="text-center title">Verify otp</h1>
+    <div class="col-12 register">
+      <form action="{% url 'verify_otp' %}" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Enter otp</label>
+          <input type="text" name="entered_otp" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <button type="submit" class="btn btn-warning">Submit</button>
+        <!-- Register button -->
+        <div class="text-center pt-3">
+        <p>Not a member? <a href="{% url 'register' %}" class="text-warning">Register</a></p>
+        </div>
+      </form>
+      <!-- Register button done -->
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}

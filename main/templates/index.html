@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block header %} {% include 'header.html' %} {% endblock header %}
+{% block carousel %} {% include 'carousel.html' %} {% endblock carousel %}
+{% block content %}
+
+<div class="container home2">
+  <h3 class="text-center title">featured products</h5>
+  <div class="row row-cols-1 row-cols-md-4 g-4">
+    {% for item in categs %}
+    <div class="col fetureprod">
+      <div class="card">
+        <img src="{{ item.pix.url }}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">{{ item.brands|title }}</h5>
+          <p class="card-text">{{ item.description }}</p>
+          <h6 class="card-title">Sponsored</h6>
+          <a href="{% url 'featureitem' item.id item.slug %}" class="btn btn-warning">View More</a> 
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="container mb-5 home">
+  <div class="row">
+    {% for item in categ %}
+    <div class="col-md-6">
+      <div class="card mb-3 mt-5" data-aos="fade-right">
+        <div class="row g-0">
+          <div class="col-md-6 motor">
+            <img src="{{ item.pix.url }}" class="img-fluid rounded-start" alt="...">
+          </div>
+          <div class="col-md-6">
+            <div class="card-body">
+              <h5 class="card-title">{{ item.brand|title }}</h5>
+              <p class="card-text">{{ item.description }}</p>
+              <a href="{% url 'category' item.id item.slug %}" class="btn btn-warning">View More</a> 
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+  {% endblock content %}
+  {% block footer %} {% include 'footer.html' %} {% endblock footer %}

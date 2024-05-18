@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block header %} {% include 'header.html' %} {% endblock header %}
+{% block banner %} {% include 'banner.html' %} {% endblock banner %}
+{% block content %}
+<div class="container mt-5 mb-5">
+  <div class="row home2">
+    <h1 class="text-center title">Merchant Log in</h1>
+    <div class="col-12 register">
+      <form action="{% url 'merchsignin' %}" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Username</label>
+          <input type="text" name="username" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Password</label>
+          <input type="password" name="password" class="form-control" id="loginPassword" aria-describedby="emailHelp">
+        </div>
+        <button type="submit" class="btn btn-warning">Login</button>
+        <!-- Register button -->
+        <div class="text-center pt-3">
+        <p>Not a member? <a href="{% url 'merchregistration' %}" class="text-warning">Register</a></p>
+        </div>
+      </form>
+      <!-- Register button done -->
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}

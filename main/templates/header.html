@@ -1,0 +1,84 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'home' %}"><img src="{{info.logo.url}}" style="height: 40px;" ></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">  
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          
+          {% if user.is_authenticated %}
+         
+          {% if user.merchant %}
+          <li class="nav-item">
+            <a class="nav-link text-nowrap" href="{% url 'mechkyc_upload' %}">KYC Verify</a>
+          </li>
+          {% endif %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              {% if user.customer %}
+              <img src="{{user.customer.pix.url}}" style="height: 25px;">
+              {% endif %}
+                
+              {% if request.user %}
+              <span>{{user.username}}!</span>
+              {% endif %}
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li> 
+              <li><a class="dropdown-item" href="{% url 'signout' %}">Logout</a></li>
+            </ul>
+          </li>
+          {% else %}
+          
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'signin' %}"> Login</a> 
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-nowrap" href="{% url 'merchregistration' %}">Sell on BuyMuchMore</a>
+          </li>
+          {% endif %} 
+            <li>
+              <form action="{% url 'search' %}" method="POST">
+                {% csrf_token %}
+                <div class="search-container">
+                    <input type="text" placeholder="Search" name="search">
+                    <button type="submit" class="bi bi-search" >  
+                    </button>
+                </div>
+            </form>
+           
+            <li class="nav-item">
+              <a class="nav-link text-nowrap carticon" href="{% url 'cart' %}">
+                  <i class="bi bi-cart4 cartcount"> Cart</i>  
+                  <span class="cart-count">
+                      {% if total_quantity %}
+                          {{ total_quantity }}
+                      {% else %}
+                          0
+                      {% endif %}
+                  </span>
+              </a>
+           
+            </div>
+          </div>
+        </nav>
+        
+        <nav class="navbar bg-body-tertiary categonav">
+          <div class="container-fluid bar">
+            {% for item in categ %}
+            <a class="navbar-brand" href="{% url 'category' item.id item.slug %}">{{item.brand|title}}</a>
+            {% endfor %} 
+          </div>
+        </nav>
+        <!-- popup -->
+
+        {% for item in messages %}
+        <div class="alert alert-success alert-dismissible fade show text-center mb-0" role="alert">
+          <strong>{{item|title}}</strong> 
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    
+  <!-- popup done -->
