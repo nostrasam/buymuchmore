@@ -39,16 +39,16 @@
             <a class="nav-link text-nowrap" href="{% url 'merchregistration' %}">Sell on BuyMuchMore</a>
           </li>
           {% endif %} 
-            <li>
+
               <form action="{% url 'search' %}" method="POST">
                 {% csrf_token %}
-                <div class="search-container">
+                <div class="search-container"> 
                     <input type="text" placeholder="Search" name="search">
-                    <button type="submit" class="bi bi-search" >  
+                 <button type="submit" class="bi bi-search" >  
                     </button>
                 </div>
             </form>
-           
+            
             <li class="nav-item">
               <a class="nav-link text-nowrap carticon" href="{% url 'cart' %}">
                   <i class="bi bi-cart4 cartcount"> Cart</i>  
@@ -60,13 +60,23 @@
                       {% endif %}
                   </span>
               </a>
-           
             </div>
           </div>
         </nav>
         
         <nav class="navbar bg-body-tertiary categonav">
           <div class="container-fluid bar">
+            {% for item in categ|slice:":5" %}
+            <a class="navbar-brand" href="{% url 'category' item.id item.slug %}">{{item.brand|title}}</a>
+            {% endfor %} 
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+              <span class="allcateg">All Category</span> <span class="navbar-toggler-icon actaeg"></span>
+            </button>
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+              <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasNavbarLabel">All Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+              </div>
             {% for item in categ %}
             <a class="navbar-brand" href="{% url 'category' item.id item.slug %}">{{item.brand|title}}</a>
             {% endfor %} 

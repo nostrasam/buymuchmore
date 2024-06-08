@@ -10,6 +10,7 @@ class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug':('model',)}
     list_display = ['id', 'type', 'model', 'price', 'description', 'telephone1', 'telephone2', 'seller_name', 'uploaded_at', 'updated_at']
     
+
 class FeatureItemAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug':('brand',)}
     
@@ -38,3 +39,6 @@ admin.site.register(Cart, CartAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Subscribe, SubscribeAdmin)
+
+
+

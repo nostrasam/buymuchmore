@@ -15,22 +15,11 @@
           <h5 class="card-title">{{item.model|title}}</h5>
           <p class="card-text">₦{{item.price}}</p>
           
-          <!-- Display reviews and ratings -->
-          <div class="reviews">
-            {% for review in item.review_set.all %}
-              <p>Rating: {{ review.rating }}</p>
-              <p>Comment: {{ review.comment }}</p>
-              <hr>
-            {% empty %}
-              <p>No reviews yet</p>
-            {% endfor %}
-          </div>
-          
           <form action="{% url 'add_to_cart' %}" method="POST"> 
             {% csrf_token %}
             <input type="hidden" name="quantity" value="1">
             <input type="hidden" name="itemsid" value="{{item.id}}">
-            <button type="submit" class="btn btn-warning">Buy Now</button>
+            <button type="submit" class="btn btn-warning">Add to Cart</button>
           </form>
         </div>
       </div>

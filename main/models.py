@@ -61,6 +61,30 @@ class Product(models.Model):
     
     def __str__(self):
         return self.model
+class FeatureProduct(models.Model):
+    type = models.ForeignKey(FeatureItem, on_delete=models.CASCADE)
+    model = models.CharField(max_length=50)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(max_length=300, blank=True, null=True)
+    condition = models.CharField(max_length=50)
+    color = models.CharField(max_length=50)
+    quantity = models.IntegerField()
+    availability = models.CharField(max_length=50)
+    address = models.CharField(max_length=200)
+    postcode = models.CharField(max_length=100, blank=True, null=True)
+    price = models.IntegerField()
+    promo_price = models.IntegerField(blank=True, null=True)
+    telephone1 = models.CharField(max_length=50)
+    telephone2 = models.CharField(max_length=50, blank=True, null=True)
+    seller_name = models.CharField(max_length=100)
+    email = models.CharField(max_length=50, blank=True, null=True)
+    message = models.TextField(blank=True, null=True)
+    carimg = models.ImageField(upload_to='carimg')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.model
     
     
 class Contact(models.Model):
@@ -87,7 +111,6 @@ class Customer(models.Model):
     def __str__(self):
         return self.user.username
     
-    
 class Merchant(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=50)
@@ -111,9 +134,7 @@ class Cart(models.Model):
     amount = models.CharField(max_length=50)
     
     def __str__(self):
-        return self.user.username
-
- 
+        return self.user.username 
     
 class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

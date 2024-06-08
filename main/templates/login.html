@@ -19,7 +19,9 @@
         <button type="submit" class="btn btn-warning">Login</button>
         <!-- Register button -->
         <div class="text-center pt-3">
-        <p>Not a member? <a href="{% url 'register' %}" class="text-warning">Register</a></p>
+        <p>Not a member?<a href="{% url 'register' %}" class="text-warning">Register</a></p>
+          <p><a href="{% url 'reset_password' %}">Forgotten Password?</a></p>
+         
         </div>
       </form>
       <!-- Register button done -->

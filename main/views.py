@@ -13,7 +13,7 @@ from django.core.mail import EmailMessage
 from django.db.models import Q
 from main.models import *
 from .forms import *
-from .models import Customer, Product, Review, Cart
+from .models import Customer, Product, FeatureProduct, Review, Cart
 from django.db.models import Sum
 
 
@@ -75,6 +75,18 @@ def products(request):
     
     return render(request, 'products.html', context)
 
+def subscription_products(request):
+    products = Subscribe.objects.all()
+    p = Paginator(products, 8)
+    page = request.GET.get('page')
+    pagin = p.get_page(page)
+    
+    context = {
+        'pagin': pagin,
+    }
+    
+    return render(request, 'subscription_products.html', context)
+
 
 def detail(request, id, slug):
     merchant_det = Product.objects.get(pk=id)
@@ -85,7 +97,6 @@ def detail(request, id, slug):
     
     return render(request, 'detail.html', context)
 
-
 def featuredetail(request, id, slug):
     merchant_det1 = Product.objects.get(pk=id)
     
@@ -94,7 +105,6 @@ def featuredetail(request, id, slug):
     }
     
     return render(request, 'featuredetail.html', context)
-
 
 def contact(request):
     form = ContactForm()
@@ -299,7 +309,7 @@ def password_update(request):
             new = request.user.username.title()
             messages.error(request, f"Dear {new}, there is an error trying to change your password: {form.errors}")
             # Render the same template with the form and errors instead of redirecting
-            return render(request, 'password_update.html', {'userprof': userprof, 'form': form})
+            return render(request, 'password_upda.html', {'userprof': userprof, 'form': form})
 
     context = {
         'userprof': userprof,
@@ -337,8 +347,6 @@ def add_to_cart(request):
     return redirect('products')
 
 # Now, in the template where you display the cart icon, you can access the total_items_in_cart variable
-
-    
 
 @login_required(login_url='signin')       
 def cart(request):
@@ -420,7 +428,7 @@ def pay(request):
     if request.method == 'POST':
         api_key = 'sk_test_ddafcabdaed050c9422c8365430f1c50b79f83f1'  # Secret key from paystack
         curl = 'https://api.paystack.co/transaction/initialize'  # Paystack call url
-        cburl = 'http://54.88.222.192/callback'  # Payment thank you page
+        cburl = 'http://127.0.0.1:8000/callback'  # Payment thank you page
         ref = str(uuid.uuid4())  # Reference number required by paystack as an additional order number
         profile = Customer.objects.get(user__username=request.user.username)
         order_no = profile.id  # Main order number

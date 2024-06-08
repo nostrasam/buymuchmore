@@ -78,7 +78,7 @@
 
 /* styling carousel */
 .caroimg img{
-    height: 60vh;
+    height: 65vh;
 }
 .carousel-control-prev-icon span{
     font-size: 40px;
@@ -110,9 +110,11 @@
     margin-right: auto;
 }
 .motor img{
-    width: 100%;
-    height: 45vh;
+    width: 85%;
+    height: 40vh;
     border: none;
+    padding-left: 5%;
+    padding-top: 3%;
 }
 .home .card-body{
     text-align: center;
@@ -122,7 +124,7 @@
 
 .home .card .card-body{
     box-shadow: 5px 10px #f0f0f0;
-    height: 40vh;
+    height: 50vh;
 }
 
 .home h1{
@@ -135,18 +137,19 @@
 
 .home2 .fetureprod{
     height: 35vh;
-    padding-bottom: 32%;
+    padding-bottom: 30%;
 }
 
 .home2 .fetureprod .card-body{
     height: 28vh;
-    padding-top: 5%;
+    padding-top: 3%;
 }
 
 .home2 .fetureprod img{
-    height: 35vh;
-    width: 92%;
-    padding-top: 3%;
+    height: 36vh;
+    width: 85%;
+    padding-top: 5%;
+    padding-left: 14%;
    
 }
 .home2 a{
@@ -204,7 +207,8 @@
     padding-bottom: 5%;
 }
 .product .card img{
-    height: 200px;
+    height: 42vh;
+    width: 80%;
     padding: 4%;
     border-bottom: 4px solid orange;
 }
@@ -295,10 +299,20 @@
 }
 /* styling register page done */
 
+/* styling password reset */
+.home2 p{
+    padding-left: 5%;
+}
+
+.home2 h6{
+    padding-left: 5%;
+}
+
+/* styling password reset done*/
 
 /* styling cart */
 .cart table{
-    width: 10px !important;
+    width: 70% !important;
 }
 .cart thead{
     background: orange;
@@ -356,6 +370,11 @@
     font-style: normal;
     font-weight: 600;
 }
+.categonav span{
+    font-size: 15px !important;
+    font-style: normal;
+    font-weight: 600;
+}
 
 /* styling category bar done */
 
@@ -405,7 +424,16 @@
     padding: 3%;
 }
 .pform form input{
+
+
+
     background-color: orange;
+}
+
+.categonav .offcanvas-end{
+    background-color: rgb(242, 246, 250);
+    padding-left: 2%;
+    border-color: black;
 }
 /* styling profile done */
 
@@ -437,8 +465,19 @@
         margin-right: auto;
     }
     .motor img{
-        width: 100%;
+        width: 85%;
         height: 40vh;
+        border: none;
+        padding-left: 5%;
+        padding-top: 3%;
+    }
+
+    .motor{
+        width: 85%;
+        height: 30vh;
+        border: none;
+        padding-left: 5%;
+        padding-top: 3%;
     }
     .map{
         padding-top: 6%;
@@ -462,7 +501,7 @@
     float: right;
     margin: 6px;
     padding-left: 10px;
-}
+    }
 
 /* Styling for search input */
 .collapse .search-container input[type=text] {
@@ -471,8 +510,7 @@
     border-radius: 25px;
     border: black;
     padding-left: 10px;
-}
-
+    }
 
 /* Styling for search button */
 .collapse .bi-search {
@@ -480,52 +518,76 @@
     color: none;
     border: none;
     
-}
+    }
 
 .categonav .bar{
-    height: 7vh !important;
-    width: 400px;
+    height: 13vh !important;
+    width: 100%;
     background-color: #eaf0f6 !important;
-}
+    }
 
 .categonav a{
     font-size: 10px !important;
     font-style: normal;
     font-weight: 500;
+    }
 
-}
+    .categonav span{
+        font-size: 11px !important;
+        font-style: normal;
+        font-weight: 500;   
+    }
+
+    .categbckgrd{
+        font-size: 11px !important;
+        font-style: normal;
+        font-weight: 500;
+        padding-left: 10% !important;
+        background: blue;   
+    }
+
+
 /* styling cart */
 
 .cart table{
-    width: 100%;
+    width: 60%;
 }
+
 .cart thead{
     background: orange;
     text-align: center;
 }
+
 .cart th{
     text-transform: capitalize;
 }
+
 .cart tbody{
     text-align: center;
 }
+
 .cart tbody i{
     color: red;
 }
+
 .cart td{
     text-transform: capitalize;
 }
+
 .item td{
     border: 2px solid orange;
 }
+
 .subtot td{
     font-weight: 600;
 }
+
 .cartbut button{
     text-transform: capitalize;
     margin-bottom: 10%;
     margin-top: 10%;
 }
+
 .carticon {
     padding-bottom: 10% !important;
     padding-left: 190px !important;
@@ -537,10 +599,63 @@
     text-transform: capitalize;
     color: red;
 }
+
 .total td{
     font-weight: 800;
     font-size: 18px;
     font-weight: bold;
+}
+
+.home2 h3{
+    font-size: 23px;
+}
+
+.home2 .fetureprod{
+    height: 35vh;
+    padding-bottom: 85%;
+}
+
+
+.home2 .fetureprod .card-body{
+    height: 35vh;
+    padding-top: 5%;
+}
+
+.home2 .fetureprod img{
+    height: 35vh;
+    width: 85%;
+    padding-top: 5%;
+    padding-left: 14%;
+   
+}
+
+.home2 a{
+    margin-left: 35%;
+}
+
+.home .card img{
+    height: 35vh;
+    width: 85%;
+    padding-top: 5%;
+    padding-left: 14%;
+   
+}
+
+.home .card-body{
+    padding-top: 1px; 
+}
+
+.product .card img{
+    height: 55vh;
+    width: 60%;
+    padding: 4%;
+    border-bottom: 4px solid orange;
+}
+
+.categonav .offcanvas-end{
+    background-color: rgb(242, 246, 250);
+    padding-left: 2%;
+    border-color: black;
 }
 
 }   

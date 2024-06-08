@@ -10,28 +10,34 @@
     <div class="col-12 col-md-5 detinfo">
       <div class="card-body">
         <h5 class="card-title text-center pb-2 pt-1 text-warning bg-dark">{{merchant_det.type|title}}</h5>
-        <p class="card-text"><span>model:</span> {{merchant_det.model}}</p>
-        <p class="card-text"><span>description:</span> {{merchant_det.description}}</p>
-        <p class="card-text"><span>condition:</span> {{merchant_det.condition}}</p>
-        <p class="card-text"><span>availability:</span> {{merchant_det.availability}}</p>
-        <p class="card-text"><span>seller address:</span> {{merchant_det.address}}</p>
-        <p class="card-text"><span>seller telephone1:</span> {{merchant_det.telephone1}}</p>
-        <p class="card-text"><span>seller telephone2:</span> {{merchant_det.telephone2}}</p>
-        <p class="card-text"><span>postcode:</span> {{merchant_det.postcode}}</p>
-        <p class="card-text"><span>quantity:</span> {{merchant_det.quantity}}</p>
-        <p class="card-text"><span>seller name:</span> {{merchant_det.seller_name}}</p>
+        <p class="card-text"><span>Model:</span> {{merchant_det.model}}</p>
+        <p class="card-text"><span>Description:</span> {{merchant_det.description}}</p>
+        <p class="card-text"><span>Condition:</span> {{merchant_det.condition}}</p>
+        <p class="card-text"><span>Availability:</span> {{merchant_det.availability}}</p>
+        <p class="card-text"><span>Seller Address:</span> {{merchant_det.address}}</p>
+        
+        {% if user.is_authenticated %}
+          <p class="card-text"><span>Seller Telephone 1:</span> {{merchant_det.telephone1}}</p>
+          <p class="card-text"><span>Seller Telephone 2:</span> {{merchant_det.telephone2}}</p>
+        {% else %}
+          <p class="card-text text-danger">Please log in to see the seller's telephone numbers.</p>
+        {% endif %}
+        
+        <p class="card-text"><span>Postcode:</span> {{merchant_det.postcode}}</p>
+        <p class="card-text"><span>Quantity:</span> {{merchant_det.quantity}}</p>
+        <p class="card-text"><span>Seller Name:</span> {{merchant_det.seller_name}}</p>
         <div class="text-center but">
           <p>₦{{merchant_det.price}}</p>
           <form action="{% url 'add_to_cart' %}" method="POST"> 
             {% csrf_token %}
             <input type="hidden" name="quantity" value="1">
             <input type="hidden" name="itemsid" value="{{merchant_det.id}}">
-            <button type="submit" class="btn btn-warning">Buy Now</button>
+            <button type="submit" class="btn btn-warning">Add to Cart</button>
           </form>
         </div>
+      </div>
     </div>
   </div>
-</div>
 </div>
 {% endblock content %}
 {% block footer %} {% include 'footer.html' %} {% endblock footer %}
