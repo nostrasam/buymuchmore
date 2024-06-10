@@ -312,7 +312,8 @@
 
 /* styling cart */
 .cart table{
-    width: 70% !important;
+    width: 100%;
+    
 }
 .cart thead{
     background: orange;
@@ -425,8 +426,6 @@
 }
 .pform form input{
 
-
-
     background-color: orange;
 }
 
@@ -497,15 +496,15 @@
         margin-bottom: 8%;
     }
 /* Styling for search bar container */
-.collapse .search-container {
-    float: right;
-    margin: 6px;
-    padding-left: 10px;
-    }
+    .collapse .search-container {
+        float: left;
+        margin: 8px;
+        padding-left: 30px;
+         }
 
 /* Styling for search input */
 .collapse .search-container input[type=text] {
-    width: 350px;
+    width: 200px;
     height: 30px;
     border-radius: 25px;
     border: black;
@@ -516,12 +515,11 @@
 .collapse .bi-search {
     background-color: none;
     color: none;
-    border: none;
-    
+    border: none; 
     }
 
 .categonav .bar{
-    height: 13vh !important;
+    height: 15vh !important;
     width: 100%;
     background-color: #eaf0f6 !important;
     }
@@ -546,85 +544,67 @@
         background: blue;   
     }
 
+    .home2 h3{
+        font-size: 23px;
+    }
 
-/* styling cart */
+    .home2 .fetureprod{
+        height: 65vh;
+        padding-bottom: 20%;
+    }
 
-.cart table{
-    width: 60%;
-}
+    .home .fetureprod{
+        height: 92vh;
+        padding-bottom: 20%;
+    }
 
-.cart thead{
-    background: orange;
-    text-align: center;
-}
-
-.cart th{
-    text-transform: capitalize;
-}
-
-.cart tbody{
-    text-align: center;
-}
-
-.cart tbody i{
-    color: red;
-}
-
-.cart td{
-    text-transform: capitalize;
-}
-
-.item td{
-    border: 2px solid orange;
-}
-
-.subtot td{
-    font-weight: 600;
-}
-
-.cartbut button{
-    text-transform: capitalize;
-    margin-bottom: 10%;
-    margin-top: 10%;
-}
-
-.carticon {
-    padding-bottom: 10% !important;
-    padding-left: 190px !important;
-}
-/* styling cart done */
-
-/* styling checkout */
-.cart h1{
-    text-transform: capitalize;
-    color: red;
-}
-
-.total td{
-    font-weight: 800;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.home2 h3{
-    font-size: 23px;
-}
-
-.home2 .fetureprod{
-    height: 35vh;
-    padding-bottom: 85%;
-}
-
+    .cart table{
+        width: 100%;
+        margin-right: 30%;
+    }
+    .cart img{
+        width: 33px;
+        height: 2vh;
+    }
+    .cart thead{
+        background: orange;
+        text-align: center;
+        font-size: 10px;
+    }
+    .item td{
+        border: 2px solid orange;
+        font-size: 10px;
+    }
+    .cartbut button{
+        text-transform: capitalize;
+        margin-bottom: 10%;
+        margin-top: 10%;
+        font-size: 10px;
+    }
+    .cart tbody{
+        text-align: center;
+        font-size: 12px;
+    }
+    .cart .btn{
+        font-size: 10px;
+    }
+    .cart .mb-3{
+        font-size: 13px;
+    }
+    .cart .total1{
+        font-size: 12px;
+    }
+    
 
 .home2 .fetureprod .card-body{
-    height: 35vh;
-    padding-top: 5%;
+    height: 30vh;
+    padding-top: 3%;
 }
 
 .home2 .fetureprod img{
     height: 35vh;
     width: 85%;
-    padding-top: 5%;
+    padding-top: 3%;
     padding-left: 14%;
    
 }
@@ -641,10 +621,6 @@
    
 }
 
-.home .card-body{
-    padding-top: 1px; 
-}
-
 .product .card img{
     height: 55vh;
     width: 60%;
@@ -657,5 +633,10 @@
     padding-left: 2%;
     border-color: black;
 }
+.det img{
+    height: 300px;
+    width: 100%;
+}
+
 
 }   

@@ -7,7 +7,7 @@
   <div class="row">
     <div class="col-12 col-md-6 cart">
       <table>
-        <h1 class="text-center mb-3">summary</h1>
+        <h1 class="text-center">summary</h1>
         <thead>
           <th>item</th>
           <th>brand</th>
@@ -29,13 +29,13 @@
             <td></td>
             <td></td>
             <td></td>
-            <td>total =</td>
-            <td>₦{{total|floatformat:2|intcomma}}</td>
+            <td class="total1">total =</td>
+            <td class="total1">₦{{total|floatformat:2|intcomma}}</td>
           </tr>
           </tbody>
       </table>
     </div>
-    <div class="col-12 col-md-6 pt-5">
+    <div class="col-12 col-md-6 pt-5 cart">
       <form action="{% url 'pay' %}" method="POST"> 
         {% csrf_token %}
         <div class="mb-3">
