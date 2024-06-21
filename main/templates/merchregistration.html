@@ -5,51 +5,51 @@
 <div class="container mt-5 mb-5">
   <div class="row">
     <div>
-    <i class="bi bi-info-circle-fill"><h4>Instruction to Register as a seller on the platform</h4></i>
-    <p><b>1.</b> Create an account by filling the <b>Registration form</b> below.</p>
-    <p><b>2.</b> Login and upload your document through the <b>KYC Verify page by clicking the KYC button for document verification</b></p>
-    <p><b>3.</b> Make payment using the below account details base on your preferred <B>Subscription</B> plan</p> 
+    <i class="bi bi-info-circle-fill"><h4>Instruction pour s'inscrire en tant que vendeur sur la plateforme</h4></i>
+    <p><b>1.</b> Create an account by filling the <b>Créez un compte en remplissant le</b> ci-dessous.</p>
+    <p><b>2.</b> Connectez-vous et téléchargez votre document via le <b>Page de vérification KYC en cliquant sur le bouton KYC pour la vérification des documents</b></p>
+    <p><b>3.</b> Effectuez le paiement en utilisant les détails du compte ci-dessous en fonction de votre préférence <B>Abonnement</B> plan</p> 
        <p> <b>(1 month subscription : N6,000)
-        (3 month subscription : N11,000)
-        (6 month subscription : N20,500)
-        (12 month subscription : N40,000) 
-      <p>Bank Name: GTB 
-      Bank Account Number: 0000000
-      Bank Account Name: Buy Much More </p></b></p>
-   <p><b>4.</b> Please wait <b>24 to 48 hours</b> for your account to be validated once your KYC verification is complete.</p> 
-   <p><b>5.</b> Already registered, use this link to <b>Signin</b> : <a class="btn btn-warning" href="{% url 'merchsignin' %}">Merchant Log in</a></p>   
+        (abonnement de 3 mois : N11,000)
+        (abonnement 6 mois : N20,500)
+        (abonnement de 12 mois : N40,000) 
+      <p>Nom de banque: GTB 
+      Numéro de compte bancaire: 0000000
+      Nom du compte bancaire: Buy Much More </p></b></p>
+   <p><b>4.</b> S'il vous plaît, attendez <b>24 à 48 heures</b> pour que votre compte soit validé une fois votre vérification KYC terminée.</p> 
+   <p><b>5.</b> Déjà inscrit, utilisez ce lien pour <b>Se connecter</b> : <a class="btn btn-warning" href="{% url 'merchsignin' %}">Connexion marchand</a></p>   
     </p>
   </div>
-    <h1 class="text-center title">Merchant registration</h1>
+    <h1 class="text-center title">Inscription du commerçant</h1>
     <div class="col-12 register">
       <form action="{% url 'merchregistration' %}" method="POST"> 
         {% csrf_token %}
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">First Name</label>
+          <label for="exampleInputEmail1" class="form-label">Prénom</label>
           <input type="text" name="first_name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Last Name</label>
+          <label for="exampleInputEmail1" class="form-label">Nom de famille</label>
           <input type="text" name="last_name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Username</label>
+          <label for="exampleInputEmail1" class="form-label">Nom d'utilisateur</label>
           <input type="text" name="username" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Phone</label>
+          <label for="exampleInputEmail1" class="form-label">Téléphone</label>
           <input type="text" name="phone" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Company name</label>
+          <label for="exampleInputEmail1" class="form-label">Nom de l'entreprise</label>
           <input type="text" name="company_name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Company registration number</label>
+          <label for="exampleInputEmail1" class="form-label">Enregistrement de la société</label>
           <input type="text" name="company_registration" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Address</label>
+          <label for="exampleInputEmail1" class="form-label">Adresse</label>
           <input type="text" name="address" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
@@ -60,14 +60,14 @@
           <input type="hidden" name="pix" value="customer/Avatar pic.png" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Password</label>
+          <label for="exampleInputEmail1" class="form-label">Mot de passe</label>
           <input type="password" name="password1" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Confirm Password</label>
+          <label for="exampleInputEmail1" class="form-label">Confirmez le mot de passe</label>
           <input type="password" name="password2" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
-        <button type="submit" class="btn btn-warning">Merchant Sign up</button>
+        <button type="submit" class="btn btn-warning">Inscription du commerçant</button>
       </form>
     </div>
     <div class="col-12 col-md-6">

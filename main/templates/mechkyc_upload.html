@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container detailh1">
   <div class="row">
-    <h1 class="text-center title mt-5 mb-5">KYC Document Upload</h1>
+    <h1 class="text-center title mt-5 mb-5">Téléchargement de documents KYC</h1>
     <div class="col-12 col-md-3 pavata">
       <img src="{{ userprof.pix.url }}" alt="">
       <h5>{{ userprof.user }}</h5>
@@ -13,27 +13,27 @@
       <form action="{% url 'mechkyc_upload' %}" method="POST" enctype="multipart/form-data"> 
         {% csrf_token %}
         <div class="mb-3">
-          <label for="id_first_name" class="form-label">First Name</label>
+          <label for="id_first_name" class="form-label">Prénom</label>
           <input type="text" name="first_name" value="{{ userprof.first_name }}" class="form-control" id="id_first_name">
         </div>
         <div class="mb-3">
-          <label for="id_last_name" class="form-label">Last Name</label>
+          <label for="id_last_name" class="form-label">Nom</label>
           <input type="text" name="last_name" value="{{ userprof.last_name }}" class="form-control" id="id_last_name">
         </div>
         <div class="mb-3">
-          <label for="id_phone" class="form-label">Phone</label>
+          <label for="id_phone" class="form-label">Téléphone</label>
           <input type="text" name="phone" value="{{ userprof.phone }}" class="form-control" id="id_phone">
         </div>
         <div class="mb-3">
-          <label for="id_address" class="form-label">Address</label>
+          <label for="id_address" class="form-label">Adresse</label>
           <input type="text" name="address" value="{{ userprof.address }}" class="form-control" id="id_address">
         </div>
         <div class="mb-3">
-          <label for="id_address" class="form-label">Company name</label>
+          <label for="id_address" class="form-label">Nom de l'entreprise</label>
           <input type="text" name="address" value="{{ userprof.company_name }}" class="form-control" id="id_address">
         </div>
         <div class="mb-3">
-          <label for="id_address" class="form-label">Company registration</label>
+          <label for="id_address" class="form-label">Enregistrement de la société</label>
           <input type="text" name="address" value="{{ userprof.company_registration }}" class="form-control" id="id_address">
         </div>
         <div class="mb-3">
@@ -41,11 +41,11 @@
           <input type="email" name="email" value="{{ userprof.email }}" class="form-control" id="id_email">
         </div>
         <div class="mb-3">
-          <label for="id_pix" class="form-label">Upload Image</label>
+          <label for="id_pix" class="form-label">Télécharger une image</label>
           <input type="file" name="pix" class="form-control" id="id_pix">
         </div>
         <div>
-          <button type="submit" class="btn btn-warning">Submit</button>
+          <button type="submit" class="btn btn-warning">Soumettre</button>
         </div>
       </form>
     </div>

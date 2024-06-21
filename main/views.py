@@ -112,7 +112,7 @@ def contact(request):
         form = ContactForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "your message has been sent successfully!!!")
+            messages.success(request, "Votre message a été envoyé avec succès!!!")
             return redirect('home')
         
     context = {
@@ -124,7 +124,7 @@ def contact(request):
 
 def signout(request):
     logout(request)
-    messages.success(request, 'you are now signed out')
+    messages.success(request, 'tu es maintenant déconnecté')
     return redirect('signin')
 
 
@@ -135,10 +135,10 @@ def signin(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            messages.success(request, 'login successfully!')
+            messages.success(request, 'Connectez-vous avec succès!')
             return redirect('home')
         else:
-            messages.error(request, 'username/password is incorrect please try again')
+            messages.error(request, 'Le nom d utilisateur/mot de passe est incorrect, veuillez réessayer')
             return redirect('signin')
         
     return render(request, 'login.html')
@@ -150,10 +150,10 @@ def merchsignin(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            messages.success(request, 'login successfully!')
+            messages.success(request, 'Connectez-vous avec succès!')
             return redirect('home')
         else:
-            messages.error(request, 'username/password is incorrect please try again')
+            messages.error(request, 'Le nom d utilisateur/mot de passe est incorrect, veuillez réessayer')
             return redirect('merchsignin')
         
     return render(request, 'logins.html')
@@ -182,7 +182,7 @@ def register(request):
             )
             new_customer.save()
 
-            messages.success(request, f'Dear {user.username}, your account is successfully created')
+            messages.success(request, f'Chère {user.username}, votre compte est créé avec succès')
             return redirect('signin')
         else:
             # Pass form errors to the template for display
@@ -217,7 +217,7 @@ def merchregistration(request):
             )
             new_merchant.save()
 
-            messages.success(request, f'Dear {user.username}, your account is successfully created')
+            messages.success(request, f'Chère {user.username}, votre compte est créé avec succès')
             return redirect('merchsignin')
         else:
             # Pass form errors to the template for display
@@ -256,11 +256,11 @@ def profile_update(request):
         if pform.is_valid():
             user = pform.save()
             new = user.first_name.title()
-            messages.success(request, f"dear {new} your profile has been updated successfully!")
+            messages.success(request, f"Chère {new} Votre profil a été mis à jour avec succés!")
             return redirect('profile')
         else:
             new = user.first_name.title()
-            messages.error(request, f'dear {new} your profile update generated the follow error: {pform.errors}')
+            messages.error(request, f'Chère {new} la mise à jour de votre profil a généré l erreur suivante: {pform.errors}')
             return redirect('profile_update')
         
     context = {
@@ -278,11 +278,11 @@ def mechkyc_upload(request):
         if pform.is_valid():
             user = pform.save()
             new = user.first_name.title()
-            messages.success(request, f"dear {new} your document has been uploaded successfully. Please make your subscription payment and wait for 24 to 48 hours for account validation as a merchant!")
+            messages.success(request, f"Chère {new} votre commande a été reçue et le paiement confirmé, nous vous contacterons sous peu! Vous avez 10 jours ouvrables pour nous contacter si vous demandez un remboursement en vertu de notre politique de retour ! Merci pour votre soutien sur les produits!")
             return redirect('mechkyc_upload')
         else:
             new = user.first_name.title()
-            messages.error(request, f'dear {new} your document upload generated the follow error: {pform.errors}')
+            messages.error(request, f'Chère {new} le téléchargement de votre document a généré l erreur suivante: {pform.errors}')
             return redirect('mechkyc_upload')
         
     context = {
@@ -303,11 +303,11 @@ def password_update(request):
             user = form.save()
             update_session_auth_hash(request, user)
             new = request.user.username.title()
-            messages.success(request, f"Dear {new}, your password has been updated!")
+            messages.success(request, f"Chère {new}, Votre mot de passe a été mis à jour!")
             return redirect('home')
         else:
             new = request.user.username.title()
-            messages.error(request, f"Dear {new}, there is an error trying to change your password: {form.errors}")
+            messages.error(request, f"Chère {new}, il y a une erreur en essayant de changer votre mot de passe: {form.errors}")
             # Render the same template with the form and errors instead of redirecting
             return render(request, 'password_upda.html', {'userprof': userprof, 'form': form})
 
@@ -331,15 +331,15 @@ def add_to_cart(request):
                 basket.quantity += quantity
                 basket.amount = main.price * basket.quantity
                 basket.save()
-                messages.success(request, 'One item added to cart')
+                messages.success(request, 'Un article ajouté au panier')
             else:
                 newitem = Cart(user=request.user, items=main, quantity=quantity, price=main.price, amount=str(main.price * quantity), paid=False)
                 newitem.save()
-                messages.success(request, 'One item added to cart')
+                messages.success(request, 'Un article ajouté au panier')
         else:
             newcart = Cart(user=request.user, items=main, quantity=quantity, price=main.price, amount=str(main.price * quantity), paid=False)
             newcart.save()
-            messages.success(request, 'One item added to cart')
+            messages.success(request, 'Un article ajouté au panier')
 
     # Calculate total items in the cart
     total_items_in_cart = Cart.objects.filter(user=request.user, paid=False).count()
@@ -428,7 +428,7 @@ def pay(request):
     if request.method == 'POST':
         api_key = 'sk_test_ddafcabdaed050c9422c8365430f1c50b79f83f1'  # Secret key from paystack
         curl = 'https://api.paystack.co/transaction/initialize'  # Paystack call url
-        cburl = 'http://52.90.126.143/callback'  # Payment thank you page
+        cburl = 'http://127.0.0.1:8000/callback'  # Payment thank you page
         ref = str(uuid.uuid4())  # Reference number required by paystack as an additional order number
         profile = Customer.objects.get(user__username=request.user.username)
         order_no = profile.id  # Main order number

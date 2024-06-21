@@ -7,13 +7,13 @@
   <div class="row">
     <div class="col-12 col-md-6 cart">
       <table>
-        <h1 class="text-center">summary</h1>
+        <h1 class="text-center">résumé</h1>
         <thead>
-          <th>item</th>
-          <th>brand</th>
-          <th>color</th>
-          <th>quantity</th>
-          <th>amount</th>
+          <th>article</th>
+          <th>marque</th>
+          <th>couleur</th>
+          <th>quantité</th>
+          <th>montante</th>
         </thead>
         <tbody>
           {% for item in cart %}
@@ -29,8 +29,8 @@
             <td></td>
             <td></td>
             <td></td>
-            <td class="total1">total =</td>
-            <td class="total1">₦{{total|floatformat:2|intcomma}}</td>
+            <td class="total1">totale =</td>
+            <td class="total1">FCFA{{total|floatformat:2|intcomma}}</td>
           </tr>
           </tbody>
       </table>
@@ -39,19 +39,19 @@
       <form action="{% url 'pay' %}" method="POST"> 
         {% csrf_token %}
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">First Name</label>
+          <label for="exampleInputEmail1" class="form-label">Prénom</label>
           <input type="text" name="first_name" value="{{userprof.first_name}}" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Last Name</label>
+          <label for="exampleInputEmail1" class="form-label">Nom</label>
           <input type="text" name="last_name" value="{{userprof.last_name}}" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Phone</label>
+          <label for="exampleInputEmail1" class="form-label">Téléphone</label>
           <input type="text" name="phone" value="{{userprof.phone}}" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Address</label>
+          <label for="exampleInputEmail1" class="form-label">Adresse</label>
           <input type="text" name="address" value="{{userprof.address}}" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
@@ -59,11 +59,11 @@
           <input type="email" name="email" value="{{userprof.email}}" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Additional information</label>
+          <label for="exampleInputEmail1" class="form-label">Informations Complémentaires</label>
           <input type="hidden" name="total" value="{{total}}" id="">
           <input type="text" name="add_info" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
-        <button type="submit" class="btn btn-warning">Pay Now</button>
+        <button type="submit" class="btn btn-warning">Payez maintenant</button>
       </form>
     </div>
   </div>

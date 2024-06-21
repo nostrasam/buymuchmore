@@ -12,7 +12,7 @@
          
           {% if user.merchant %}
           <li class="nav-item">
-            <a class="nav-link text-nowrap" href="{% url 'mechkyc_upload' %}">KYC Verify</a>
+            <a class="nav-link text-nowrap" href="{% url 'mechkyc_upload' %}">KYC Vérifier</a>
           </li>
           {% endif %}
           <li class="nav-item dropdown">
@@ -26,32 +26,33 @@
               {% endif %}
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li> 
-              <li><a class="dropdown-item" href="{% url 'signout' %}">Logout</a></li>
+              <li><a class="dropdown-item" href="{% url 'profile' %}">Profil</a></li> 
+              <li><a class="dropdown-item" href="{% url 'signout' %}">Se déconnecter</a></li>
             </ul>
           </li>
           {% else %}
           
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'signin' %}"> Login</a> 
+            <a class="nav-link text-nowrap" href="{% url 'signin' %}"> Se connecter</a> 
           </li>
           <li class="nav-item">
-            <a class="nav-link text-nowrap" href="{% url 'merchregistration' %}">Sell on BuyMuchMore</a>
+            <a class="nav-link text-nowrap" href="{% url 'merchregistration' %}">Vendre sur BuyMuchMore</a>
           </li>
           {% endif %} 
 
-              <form action="{% url 'search' %}" method="POST">
-                {% csrf_token %}
-                <div class="search-container"> 
-                    <input type="text" placeholder="Search" name="search">
-                 <button type="submit" class="bi bi-search" >  
-                    </button>
-                </div>
-            </form>
+          <form action="{% url 'search' %}" method="POST">
+            {% csrf_token %}
+            <div class="search-container" style="position: relative; width: 100%;">
+                <input type="text" placeholder="Recherche" name="search" style="width: 100%; padding-right: 40px;">
+                <button type="submit" class="bi bi-search" style="position: absolute; right: 0; top: 0; height: 100%; border: none; background: none; padding: 0 10px; cursor: pointer;">
+                </button>
+            </div>
+        </form>
+        
             
             <li class="nav-item">
               <a class="nav-link text-nowrap carticon" href="{% url 'cart' %}">
-                  <i class="bi bi-cart4 cartcount"> Cart</i>  
+                  <i class="bi bi-cart4 cartcount"> Panier</i>  
                   <span class="cart-count">
                       {% if total_quantity %}
                           {{ total_quantity }}
@@ -70,11 +71,11 @@
             <a class="navbar-brand" href="{% url 'category' item.id item.slug %}">{{item.brand|title}}</a>
             {% endfor %} 
             <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-              <span class="allcateg">All Category</span> <span class="navbar-toggler-icon actaeg"></span>
+              <span class="allcateg">Toutes les catégories</span> <span class="navbar-toggler-icon actaeg"></span>
             </button>
             <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
               <div class="offcanvas-header">
-                <h5 class="offcanvas-title" id="offcanvasNavbarLabel">All Category</h5>
+                <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Toutes les catégories</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
               </div>
             {% for item in categ %}

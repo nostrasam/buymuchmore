@@ -4,23 +4,23 @@
 {% block content %}
 <div class="container mt-5 mb-5">
   <div class="row home2">
-    <h1 class="text-center title">Log in</h1>
+    <h1 class="text-center title">Se connecter</h1>
     <div class="col-12 register">
       <form action="{% url 'signin' %}" method="POST">
         {% csrf_token %}
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Username</label>
+          <label for="exampleInputEmail1" class="form-label">Nom d’utilisateur</label>
           <input type="text" name="username" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Password</label>
+          <label for="exampleInputEmail1" class="form-label">Mot de passe</label>
           <input type="password" name="password" class="form-control" id="loginPassword" aria-describedby="emailHelp">
         </div>
-        <button type="submit" class="btn btn-warning">Login</button>
+        <button type="submit" class="btn btn-warning">Se connecter</button>
         <!-- Register button -->
         <div class="text-center pt-3">
-        <p>Not a member?<a href="{% url 'register' %}" class="text-warning">Register</a></p>
-          <p><a href="{% url 'reset_password' %}">Forgotten Password?</a></p>
+        <p>Pas membre?<a href="{% url 'register' %}" class="text-warning">Inscription</a></p>
+          <p><a href="{% url 'reset_password' %}">Mot de passe oublié?</a></p>
          
         </div>
       </form>

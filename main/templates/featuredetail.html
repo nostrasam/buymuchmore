@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
-{% block header %} {% include 'header.html' %} {% endblock header %}
-{% block banner %} {% include 'banner.html' %} {% endblock banner %}
+{% block header %} 
+  {% include 'header.html' %} 
+{% endblock header %}
+{% block banner %} 
+  {% include 'banner.html' %} 
+{% endblock banner %}
 {% block content %}
 <div class="card container mb-5 mt-5 detail">
   <div class="row g-0 detrow">
@@ -10,29 +14,29 @@
     <div class="col-12 col-md-5 detinfo">
       <div class="card-body">
         <h5 class="card-title text-center pb-2 pt-1 text-warning bg-dark">{{merchant_det1.type|title}}</h5>
-        <p class="card-text"><span>Model:</span> {{merchant_det1.model}}</p>
+        <p class="card-text"><span>Modèle:</span> {{merchant_det1.model}}</p>
         <p class="card-text"><span>Description:</span> {{merchant_det1.description}}</p>
         <p class="card-text"><span>Condition:</span> {{merchant_det1.condition}}</p>
-        <p class="card-text"><span>Availability:</span> {{merchant_det1.availability}}</p>
-        <p class="card-text"><span>Seller Address:</span> {{merchant_det1.address}}</p>
+        <p class="card-text"><span>Disponibilité:</span> {{merchant_det1.availability}}</p>
         
         {% if user.is_authenticated %}
-          <p class="card-text"><span>Seller Telephone 1:</span> {{merchant_det1.telephone1}}</p>
-          <p class="card-text"><span>Seller Telephone 2:</span> {{merchant_det1.telephone2}}</p>
+          <p class="card-text"><span>Téléphone de Vendeur1:</span> {{merchant_det1.telephone1}}</p>
+          <p class="card-text"><span>Téléphone de Vendeur2:</span> {{merchant_det1.telephone2}}</p>
+          <p class="card-text"><span>Adresse du Vendeur:</span> {{merchant_det1.address}}</p>
         {% else %}
-          <p class="card-text text-danger">Please Register or log in to see the seller's telephone numbers.</p>
+          <p class="card-text text-danger">Veuillez vous inscrire ou vous connecter pour voir les numéros de téléphone et l'adresse du vendeur.</p>
         {% endif %}
         
-        <p class="card-text"><span>Postcode:</span> {{merchant_det1.postcode}}</p>
-        <p class="card-text"><span>Seller Name:</span> {{merchant_det1.seller_name}}</p>
-        <p class="card-text"><span>Promo Price:</span> ₦{{merchant_det1.promo_price}}</p>
+        <p class="card-text"><span>Code postal:</span> {{merchant_det1.postcode}}</p>
+        <p class="card-text"><span>Nom du Vendeur:</span> {{merchant_det1.seller_name}}</p>
+        <p class="card-text"><span>Prix ​​promotionnel:</span> FCFA{{merchant_det1.promo_price}}</p>
         <div class="text-center but">
           <p>₦{{merchant_det1.price}}</p>
           <form action="{% url 'add_to_cart' %}" method="POST"> 
             {% csrf_token %}
             <input type="hidden" name="quantity" value="1">
             <input type="hidden" name="itemsid" value="{{merchant_det1.id}}">
-            <button type="submit" class="btn btn-warning">Add to Cart</button>
+            <button type="submit" class="btn btn-warning">Ajouter au Panier</button>
           </form>
         </div>
       </div>
@@ -40,4 +44,6 @@
   </div>
 </div>
 {% endblock content %}
-{% block footer %} {% include 'footer.html' %} {% endblock footer %}
+{% block footer %} 
+  {% include 'footer.html' %} 
+{% endblock footer %}
