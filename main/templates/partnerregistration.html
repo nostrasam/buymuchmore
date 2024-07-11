@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block header %} {% include 'header.html' %} {% endblock header %}
+{% block banner %} {% include 'banner.html' %} {% endblock banner %}
+{% block content %}
+<div class="container mt-5 mb-5">
+  <div class="row">
+    <h1 class="text-center title">Partners registration</h1>
+    <div class="col-12 register">
+      <form action="{% url 'partnerregistration' %}" method="POST"> 
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="first_name" class="form-label">First Name</label>
+          <input type="text" name="first_name" class="form-control" id="first_name" aria-describedby="firstNameHelp">
+        </div>
+        <div class="mb-3">
+          <label for="last_name" class="form-label">Last Name</label>
+          <input type="text" name="last_name" class="form-control" id="last_name" aria-describedby="lastNameHelp">
+        </div>
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" name="username" class="form-control" id="username" aria-describedby="usernameHelp">
+        </div>
+        <div class="mb-3">
+          <label for="phone" class="form-label">Contact telephone number</label>
+          <input type="text" name="phone" class="form-control" id="phone" aria-describedby="phoneHelp">
+        </div>
+        <div class="mb-3">
+          <label for="company_name" class="form-label">Company name</label>
+          <input type="text" name="company_name" class="form-control" id="company_name" aria-describedby="companyNameHelp">
+        </div>
+        <div class="mb-3">
+          <label for="company_registration" class="form-label">Company registration</label>
+          <input type="text" name="company_registration" class="form-control" id="company_registration" aria-describedby="companyRegistrationHelp">
+        </div>
+        <div class="mb-3">
+          <label for="address" class="form-label">Address</label>
+          <input type="text" name="address" class="form-control" id="address" aria-describedby="addressHelp">
+        </div>
+        <div class="mb-3">
+          <label for="address_type" class="form-label">Address Type</label>
+          <select name="address_type" class="form-select" id="address_type">
+            <option value="seller">Seller Address</option>
+            <option value="delivery">Delivery Service Address</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" id="email" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="business_sector" class="form-label">Business Sector Type</label>
+          <select name="business_sector" class="form-select" id="business_sector">
+            <option value="Logistics">Logistics</option>
+            <option value="Insurance">Insurance</option>
+            <option value="Agriculture">Agriculture</option>
+            <option value="Manufacturing">Manufacturing</option>
+            <option value="Trading">Trading</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <input type="hidden" name="pix" value="customer/Avatar pic.png" class="form-control" id="pix">
+        </div>
+        <div class="mb-3">
+          <label for="password1" class="form-label">Password</label>
+          <input type="password" name="password1" class="form-control" id="password1" aria-describedby="passwordHelp">
+        </div>
+        <div class="mb-3">
+          <label for="password2" class="form-label">Confirm Password</label>
+          <input type="password" name="password2" class="form-control" id="password2" aria-describedby="confirmPasswordHelp">
+        </div>
+        <button type="submit" class="btn btn-warning">Partner Sign up</button>
+      </form>
+    </div>
+    <div class="col-12 col-md-6">
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}

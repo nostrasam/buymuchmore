@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block header %} {% include 'header.html' %} {% endblock header %}
+{% block banner %} {% include 'banner.html' %} {% endblock banner %}
+{% block content %}
+<div class="container">
+    <h2 class="mt-4">Merchant Details</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ merchant.name }}</h5>
+            <p class="card-text"><strong>Email:</strong> {{ merchant.email }}</p>
+            <p class="card-text"><strong>Phone:</strong> {{ merchant.phone }}</p>
+            <p class="card-text"><strong>Address:</strong> {{ merchant.address }}</p>
+            <a href="{% url 'merchant_dashboard' %}" class="btn btn-primary mt-3">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}

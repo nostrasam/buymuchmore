@@ -10,7 +10,7 @@
       <h5>{{ userprof.user }}</h5>
     </div>
     <div class="col-12 col-md-6 pform">
-      <form action="{% url 'mechkyc_upload' %}" method="POST" enctype="multipart/form-data"> 
+      <form action="{% url 'kyc_upload' %}" method="POST" enctype="multipart/form-data"> 
         {% csrf_token %}
         <div class="mb-3">
           <label for="id_first_name" class="form-label">First Name</label>
@@ -21,7 +21,7 @@
           <input type="text" name="last_name" value="{{ userprof.last_name }}" class="form-control" id="id_last_name">
         </div>
         <div class="mb-3">
-          <label for="id_phone" class="form-label">Phone</label>
+          <label for="id_phone" class="form-label">Contact telephone number</label>
           <input type="text" name="phone" value="{{ userprof.phone }}" class="form-control" id="id_phone">
         </div>
         <div class="mb-3">
@@ -41,7 +41,7 @@
           <input type="email" name="email" value="{{ userprof.email }}" class="form-control" id="id_email">
         </div>
         <div class="mb-3">
-          <label for="id_pix" class="form-label">Upload Image</label>
+          <label for="id_pix" class="form-label">Upload Valid ID or Company Registration Document</label>
           <input type="file" name="pix" class="form-control" id="id_pix">
         </div>
         <div>

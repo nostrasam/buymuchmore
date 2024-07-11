@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block header %} {% include 'header.html' %} {% endblock header %}
+{% block banner %} {% include 'banner.html' %} {% endblock banner %}
+{% block content %}
+
+<title>Nearest Locations</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+    .container {
+        max-width: 800px;
+        margin: 50px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+    .location {
+        margin: 20px 0;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .location h2 {
+        margin-top: 0;
+    }
+</style>
+
+<div class="container">
+    <h1>Nearest Locations</h1>
+    <div class="location" id="nearest-seller">
+        <h2>Nearest Seller Address</h2>
+        <p>Loading...</p>
+    </div>
+    <div class="location" id="nearest-delivery-service">
+        <h2>Nearest Delivery Service Address</h2>
+        <p>Loading...</p>
+    </div>
+</div>
+<script>
+    async function fetchNearestLocation(url, elementId) {
+        try {
+            let response = await fetch(url);
+            let data = await response.json();
+            document.getElementById(elementId).innerHTML = `
+                <h2>${data.address_type} Address</h2>
+                <p>Address: ${data.address}</p>
+                <p>Distance: ${data.distance} miles</p>
+            `;
+        } catch (error) {
+            document.getElementById(elementId).innerHTML = `<p>Error loading data</p>`;
+        }
+    }
+
+    const customerId = {{ customer.id }};
+    fetchNearestLocation(`/nearest_seller/${customerId}/`, 'nearest-seller');
+    fetchNearestLocation(`/nearest_delivery_service/${customerId}/`, 'nearest-delivery-service');
+</script>
+
+{% endblock content %}
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}

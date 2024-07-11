@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from main import views
+from .views import merchregistration, verify_email, find_nearest_seller, find_nearest_delivery_service, find_nearest_delivery_service
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -16,8 +17,10 @@ urlpatterns = [
     path('profile', views.profile, name='profile'),
     path('profile_update', views.profile_update, name='profile_update'),
     path('password_update', views.password_update, name='password_update'),
-    path('merchregistration', views.merchregistration, name='merchregistration'),
-    path('merchkyc_upload', views.mechkyc_upload, name='mechkyc_upload'),
+    path('register/', merchregistration, name='merchregistration'),
+    path('verify-email/<uidb64>/<token>/', verify_email, name='verify_email'),
+    path('partnerregistration', views.partnerregistration, name='partnerregistration'),
+    path('kyc_upload', views.kyc_upload, name='kyc_upload'),
     path('merchsignin', views.merchsignin, name='merchsignin'),
     path('merhprofile', views.merchprofile, name='merchprofile'),
     path('add_to_cart', views.add_to_cart, name='add_to_cart'),
@@ -41,4 +44,9 @@ urlpatterns = [
     path('reset_password_complete/', 
          auth_views.PasswordResetCompleteView.as_view(template_name="password_reset_done.html"), 
          name="password_reset_complete"),
+    path('nearest_locations_for_customer/<int:customer_id>/', views.find_nearest_seller, name='nearest_locations_for_customer'),
+    path('nearest_locations_for_merchant/<int:merchant_id>/', views.find_nearest_delivery_service, name='nearest_locations_for_merchant'),
+    path('find_nearest_delivery_service/<int:merchant_id>/', views.find_nearest_delivery_service, name='find_nearest_delivery_service'),
+    path('merchant/dashboard/', views.merchant_dashboard, name='merchant_dashboard'),
 ]
+

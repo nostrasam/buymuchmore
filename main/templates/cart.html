@@ -30,7 +30,7 @@
              </form>
              <td><img src="{{item.items.carimg.url}}" alt="" style="height: 80px;"></td>
              <td>{{item.items.model}}</td>
-             <td>₦{{item.price|floatformat:2|intcomma}}</td>
+             <td>£{{item.price|floatformat:2|intcomma}}</td>
              <td>{{item.items.color}}</td>
              <form action="{% url 'update' %}" method="POST">
               {% csrf_token %}
@@ -40,7 +40,7 @@
                 <button type="submit" class="btn btn-success">update</button>
               </td>
              </form>
-             <td>₦{{item.amount|floatformat:2|intcomma}}</td>
+             <td>£{{item.amount|floatformat:2|intcomma}}</td>
            </tr>
           {% endfor %}
           <tr class="subtot">
@@ -50,7 +50,7 @@
             <td></td>
             <td></td>
             <td>subtotal= </td>
-            <td>₦{{subtotal|floatformat:2|intcomma}}</td>
+            <td>£{{subtotal|floatformat:2|intcomma}}</td>
           </tr>
           <tr class="subtot">
             <td></td>
@@ -59,7 +59,7 @@
             <td></td>
             <td></td>
             <td>vat= </td>
-            <td>₦{{vat|floatformat:2|intcomma}}</td>
+            <td>£{{vat|floatformat:2|intcomma}}</td>
           </tr>
           <tr class="subtot">
             <td></td>
@@ -68,7 +68,7 @@
             <td></td>
             <td></td>
             <td>total= </td>
-            <td>₦{{total|floatformat:2|intcomma}}</td>
+            <td>£{{total|floatformat:2|intcomma}}</td>
           </tr>
           <tr class="cartbut">
             <td></td>

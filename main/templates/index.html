@@ -3,7 +3,7 @@
 {% block carousel %} {% include 'carousel.html' %} {% endblock carousel %}
 {% block content %}
 
-<div class="container home2">
+<div class="container mb4 home2">
   <h3 class="text-center title">featured products</h5>
   <div class="row row-cols-1 row-cols-md-4 g-4">
     {% for item in categs %}
@@ -22,11 +22,11 @@
   </div>
 </div>
 
-<div class="container mb-5 home">
+<div class="container mb-6 home">
   <div class="row">
     {% for item in categ %}
-    <div class="col-md-6 fetureprod">
-      <div class="card mb-3 mt-5" data-aos="fade-right">
+    <div class="col-md-6">
+      <div class="card " data-aos="fade-right">
         <div class="row g-0 catcard">
           <div class="col-md-6 motor">
             <img src="{{ item.pix.url }}" class="img-fluid rounded-start" alt="...">

@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
-{% block header %} {% include 'header.html' %} {% endblock header %}
-{% block banner %} {% include 'banner.html' %} {% endblock banner %}
+{% block header %} 
+  {% include 'header.html' %} 
+{% endblock header %}
+{% block banner %} 
+  {% include 'banner.html' %} 
+{% endblock banner %}
 {% block content %}
 <div class="card container mb-5 mt-5 detail">
   <div class="row g-0 detrow">
@@ -14,20 +18,20 @@
         <p class="card-text"><span>Description:</span> {{merchant_det1.description}}</p>
         <p class="card-text"><span>Condition:</span> {{merchant_det1.condition}}</p>
         <p class="card-text"><span>Availability:</span> {{merchant_det1.availability}}</p>
-        <p class="card-text"><span>Seller Address:</span> {{merchant_det1.address}}</p>
         
         {% if user.is_authenticated %}
           <p class="card-text"><span>Seller Telephone 1:</span> {{merchant_det1.telephone1}}</p>
           <p class="card-text"><span>Seller Telephone 2:</span> {{merchant_det1.telephone2}}</p>
+          <p class="card-text"><span>Seller Address:</span> {{merchant_det1.address}}</p>
+          <p class="card-text"><span>Postcode:</span> {{merchant_det1.postcode}}</p>
         {% else %}
-          <p class="card-text text-danger">Please Register or log in to see the seller's telephone numbers.</p>
+          <p class="card-text text-danger">Please Register or log in to see the seller's telephone numbers and Address.</p>
         {% endif %}
         
-        <p class="card-text"><span>Postcode:</span> {{merchant_det1.postcode}}</p>
         <p class="card-text"><span>Seller Name:</span> {{merchant_det1.seller_name}}</p>
-        <p class="card-text"><span>Promo Price:</span> ₦{{merchant_det1.promo_price}}</p>
+        <p class="card-text"><span>Promo Price:</span> £{{merchant_det1.promo_price}}</p>
         <div class="text-center but">
-          <p>₦{{merchant_det1.price}}</p>
+          <p>£{{merchant_det1.price}}</p>
           <form action="{% url 'add_to_cart' %}" method="POST"> 
             {% csrf_token %}
             <input type="hidden" name="quantity" value="1">
@@ -40,4 +44,6 @@
   </div>
 </div>
 {% endblock content %}
-{% block footer %} {% include 'footer.html' %} {% endblock footer %}
+{% block footer %} 
+  {% include 'footer.html' %} 
+{% endblock footer %}

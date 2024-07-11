@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block header %} {% include 'header.html' %} {% endblock header %}
+{% block banner %} {% include 'banner.html' %} {% endblock banner %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Nearest Delivery Service Location</h2>
+
+    <div class="card">
+        <div class="card-header">
+            Nearest Delivery Service to {{ merchant.company_name }}
+        </div>
+        <div class="card-body">
+            {% if nearest_service %}
+                <h5 class="card-title">Delivery Service: {{ nearest_service.company_name }}</h5>
+                <p class="card-text">
+                    <strong>Address:</strong> {{ nearest_service.address }}<br>
+                    <strong>Phone:</strong> {{ nearest_service.phone }}<br>
+                    <strong>Distance:</strong> {{ distance|floatformat:2 }} miles
+                </p>
+            {% else %}
+                <p class="text-danger">{{ error }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <a href="{% url 'merchant_dashboard' %}" class="btn btn-warning mt-3">View other Service Delivery Providers</a>
+</div>
+
+{% endblock content %}
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}

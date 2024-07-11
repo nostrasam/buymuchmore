@@ -26,6 +26,10 @@ class PaymentAdmin(admin.ModelAdmin):
 class SubscribeAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug':('plan',)}
     list_display = ['id', 'plan', 'description', 'price', 'promo_price']
+class MerchantAdmin(admin.ModelAdmin):
+    list_display = ['id', 'company_name', 'address', 'address_type', 'postcode', 'coverage_zones', 'operating_hours', 'service_rates', 'availability', 'business_sector']
+class CustomerAdmin(admin.ModelAdmin):
+    list_display = ['id', 'first_name', 'last_name', 'address', 'phone', 'email', 'user']
     
 
 admin.site.register(AppInfo)
@@ -33,8 +37,8 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(FeatureItem, FeatureItemAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Contact)
-admin.site.register(Customer)
-admin.site.register(Merchant)
+admin.site.register(Customer, CustomerAdmin)
+admin.site.register(Merchant, MerchantAdmin)
 admin.site.register(Cart, CartAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)

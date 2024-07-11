@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.conf import settings
 
 
+
 # Create your models here.
 
 class AppInfo(models.Model):
@@ -107,11 +108,20 @@ class Customer(models.Model):
     address = models.CharField(max_length=150)
     phone = models.CharField(max_length=50)
     pix = models.ImageField(upload_to='customer')
+    latitude = models.FloatField(default=0.0)
+    longitude = models.FloatField(default=0.0)
     
     def __str__(self):
         return self.user.username
     
 class Merchant(models.Model):
+    SELLER_ADDRESS = 'seller'
+    DELIVERY_SERVICE_ADDRESS = 'delivery'
+    ADDRESS_CHOICES = [
+        (SELLER_ADDRESS, 'Seller Address'),
+        (DELIVERY_SERVICE_ADDRESS, 'Delivery Service Address'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -119,8 +129,29 @@ class Merchant(models.Model):
     company_registration = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(max_length=254)
     address = models.CharField(max_length=150)
+    address_type = models.CharField(
+        max_length=8,
+        choices=ADDRESS_CHOICES,
+        default=SELLER_ADDRESS,
+    )
     phone = models.CharField(max_length=50)
+    postcode = models.CharField(max_length=100, blank=True, null=True)
+    coverage_zones = models.CharField(max_length=50, blank=True, null=True)
+    delivery_services = models.CharField(max_length=150, blank=True, null=True)
+    operating_hours = models.IntegerField(blank=True, null=True)
+    service_rates = models.IntegerField(blank=True, null=True)
+    vehicle_types = models.CharField(max_length=100, blank=True, null=True)
+    availability = models.CharField(max_length=50)
+    business_sector = models.CharField(max_length=50, choices=[
+        ('Logistics', 'Logistics'),
+        ('Insurance', 'Insurance'),
+        ('Agriculture', 'Agriculture'),
+        ('Manufacturing', 'Manufacturing'),
+        ('Trading', 'Trading')
+    ])
     pix = models.ImageField(upload_to='merchant')
+    latitude = models.FloatField(default=0.0)
+    longitude = models.FloatField(default=0.0)
     
     def __str__(self):
         return self.user.username
@@ -186,9 +217,3 @@ class Subscribe(models.Model):
     
     def __str__(self):
         return self.plan
-    
-    
-
-    
-
-

@@ -3,17 +3,17 @@
 {% block banner %} {% include 'banner.html' %} {% endblock banner %}
 {% block content %}
 <div class="container product">
-  <h1 class="text-center text-warning bg-dark pt-2">All products</h1>
-  <div class="row mt-5 mb-5">
+  <h1 class="text-center text-warning bg-dark pt-1">All products</h1>
+  <div class="row mt-2 mb-4">
  
     {% for item in pagin %}
-    <div class="col-12 col-md-6 col-lg-3 pt-4 mt-5">
+    <div class="col-12 col-md-6 col-lg-3 pt-4 mt-4">
       <div class="card text-center"> 
         <a href="{% url 'detail' item.id item.slug %}"><img src="{{item.carimg.url}}" class="card-img-top" alt="..."><p>View more</p></a> 
         <div class="card-body">
-          <h5 class="card-title">{{item.type|title}}</h5>
-          <h5 class="card-title">{{item.model|title}}</h5>
-          <p class="card-text">₦{{item.price}}</p>
+          <h5 class="card-title">{{item.type}}</h5>
+          <h5 class="card-title">{{item.model}}</h5>
+          <p class="card-text">£{{item.price}}</p>
           
           <form action="{% url 'add_to_cart' %}" method="POST"> 
             {% csrf_token %}

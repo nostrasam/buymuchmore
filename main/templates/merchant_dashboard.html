@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block header %} {% include 'header.html' %} {% endblock header %}
+{% block banner %} {% include 'banner.html' %} {% endblock banner %}
+{% block content %}
+
+    <!-- dashboard.html -->
+
+    <div class="container mb4 home2">
+        <h3 class="text-center title">Partners & Merchant Dashboard</h5>
+        <div class="row">
+<form method="GET" action="{% url 'merchant_dashboard' %}">
+    <input type="text" name="search" value="{{ search_query }}" placeholder="Search for a merchant..." style="padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;">
+    <button type="submit" style="padding: 10px 15px; border: none; background-color: #FFA500; color: white; border-radius: 4px; cursor: pointer;">Search</button>
+</form>
+
+<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <thead>
+        <tr style="background-color: #f2f2f2; color: #333;">
+            <th style="padding: 10px; border: 1px solid #ddd;">Company Name</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Contact</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Email</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Phone</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Address</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Postcode</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for merchant in merchants %}
+        <tr>
+            <td style="padding: 10px; border: 1px solid #ddd;">{{ merchant.company_name }}</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">{{ merchant.first_name }} {{ merchant.last_name }}</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">{{ merchant.email }}</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">{{ merchant.phone }}</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">{{ merchant.address }}</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">{{ merchant.postcode }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: center;">No merchants found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+{% endblock content %}
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}

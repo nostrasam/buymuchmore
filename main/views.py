@@ -3,7 +3,7 @@ import json
 import requests
 
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -13,13 +13,24 @@ from django.core.mail import EmailMessage
 from django.db.models import Q
 from main.models import *
 from .forms import *
-from .models import Customer, Product, FeatureProduct, Review, Cart
+from .models import Customer, Product, FeatureProduct, Review, Cart, Merchant
 from django.db.models import Sum
-
+from django.conf import settings
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_str
 
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
+from geopy.distance import geodesic
+from django.http import JsonResponse
+from .utils import find_nearest_location
+
+
 
 # Create your views here.
     
@@ -77,7 +88,7 @@ def products(request):
 
 def subscription_products(request):
     products = Subscribe.objects.all()
-    p = Paginator(products, 8)
+    p = Paginator(products, 16)
     page = request.GET.get('page')
     pagin = p.get_page(page)
     
@@ -165,10 +176,13 @@ def register(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
         if form.is_valid():
-            user = form.save()  # Save the user instance
-            address = request.POST['address']
-            phone = request.POST['phone']
-            pix = request.POST['pix']
+            user = form.save(commit=False)
+            user.is_active = False  # Deactivate account until email verification
+            user.save()
+
+            address = request.POST.get('address')
+            phone = request.POST.get('phone')
+            pix = request.POST.get('pix')
 
             # Create and save Customer object
             new_customer = Customer(
@@ -182,7 +196,33 @@ def register(request):
             )
             new_customer.save()
 
-            messages.success(request, f'Dear {user.username}, your account is successfully created')
+            # Generate email verification token
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+            # Generate email verification link
+            verification_link = request.build_absolute_uri(
+                reverse('verify_email', kwargs={'uidb64': uid, 'token': token})
+            )
+
+            # Send verification email
+            subject = 'Verify your email address'
+            message = f"""
+            Hi {user.first_name},
+
+            Thank you for registering on our platform. Please click the link below to verify your email address:
+
+            {verification_link}
+
+            If you did not make this request, you can ignore this email.
+
+            Thank you!
+            """
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [user.email]
+            send_mail(subject, message, email_from, recipient_list)
+
+            messages.success(request, f'Dear {user.username}, your account is successfully created. Please check your email to verify your account.')
             return redirect('signin')
         else:
             # Pass form errors to the template for display
@@ -190,20 +230,26 @@ def register(request):
 
     return render(request, 'register.html', {'form': form})
 
+
 def merchregistration(request):
-    form = MerchantForm()  # Renamed variable to avoid naming conflict
+    form = MerchantForm()
 
     if request.method == 'POST':
         form = MerchantForm(request.POST)
         if form.is_valid():
-            user = form.save()  # Save the user instance
+            user = form.save(commit=False)
+            user.is_active = False  # Deactivate account until email verification
+            user.save()
+
             address = request.POST['address']
+            address_type = request.POST['address_type']
             phone = request.POST['phone']
             pix = request.POST['pix']
             company_name = request.POST['company_name']
             company_registration = request.POST['company_registration']
+            business_sector = request.POST['business_sector']
 
-            # Create and save Customer object
+            # Create and save Merchant object
             new_merchant = Merchant(
                 user=user,
                 first_name=user.first_name,
@@ -212,20 +258,131 @@ def merchregistration(request):
                 phone=phone,
                 company_name=company_name,
                 company_registration=company_registration,
+                business_sector=business_sector,
                 address=address,
+                address_type=address_type,
                 pix=pix
             )
             new_merchant.save()
 
-            messages.success(request, f'Dear {user.username}, your account is successfully created')
+            # Generate email verification token
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+            # Generate email verification link
+            verification_link = request.build_absolute_uri(
+                reverse('verify_email', kwargs={'uidb64': uid, 'token': token})
+            )
+
+            # Send verification email
+            subject = 'Verify your email address'
+            message = f"""
+            Hi {user.first_name},
+
+            Thank you for registering on our platform. Please click the link below to verify your email address:
+
+            {verification_link}
+
+            If you did not make this request, you can ignore this email.
+
+            Thank you!
+            """
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [user.email]
+            send_mail(subject, message, email_from, recipient_list)
+
+            messages.success(request, f'Dear {user.username}, your account is successfully created. Please check your email to verify your account.')
             return redirect('merchsignin')
         else:
-            # Pass form errors to the template for display
             messages.error(request, form.errors)
 
     return render(request, 'merchregistration.html', {'form': form})
 
-            
+def partnerregistration(request):
+    form = MerchantForm()
+
+    if request.method == 'POST':
+        form = MerchantForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_active = False  # Deactivate account until email verification
+            user.save()
+
+            address = request.POST['address']
+            address_type = request.POST['address_type']
+            phone = request.POST['phone']
+            pix = request.POST['pix']
+            company_name = request.POST['company_name']
+            company_registration = request.POST['company_registration']
+            business_sector = request.POST['business_sector']
+
+            # Create and save Merchant object
+            new_merchant = Merchant(
+                user=user,
+                first_name=user.first_name,
+                last_name=user.last_name,
+                email=user.email,
+                phone=phone,
+                company_name=company_name,
+                company_registration=company_registration,
+                business_sector=business_sector,
+                address=address,
+                address_type=address_type,
+                pix=pix
+            )
+            new_merchant.save()
+
+            # Generate email verification token
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+            # Generate email verification link
+            verification_link = request.build_absolute_uri(
+                reverse('verify_email', kwargs={'uidb64': uid, 'token': token})
+            )
+
+            # Send verification email
+            subject = 'Verify your email address'
+            message = f"""
+            Hi {user.first_name},
+
+            Thank you for registering on our platform. Please click the link below to verify your email address:
+
+            {verification_link}
+
+            If you did not make this request, you can ignore this email.
+
+            Thank you!
+            """
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [user.email]
+            send_mail(subject, message, email_from, recipient_list)
+
+            messages.success(request, f'Dear {user.username}, your account is successfully created. Please check your email to verify your account.')
+            return redirect('merchsignin')
+        else:
+            messages.error(request, form.errors)
+
+    return render(request, 'partnerregistration.html', {'form': form})
+
+
+def verify_email(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        messages.success(request, 'Your email has been verified successfully.')
+        return redirect('merchsignin')
+    else:
+        messages.error(request, 'The verification link is invalid.')
+        return redirect('merchregistration')
+     
+         
 @login_required(login_url='signin')
 def profile(request):
     userprof = Customer.objects.get(user__username=request.user.username)
@@ -270,7 +427,7 @@ def profile_update(request):
     return render(request, 'profile_update.html', context)
 
 
-def mechkyc_upload(request):
+def kyc_upload(request):
     userprof = Merchant.objects.get(user__username = request.user.username)
     pform = MerchantProfileForm(instance=request.user.merchant)
     if request.method == 'POST':
@@ -279,17 +436,17 @@ def mechkyc_upload(request):
             user = pform.save()
             new = user.first_name.title()
             messages.success(request, f"dear {new} your document has been uploaded successfully. Please make your subscription payment and wait for 24 to 48 hours for account validation as a merchant!")
-            return redirect('mechkyc_upload')
+            return redirect('kyc_upload')
         else:
             new = user.first_name.title()
             messages.error(request, f'dear {new} your document upload generated the follow error: {pform.errors}')
-            return redirect('mechkyc_upload')
+            return redirect('kyc_upload')
         
     context = {
         'userprof':userprof
     }
     
-    return render(request, 'mechkyc_upload.html', context)
+    return render(request, 'kyc_upload.html', context)
 
 
 @login_required(login_url='signin')
@@ -428,7 +585,7 @@ def pay(request):
     if request.method == 'POST':
         api_key = 'sk_test_ddafcabdaed050c9422c8365430f1c50b79f83f1'  # Secret key from paystack
         curl = 'https://api.paystack.co/transaction/initialize'  # Paystack call url
-        cburl = 'http://52.90.126.143/callback'  # Payment thank you page
+        cburl = 'http://54.162.167.226/callback'  # Payment thank you page
         ref = str(uuid.uuid4())  # Reference number required by paystack as an additional order number
         profile = Customer.objects.get(user__username=request.user.username)
         order_no = profile.id  # Main order number
@@ -521,8 +678,85 @@ def subscribes(request):
     return render(request, 'subscribes.html', context)
 
 
+@login_required
+def find_nearest_seller(request, customer_id):
+    customer = get_object_or_404(Customer, id=customer_id)
+    customer_location = (customer.latitude, customer.longitude)
+
+    merchants = Merchant.objects.filter(address_type=Merchant.SELLER_ADDRESS)
+    seller_locations = [
+        {
+            'latitude': merchant.latitude,
+            'longitude': merchant.longitude,
+            'address': merchant.address,
+            'address_type': 'Seller',
+            'company_name': merchant.company_name,  # Assuming company_name field exists
+            'phone': merchant.phone  # Assuming phone field exists
+        } 
+        for merchant in merchants
+    ]
+
+    nearest_seller, distance = find_nearest_location(customer_location, seller_locations)
+
+    context = {
+        'address': nearest_seller['address'],
+        'address_type': nearest_seller['address_type'],
+        'distance': distance,
+        'company_name': nearest_seller['company_name'],
+        'phone': nearest_seller['phone']
+    }
+
+    return render(request, 'nearest_seller.html', context)
+
+
+@login_required
+def find_nearest_delivery_service(request, merchant_id):
+    merchant = get_object_or_404(Merchant, pk=merchant_id)
+    merchant_location = (merchant.latitude, merchant.longitude)
+
+    # Filter out the merchant itself and include only DELIVERY_SERVICE_ADDRESS type
+    delivery_locations = Merchant.objects.filter(address_type=Merchant.DELIVERY_SERVICE_ADDRESS).exclude(id=merchant_id)
+
+    delivery_locations_list = [
+        {
+            'id': location.id,
+            'latitude': location.latitude,
+            'longitude': location.longitude,
+            'address': location.address,
+            'address_type': location.address_type,
+            'company_name': location.company_name,
+            'phone': location.phone
+        }
+        for location in delivery_locations
+    ]
+
+    nearest_delivery_service, shortest_distance = find_nearest_location(merchant_location, delivery_locations_list)
+
+    if nearest_delivery_service:
+        context = {
+            'merchant': merchant,
+            'nearest_service': nearest_delivery_service,
+            'distance': shortest_distance
+        }
+    else:
+        context = {
+            'merchant': merchant,
+            'error': 'No delivery services found nearby.'
+        }
+
+    return render(request, 'nearest_delivery_service.html', context)
+
+
+
+def merchant_dashboard(request):
+    search_query = request.GET.get('search', '')
+    merchants = Merchant.objects.filter(company_name__icontains=search_query, email__icontains=search_query, address__icontains=search_query)  # Adjusted the filter field to company_name
+    context = {
+        'merchants': merchants,
+        'search_query': search_query,
+    }
+    return render(request, 'merchant_dashboard.html', context)
+
 
 
     
-    
-

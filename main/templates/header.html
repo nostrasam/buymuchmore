@@ -12,9 +12,11 @@
          
           {% if user.merchant %}
           <li class="nav-item">
-            <a class="nav-link text-nowrap" href="{% url 'mechkyc_upload' %}">KYC Verify</a>
+            <a class="nav-link text-nowrap" href="{% url 'kyc_upload' %}">KYC Verify</a>
           </li>
           {% endif %}
+
+      
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               {% if user.customer %}
@@ -38,17 +40,33 @@
           <li class="nav-item">
             <a class="nav-link text-nowrap" href="{% url 'merchregistration' %}">Sell on BuyMuchMore</a>
           </li>
+          <li class="nav-item partn">
+            <a class="nav-link text-nowrap" href="{% url 'partnerregistration' %}">Partners</a>
+          </li>
           {% endif %} 
 
-              <form action="{% url 'search' %}" method="POST">
-                {% csrf_token %}
-                <div class="search-container"> 
-                    <input type="text" placeholder="Search" name="search">
-                 <button type="submit" class="bi bi-search" >  
-                    </button>
-                </div>
-            </form>
-            
+          <form action="{% url 'search' %}" method="POST">
+            {% csrf_token %}
+            <div class="search-container" style="position: relative; width: 100%;">
+                <input type="text" placeholder="Search" name="search" style="width: 100%; padding-right: 40px;">
+                <button type="submit" class="bi bi-search" style="position: absolute; right: 0; top: 0; height: 100%; border: none; background: none; padding: 0 10px; cursor: pointer;">
+                </button>
+            </div>
+        </form>
+         <div>
+        {% if user.is_authenticated %}
+                    {% if user.customer %}
+                        <li class="nav-item">
+                            <a class="nav-link text-nowrap" href="{% url 'nearest_locations_for_customer' customer_id=user.customer.id %}">Seller's Locator</a>
+                        </li>
+                    {% elif user.merchant %}
+                        <li class="nav-item">
+                            <a class="nav-link text-nowrap" href="{% url 'nearest_locations_for_merchant' merchant_id=user.merchant.id %}">Delivery Service Locator</a>
+                        </li>
+                    {% endif %}
+                    {% endif %}
+                  </div>
+            <div>
             <li class="nav-item">
               <a class="nav-link text-nowrap carticon" href="{% url 'cart' %}">
                   <i class="bi bi-cart4 cartcount"> Cart</i>  
@@ -60,6 +78,9 @@
                       {% endif %}
                   </span>
               </a>
+            </i>
+            </div>
+
             </div>
           </div>
         </nav>

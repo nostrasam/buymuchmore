@@ -22,7 +22,7 @@
               <td>{{item.items.model}}</td>
               <td>{{item.items.color}}</td>
               <td>{{item.quantity}}</td>
-              <td>₦{{item.amount|floatformat:2|intcomma}}</td>
+              <td>£{{item.amount|floatformat:2|intcomma}}</td>
             </tr>
           {% endfor %}
           <tr class="total">
@@ -30,7 +30,7 @@
             <td></td>
             <td></td>
             <td class="total1">total =</td>
-            <td class="total1">₦{{total|floatformat:2|intcomma}}</td>
+            <td class="total1">£{{total|floatformat:2|intcomma}}</td>
           </tr>
           </tbody>
       </table>
