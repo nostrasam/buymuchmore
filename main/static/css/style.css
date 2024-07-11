@@ -130,7 +130,7 @@
 }
 .home .card{
     margin-bottom: 2%;
-    margin-top: 3%;
+    margin-top: 5%;
 }
 
 .home h1{
@@ -576,7 +576,8 @@
     }
     .home2 .fetureprod {
         height: 340px;
-        margin-bottom: 4%;   
+        margin-bottom: 4%; 
+        margin-top: 4%;  
     }
     .home .fetureprod {
         height: 485px;
@@ -589,7 +590,7 @@
 
     .home .card{
         margin-bottom: 3%;
-        margin-top: 8%;
+        margin-top: 10%;
     }
     .cart table {
         width: 100%;
@@ -629,7 +630,11 @@
     }
     .home2 .fetureprod .card-body {
         height: auto;
-        padding-top: 3%;
+        padding-top: 5%;
+    }
+    .home2 .fetureprod {
+        height: auto;
+        padding-top: 5%;
     }
     .home2 .fetureprod img {
         height: 35vh;
