@@ -130,7 +130,7 @@
 }
 .home .card{
     margin-bottom: 2%;
-    margin-top: 4%;
+    margin-top: 3%;
 }
 
 .home h1{
@@ -232,9 +232,12 @@
     padding-bottom: auto;
     margin-top: auto;
 }
+
 .product .card:hover{
     transform: translateY(-30px);
 }
+
+
 .product .page-link{
     color: orange;
 }
@@ -476,6 +479,13 @@
     padding-left: 2%;
     border-color: black;
 }
+
+/* styling whatsapp icon */
+
+
+/* styling whatsapp icon done */
+
+
 /* styling profile done */
 @media (min-width: 320px) and (max-width: 768px) {
     .caroimg img {
@@ -534,8 +544,8 @@
     }
     .collapse .search-container {
         float: left;
-        margin: 8px;
-        padding-left: 60px;
+        margin: 6px;
+        padding-left: 30px;
     }
     .collapse .search-container input[type=text] {
         width: 200px;
@@ -576,13 +586,10 @@
     }
     .home2 .fetureprod {
         height: 340px;
-        margin-bottom: 4%; 
+        margin-bottom: 2%; 
         margin-top: 3%;  
     }
-    .home .fetureprod {
-        height: 485px;
-        margin-bottom: 1%;  
-    }
+
     .home .card .card-body {
         height: 268px;
         margin-bottom: 2%;  
@@ -590,7 +597,8 @@
 
     .home .card{
         margin-bottom: 3%;
-        margin-top: 10%;
+        margin-top: 6%;
+        height: auto;
     }
     .cart table {
         width: 100%;
@@ -638,7 +646,7 @@
     }
     .home2 .fetureprod img {
         height: 35vh;
-        width: 85%;
+        width: 90%;
         padding-top: 3%;
         padding-left: 7.5%;
     }
@@ -647,7 +655,7 @@
     }
     .home .card img {
         height: 30vh;
-        width: 85%;
+        width: 90%;
         padding-top: 5%;
         padding-left: 7.5%;
     }
@@ -678,5 +686,10 @@
         background-repeat: no-repeat;
         background-position: center;
         background-size: cover;
+    }
+
+    .carticon {
+        padding-bottom: 10% !important;
+        padding-left: 160px !important;
     }
 }

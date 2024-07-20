@@ -483,7 +483,7 @@ def add_to_cart(request):
         main = Product.objects.get(pk=itemsid)
         cart = Cart.objects.filter(user__username=request.user.username, paid=False)
         if cart.exists():
-            basket = cart.filter(items=main, quantity=quantity).first()
+            basket = cart.filter(items=main).first()
             if basket:
                 basket.quantity += quantity
                 basket.amount = main.price * basket.quantity
@@ -498,12 +498,7 @@ def add_to_cart(request):
             newcart.save()
             messages.success(request, 'One item added to cart')
 
-    # Calculate total items in the cart
-    total_items_in_cart = Cart.objects.filter(user=request.user, paid=False).count()
-
     return redirect('products')
-
-# Now, in the template where you display the cart icon, you can access the total_items_in_cart variable
 
 @login_required(login_url='signin')       
 def cart(request):
@@ -517,7 +512,7 @@ def cart(request):
         item.save()
         
     subtotal = sum(item.price * item.quantity for item in cart_items)
-    vat = 0.075 * subtotal
+    vat = 0.20 * subtotal
     total = subtotal + vat
         
     context = {
@@ -530,13 +525,12 @@ def cart(request):
     
     return render(request, 'cart.html', context)
 
-
 @login_required(login_url='signin')
 def delete(request):
     if request.method == 'POST':
         del_item = request.POST['delid']
         Cart.objects.filter(pk=del_item).delete()
-        messages.success(request, 'one item deleted')
+        messages.success(request, 'One item deleted')
         return redirect('cart')
 
 @login_required(login_url='signin')   
@@ -548,7 +542,7 @@ def update(request):
         newqty.quantity = new_qty
         newqty.amount = newqty.price * newqty.quantity
         newqty.save()
-        messages.success(request, 'quantity updated')
+        messages.success(request, 'Quantity updated')
         return redirect('cart')
     
     
@@ -566,7 +560,7 @@ def checkout(request):
     
     for item in cart:
         subtotal += item.price * item.quantity
-        vat = 0.075 * subtotal
+        vat = 0.20 * subtotal
         total = subtotal + vat
         
     context = {
@@ -580,12 +574,13 @@ def checkout(request):
     return render(request, 'checkout.html', context)
 
 
+
 @login_required(login_url='signin')
 def pay(request):
     if request.method == 'POST':
         api_key = 'sk_test_ddafcabdaed050c9422c8365430f1c50b79f83f1'  # Secret key from paystack
         curl = 'https://api.paystack.co/transaction/initialize'  # Paystack call url
-        cburl = 'http://3.92.163.67/callback'  # Payment thank you page
+        cburl = 'http://127.0.0.1:8000/callback'  # Payment thank you page
         ref = str(uuid.uuid4())  # Reference number required by paystack as an additional order number
         profile = Customer.objects.get(user__username=request.user.username)
         order_no = profile.id  # Main order number

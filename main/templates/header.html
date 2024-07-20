@@ -66,20 +66,21 @@
                     {% endif %}
                     {% endif %}
                   </div>
-            <div>
-            <li class="nav-item">
-              <a class="nav-link text-nowrap carticon" href="{% url 'cart' %}">
-                  <i class="bi bi-cart4 cartcount"> Cart</i>  
-                  <span class="cart-count">
-                      {% if total_quantity %}
-                          {{ total_quantity }}
-                      {% else %}
-                          0
-                      {% endif %}
-                  </span>
-              </a>
-            </i>
-            </div>
+                  <div>
+                    <li class="nav-item">
+                        <a class="nav-link text-nowrap carticon" href="{% url 'cart' %}">
+                            <i class="bi bi-cart4 cartcount"> Cart</i>  
+                            <span class="cart-count">
+                                {% if total_quantity %}
+                                    {{ total_quantity }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </span>
+                        </a>
+                    </li>
+                </div>
+                
 
             </div>
           </div>

@@ -13,12 +13,26 @@
         </div>
         <div class="card-body">
             {% if nearest_service %}
-                <h5 class="card-title">Delivery Service: {{ nearest_service.company_name }}</h5>
-                <p class="card-text">
-                    <strong>Address:</strong> {{ nearest_service.address }}<br>
-                    <strong>Phone:</strong> {{ nearest_service.phone }}<br>
-                    <strong>Distance:</strong> {{ distance|floatformat:2 }} miles
-                </p>
+                <table class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <th scope="row">Delivery Service:</th>
+                            <td>{{ nearest_service.company_name }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Address:</th>
+                            <td>{{ nearest_service.address }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Phone:</th>
+                            <td>{{ nearest_service.phone }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Distance:</th>
+                            <td>{{ distance|floatformat:2 }} miles</td>
+                        </tr>
+                    </tbody>
+                </table>
             {% else %}
                 <p class="text-danger">{{ error }}</p>
             {% endif %}
