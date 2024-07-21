@@ -4,9 +4,11 @@
     box-sizing: border-box;
 }
 
+
 /* styling navbar */
 .navbar{
     background-color: rgb(244, 246, 247);
+
 }
 .navbar-nav .nav-link{
     color: black;
@@ -81,7 +83,7 @@
 
 /* styling carousel */
 .caroimg img{
-    height: 68vh;
+    height: 70vh;
 }
 .carousel-control-prev-icon span{
     font-size: 40px;
@@ -143,7 +145,7 @@
 
 .home2 .fetureprod{
     height: 35vh;
-    margin-bottom: 14%;
+    margin-bottom: 15%;
 }
 
 .home2 .fetureprod .card-body{
@@ -422,6 +424,13 @@
     font-weight: 600;
 }
 
+.categonav .offcanvas-end{
+    background-color: rgb(242, 246, 250);
+    padding-left: 2%;
+    border-color: black;
+    padding-top: 5%;
+}
+
 /* styling category bar done */
 
 /* styling profile */
@@ -472,12 +481,6 @@
 .pform form input{
 
     background-color: orange;
-}
-
-.categonav .offcanvas-end{
-    background-color: rgb(242, 246, 250);
-    padding-left: 2%;
-    border-color: black;
 }
 
 /* styling whatsapp icon */

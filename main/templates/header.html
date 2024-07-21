@@ -1,7 +1,52 @@
 {% load static %}
+
+    <style>
+        body {
+            padding-top: 120px; /* Adjust based on the height of the navbar and categonav */
+        }
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1030;
+            background: rgb(249, 250, 250);
+            border-bottom: 1px solid #ddd;
+        }
+        .categonav {
+            position: fixed;
+            top: 68px; /* Adjust based on the height of the navbar */
+            width: 100%;
+            z-index: 1020;
+            background-color: #f8f9fa;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+        }
+        .container-fluid.bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar-toggler {
+            margin-right: 1rem;
+        }
+        .offcanvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .alert-dismissible {
+            position: fixed;
+            top: 120px; /* Adjust based on the combined height of the navbar and categonav */
+            width: 100%;
+            z-index: 1010;
+        }
+    </style>
+
+<body>
+
 <nav class="navbar navbar-expand-lg">
     <div class="container">
-      <a class="navbar-brand" href="{% url 'home' %}"><img src="{{info.logo.url}}" style="height: 40px;" ></a>
+      <a class="navbar-brand" href="{% url 'home' %}"><img src="{{info.logo.url}}" style="height: 40px;"></a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -114,3 +159,7 @@
         {% endfor %}
     
   <!-- popup done -->
+
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+
