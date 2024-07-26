@@ -19,18 +19,16 @@
                     <th scope="col">Contact</th>
                     <th scope="col">Email</th>
                     <th scope="col">Phone</th>
-                    <th scope="col">Address</th>
                     <th scope="col">Postcode</th>
                 </tr>
             </thead>
             <tbody>
                 {% for merchant in merchants %}
-                    <tr>
+                    <tr class="dashbrd">
                         <td>{{ merchant.company_name }}</td>
                         <td>{{ merchant.first_name }} {{ merchant.last_name }}</td>
                         <td>{{ merchant.email }}</td>
                         <td>{{ merchant.phone }}</td>
-                        <td>{{ merchant.address }}</td>
                         <td>{{ merchant.postcode }}</td>
                     </tr>
                 {% empty %}

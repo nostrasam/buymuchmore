@@ -112,8 +112,8 @@
                     {% endif %}
                   </div>
                   <div>
-                    <li class="nav-item">
-                        <a class="nav-link text-nowrap carticon" href="{% url 'cart' %}">
+                    <li class="nav-item carticon">
+                        <a class="nav-link text-nowrap " href="{% url 'cart' %}">
                             <i class="bi bi-cart4 cartcount"> Cart</i>  
                             <span class="cart-count">
                                 {% if total_quantity %}

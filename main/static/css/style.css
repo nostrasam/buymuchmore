@@ -164,6 +164,7 @@
     margin-left: 25%;
 }
 
+
 /* styling content done */
 
 /* styling footer */
@@ -391,8 +392,15 @@
 }
 .carticon {
     padding-bottom: 10% !important;
-    padding-left: 220px !important;
+    padding-left: 160px !important;
+    box-sizing: inherit !important;
+    border-color: black !important;
 }
+.carticon .nav-link{
+    box-sizing: inherit !important;
+    border-color: black !important;
+}
+
 /* styling cart done */
 
 /* styling checkout */
@@ -409,7 +417,7 @@
 
 /* styling category bar */
 .categonav .bar{
-    height: 7vh !important;
+    height: 8vh !important;
     background-color: #eaf0f6 !important;
 }
 
@@ -563,7 +571,7 @@
         border: none;
     }
     .categonav .bar {
-        height: 17vh !important;
+        height: 16vh !important;
         width: 100%;
         background-color: #eaf0f6 !important;
     }
@@ -584,6 +592,14 @@
         padding-left: 10% !important;
         background: blue;
     }
+
+    .categonav .offcanvas-end{
+        background-color: rgb(242, 246, 250);
+        padding-left: 2%;
+        border-color: black;
+        padding-top: 15%;
+    }
+
     .home2 h3 {
         font-size: 23px;
     }
@@ -662,6 +678,15 @@
         padding-top: 5%;
         padding-left: 7.5%;
     }
+
+    .home2 .thead-light{
+        font-size: 7px;
+    }
+    .home2 .dashbrd{
+        font-size: 7px;
+        font-weight: bold;
+    }
+
     .product .card img {
         height: 35vh;
         width: 55%;
@@ -695,5 +720,6 @@
         padding-bottom: 10% !important;
         padding-left: 160px !important;
     }
+    
 
 }
