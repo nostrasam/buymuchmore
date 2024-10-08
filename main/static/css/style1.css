@@ -1,0 +1,1012 @@
+*{
+    padding: 0%;
+    margin: 0%;
+    box-sizing: border-box;
+}
+
+
+/* styling navbar */
+.navbar{
+    background-color: rgb(241, 245, 247);
+
+}
+.navbar-nav .nav-link{
+    color: black;
+    font-weight: 500;
+    margin-left: 25%;
+}
+.navbar-nav .nav-link img{
+    border-radius: 100%;
+}
+.dropdown-toggle{
+    margin-left: 15% !important;
+}
+
+.dropdown .dropdown-menu{
+    background-color: rgb(179, 194, 199);
+}
+.dropdown .dropdown-menu .dropdown-item:hover{
+    background-color: gray !important;
+    color: white;
+}
+.navbar .uk{
+    font-size: 10px;
+    padding-bottom: 1.4%;
+}
+ /*.collapse form button{
+    background-color: black;
+    color: white;
+    border: none;
+}
+
+.collapse form{
+    padding-right: 30% !important;    
+}
+
+.collapse form button:hover{
+    background-color: rgb(43, 33, 33);
+}
+/* Styling for search bar container */
+.collapse .search-container {
+    float: right;
+    margin: 6px;
+    padding-left: 140px;
+}
+
+/* Styling for search input */
+.collapse .search-container input[type=text] {
+    width: 330px;
+    height: 30px;
+    border-radius: 25px;
+    border: black;
+    padding-left: 20px;
+}
+
+
+/* Styling for search button */
+.collapse .bi-search {
+    background-color: none;
+    color: none;
+    border: none;   
+}
+
+.partn {
+       padding-left: 2%;
+}
+
+.cart-count{
+    color: rgb(243, 111, 55) !important;
+}
+
+/* Styling for search icon inside the button */
+
+
+/* styling navbar done*/
+
+
+
+/* Styling for the carousel images */
+.caroimg img {
+    height: 50vh; /* Sets the height to half of 70vh */
+    width: auto;  /* Automatically adjusts the width to maintain aspect ratio */
+    object-fit: cover; /* Ensures the image fills the container without distortion */
+}
+
+/* Optionally, style for carousel controls */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: transparent;
+    font-size: 40px;
+    color: orange !important;
+}
+
+/* For active indicators */
+.carousel-indicators .active {
+    background-color: orange !important;
+}
+/* styling content */
+.title{
+    text-transform: capitalize;
+    color: orange;
+    font-weight: 400;
+    font-size: 39px;
+    display: inline-block !important;
+    -webkit-text-stroke: 0.2px rgb(30, 29, 29);
+    padding-left: 40%;
+   
+}
+.title::after{
+    content: '';
+    display: block;
+    width: 190px;
+    height: 4px;
+    background-color: rgb(23, 22, 22);
+    margin-left: auto;
+    margin-right: auto;
+}
+.motor img{
+    width: 85%;
+    height: 40vh;
+    border: none;
+    padding-left: 5%;
+    padding-top: 3%;
+}
+.home .card-body{
+    text-align: center;
+    text-transform: capitalize;
+}
+
+.home .card .card-body{
+    box-shadow: 5px 10px hwb(0 72% 28%);
+    height: 50vh;
+    background-color: #e5ecf3;
+}
+
+.home .card{
+    margin-bottom: 2%;
+    margin-top: 3%;
+}
+
+.home h1{
+    font-size: 26px;
+}
+.home h5{
+    font-size: 20px !important;
+}
+.home p{
+    font-size: 15px !important;
+}
+.home2 h1{
+    font-size: 35px;
+    
+}
+
+.home2 h3{
+    font-size: 22px;
+   
+}
+.home2 h5{
+    font-size: 25px;
+    padding-top: 3%;
+   
+}
+
+.home2 .fetureprod{
+    height: 35vh;
+    margin-bottom: 15%;
+    
+}
+
+.home2 .fetureprod .card-body{
+    height: 26vh;
+    padding-top: 6px;
+    background-color: #e5ecf3;
+}
+
+.home2 .fetureprod .img2 {
+    height: 35vh;
+    width: 97%;
+    padding-top: 8px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: cover; /* Ensures the image fills the space while maintaining aspect ratio */
+    border-bottom: 1px solid rgb(248, 249, 250);
+}
+
+.home2 a{
+    margin-left: 25%;
+}
+.home2 .descr{
+    padding-left: 4%;
+}
+
+/* styling content done */
+
+/* styling footer */
+.footer{
+    background-color: #858080;
+    padding-top: 3%;
+}
+.footer img{
+    height: 40px;
+}
+.footer h2{
+    text-transform: capitalize;
+    color: rgb(27, 11, 71);
+    font-size: 20px;
+}
+.footer ul a{
+    text-decoration: none;
+    color: black;
+}
+.footer ul a:hover{
+    color: orange;
+}
+.footer ul i{
+    color: rgb(26, 86, 110);
+}
+.footer2{
+    background: rgb(249, 250, 250);
+}
+.footer2 p{
+    font-weight: 500;
+    text-transform: capitalize;
+}
+.footer h6{
+    color: #000;
+}
+/* styling footer done */
+
+
+.banner img{
+    background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url(../img/onlinestore.jpeg);
+    height: 40vh;
+    width: 100% !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+/* styling for products page */
+.caroimg2 img{
+    width: 100%;
+    height: 70vh;
+}
+.product{
+    padding-bottom: 5%;
+}
+.product .card img{
+    height: 35vh;
+    width: 90%;
+    padding: 4%;
+    border-bottom: 4px solid orange;
+}
+
+.product .card-body{
+    height: 135px;
+    padding: 2%; 
+}
+
+.product .card{
+    border: 2px solid orange;
+    border-radius: 3%;
+    box-shadow: 2px 2px 6px 2px;
+    transition:1s;
+    padding-bottom: auto;
+    margin-top: auto;
+}
+
+.product .card:hover{
+    transform: translateY(-30px);
+}
+
+
+.product .page-link{
+    color: orange;
+}
+.product .page-link:hover{
+    color: rgb(18, 18, 18);  
+}
+
+.product h1{
+    font-size: 28px;
+}
+
+.product h5{
+    font-size: 15px;
+}
+.product button{
+    font-size: 14px;
+}
+
+.products .card{
+    border: 2px solid orange;
+    border-radius: 3%;
+    box-shadow: 2px 2px 6px 2px;
+    transition:1s;
+    padding-bottom: auto;
+    margin-top: auto;
+}
+.products .card img{
+    height: 35vh;
+    width: 90%;
+    padding: 4%;
+    border-bottom: 4px solid orange;
+}
+.products h1{
+    font-size: 26px;
+}
+.products h5{
+    font-size: 15px;
+}
+.products button{
+    font-size: 14px;
+}
+
+/* styling for products page done */
+
+/* styling detail page */
+.det{
+    border-right: 2px solid orange;
+}
+.det img{
+    height: 390px;
+    padding: 7%;
+
+}
+
+.det2 img{
+    height: 100px;
+    padding: 7%;
+}
+
+.det2{
+    height: 60px;
+    width: 55%;
+    margin-bottom: 2%;
+}
+
+.det2 .btn{
+    width: 92px;
+    height: 5vh;
+}
+.det2 a{
+    color: #000;
+    font-size: 10px;
+}
+
+.expanded-card {
+    padding: 0 9px; /* Adds horizontal padding */
+    margin-bottom: 20px; /* Adds space between rows */
+  }
+
+.card .det2{
+    width: 75%; /* Makes sure the card takes the full width of its column */
+    height: 250px; /* Ensures consistent height for cards */
+    margin-bottom: 20px; /* Adds margin below each card */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Adds subtle shadow for better visibility */
+    padding-bottom: 1px;
+  }
+
+  .det2 .card-body h5.card-title {
+    font-size: 1rem; /* Adjusts title size */
+    font-weight: bold; /* Makes title bolder */
+    padding-top: 15px;
+  }
+
+  .card-body p.card-text {
+    font-size: 1rem; /* Slightly bigger text for price */
+    color: #555; /* Adjusts text color */
+  }
+
+.detail{
+    border: 2px solid orange !important;
+    box-shadow: 0 0 9px 0 rgb(37, 65, 114);
+}
+.detail h5{
+    font-weight: bold;
+}
+
+.detail h1{
+    font-size: 30px;
+}
+.detail button{
+    font-size: 15px;
+}
+.detail .similarity{
+    margin-right: 30%;
+}
+
+.det .zoom-container {
+    overflow: hidden;
+    position: relative
+  }
+  
+  .det .zoom-img {
+    transition: transform 0.5s ease;
+    position: relative; /* Allows for precise control of positioning */
+    top: 0; /* Aligns the image to the top of the container */
+    left: 0; /* Aligns the image to the left of the container */
+  }
+  
+  .det .zoom-img:hover {
+    transform: scale(1.4); /* Adjust the scale value to control the zoom level */
+    cursor: pointer;
+  }
+
+.card-body p{
+    text-transform: capitalize;
+    font-size: 15px;
+    font-family: 'Times New Roman', Times, serif;
+    word-spacing: 1px;
+}
+.but p{
+    font-size: 17px;
+    color: rgb(27, 19, 3);
+}
+/* styling detail done page */
+
+.star-rating {
+    direction: rtl;
+    font-size: 1.5rem;
+    display: inline-flex;
+    margin-left: 580px;
+  }
+.star-rating2 {
+    margin-left: 570px;
+  }
+  
+  .star-rating input[type="radio"] {
+    display: none;
+  }
+  
+  .star-rating label {
+    cursor: pointer;
+    color: #ccc;
+  }
+  
+  .star-rating input[type="radio"]:checked ~ label {
+    color: #f5b301;
+  }
+  
+  .star-rating label:hover,
+  .star-rating label:hover ~ label {
+    color: #f5b301;
+  }
+  .star-rating {
+    color: #ffcc00; /* Gold color for stars */
+  }
+  
+  .checked {
+    color: #ffcc00;
+  }
+  
+  .fa-star, .fa-star-o {
+    font-size: 1.2em;
+  }
+    
+
+/* styling contact page */
+.contact{
+    padding-top: 3%;
+}
+.contact form{
+    outline: 2px solid orange;
+    padding: 1%;
+}
+.map{
+    padding-top: 6%;
+}
+/* styling contact page done */
+
+/* styling register page */
+.register form{
+    width: 50%;
+    margin-left: 25%;
+    margin-right: 25%;
+    outline: 2px solid orange;
+    padding: 3%;
+    margin-top: 3%;
+    background-color: #fcfafa;
+}
+.register button{
+    width: 100%;
+}
+/* styling register page done */
+
+/* styling password reset */
+.home2 p{
+    padding-left: 18%;
+}
+
+.home2 h6{
+    padding-left: 5%;
+    font-size: 12px;
+    padding-bottom: 5px;
+}
+
+.home2 .sponsor a {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    color: rgb(12, 11, 11);
+    font-weight: 400;
+}
+
+.home2 .social{
+    padding-right: 120px;
+}
+
+/* styling password reset done*/
+
+/* styling cart */
+.cart table{
+    width: 100%;
+    
+}
+.cart thead{
+    background: orange;
+    text-align: center;
+}
+.cart th{
+    text-transform: capitalize;
+}
+.cart tbody{
+    text-align: center;
+}
+.cart tbody i{
+    color: red;
+}
+.cart td{
+    text-transform: capitalize;
+}
+.item td{
+    border: 2px solid orange;
+}
+.subtot td{
+    font-weight: 600;
+}
+.cartbut button{
+    text-transform: capitalize;
+    margin-bottom: 10%;
+    margin-top: 10%;
+}
+.carticon {
+    padding-bottom: 10% !important;
+    padding-left: 160px !important;
+}
+
+/* styling cart done */
+
+/* styling checkout */
+.cart h1{
+    text-transform: capitalize;
+    font-size: 35px;
+    color: orange;
+    padding-top: 10px;
+    display: inline-block !important;
+    -webkit-text-stroke: 0.2px black;
+}
+.total td{
+    font-weight: 800;
+    font-size: 18px;
+    font-weight: bold;
+}
+/* styling checkout done */
+
+/* styling category bar */
+.categonav .bar{
+    height: 8vh;
+    background-color: #e5ecf3 !important;
+}
+
+.categonav a{
+    font-size: 15px !important;
+    font-style: normal;
+    font-weight: 600;
+}
+.categonav span{
+    font-size: 15px !important;
+    font-style: normal;
+    font-weight: 600;
+}
+
+.categonav .offcanvas-end{
+    background-color: rgb(242, 246, 250);
+    padding-left: 2%;
+    border-color: black;
+    padding-top: 5%;
+}
+
+.brand-hover {
+    text-decoration: none; /* Remove underline by default */
+    color: #000; /* Default text color */
+    transition: color 0.3s ease; /* Smooth transition effect */
+}
+
+.brand-hover:hover {
+    color: #3498db; /* Change text color on hover */
+    text-decoration: underline; /* Underline on hover */
+}
+
+/* styling category bar done */
+
+/* styling profile */
+.pavatar{
+    text-align: center;
+}
+.pavatar img{
+    height: 200px;
+    border-radius: 100%;
+}
+.pavatar h5{
+    font-style: italic;
+    text-transform: capitalize;
+    margin-top: 3%;
+}
+.pavata{
+    text-align: center;
+}
+.pavata img{
+    height: 130px;
+    width: 85%;
+}
+.pavata h5{
+    font-style: italic;
+    text-transform: capitalize;
+    margin-top: 3%;
+    padding-top: 15%;
+}
+.plink{
+    background-color: orange;
+    border-radius: 1rem;
+}
+.plink h2{
+    text-transform: capitalize;
+    border-bottom: 2px solid black;
+    margin-top: 4%;
+}
+.plink ul a{
+    text-decoration: none;
+    text-transform: capitalize;
+    color: black;
+    font-size: 20px;
+}
+.pform form{
+    outline: 2px solid orange;
+    padding: 3%;
+}
+.pform form input{
+
+    background-color: orange; 
+}
+
+/* styling whatsapp icon */
+
+
+.product .titlebar {
+    background-color: none !important;
+    display: inline-block !important;
+    -webkit-text-stroke: 0.2px black;
+    color: #000;
+    width: 18%;
+    margin-left: 41% !important;
+    font-size: 20px;
+    padding-top: 0.9% !important;
+    padding-bottom: 0.4%;
+    position: relative;
+    display: inline-block;
+    color: orange !important;
+    
+}
+
+.product .titlebar::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px; /* Set the thickness of the underline */
+    width: 86%;
+    background-color: black; /* Set the underline color to black */
+    margin-left: 7%;
+}
+
+/* styling whatsapp icon done */
+
+/* styling profile done */
+
+@media (min-width: 320px) and (max-width: 1180px) {
+    .caroimg img {
+        height: 30vh;
+    }
+    .carousel-control-prev span i,
+    .carousel-control-next span i {
+        font-size: 20px;
+        color: orange;
+    }
+    .title {
+        text-transform: capitalize;
+        color: orangered;
+        font-weight: 600;
+        font-size: 25px;
+    }
+    .title::after {
+        content: '';
+        display: block;
+        width: 150px;
+        height: 2px;
+        background-color: black;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .motor img {
+        width: 85%;
+        height: 40vh;
+        border: none;
+        padding-left: 5%;
+        padding-top: 3%;
+    }
+    .motor {
+        width: 85%;
+        height: 30vh;
+        border: none;
+        padding-left: 5%;
+        padding-top: 3%;
+    }
+    .map {
+        padding-top: 6%;
+        width: 100%;
+    }
+    .register form {
+        width: 100%;
+        margin-left: 1%;
+        margin-right: 1%;
+        outline: 2px solid orange;
+        padding: 3%;
+        margin-top: 3%;
+    }
+    .pform form {
+        outline: 2px solid orange;
+        padding: 3%;
+        margin-bottom: 8%;
+    }
+    .collapse .search-container {
+        float: left;
+        margin: 6px;
+        padding-left: 30px;
+    }
+    .collapse .search-container input[type=text] {
+        width: 200px;
+        height: 30px;
+        border-radius: 25px;
+        border: black;
+        padding-left: 10px;
+    }
+    .collapse .bi-search {
+        background-color: none;
+        color: none;
+        border: none;
+    }
+    .categonav .bar {
+        height: 10vh;
+        width: 100%;
+        background-color: #eaf0f6 !important;
+    }
+    .categonav a {
+        font-size: 10px !important;
+        font-style: normal;
+        font-weight: 700;
+    }
+    .categonav span {
+        font-size: 11px !important;
+        font-style: normal;
+        font-weight: 500;
+    }
+    .categbckgrd {
+        font-size: 11px !important;
+        font-style: normal;
+        font-weight: 500;
+        padding-left: 10% !important;
+        background: blue;
+    }
+
+    .categonav .offcanvas-end{
+        background-color: rgb(242, 246, 250);
+        padding-left: 2%;
+        border-color: black;
+        padding-top: 15%;
+    }
+
+
+    .home .card .card-body {
+        height: 228px;
+        padding: 5px;
+        box-shadow: 5px 10px #f0f0f0;
+    }
+
+  
+    .home .card img {
+        height: 30vh;
+        width: 95%;
+        padding: 5%;
+    }  
+    .cart table {
+        width: 100%;
+        margin-right: 32%;
+    }
+    .cart img {
+        width: 33px;
+        height: 2vh;
+    }
+    .cart thead {
+        background: orange;
+        text-align: center;
+        font-size: 10px;
+    }
+    .item td {
+        border: 2px solid orange;
+        font-size: 10px;
+    }
+    .cartbut button {
+        text-transform: capitalize;
+        margin-bottom: 10%;
+        margin-top: 10%;
+        font-size: 10px;
+    }
+    .cart tbody {
+        text-align: center;
+        font-size: 11px;
+    }
+    .cart .btn {
+        font-size: 10px;
+    }
+    .cart .mb-3 {
+        font-size: 12px;
+    }
+    .cart .total1 {
+        font-size: 12px;
+    }
+    .home2 .fetureprod .card-body {
+        height: auto;
+        padding: 5%;
+    }
+    .home2 .fetureprod {
+        height: auto;
+        padding-top: 4%;
+        margin-bottom: auto; 
+        margin-top: auto;  
+    }
+    
+    .home2 .fetureprod .img2 {
+        height: 28vh;
+        width: 90%;
+        padding-top: 5%;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        object-fit: cover;
+    }
+    .home2 a {
+        margin-left: 35%;
+    }
+
+    .home2 .thead-light{
+        font-size: 7px;
+    }
+    .home2 .dashbrd{
+        font-size: 7px;
+        font-weight: bold;
+    }
+
+    .home2 h3 {
+        font-size: 23px;
+        padding-top: 3%;
+    }
+    .home2 .title2 {
+        font-size: 23px !important;
+        padding-top: 3% !important;
+    }
+
+    .product .card img {
+        height: 35vh;
+        width: 96%;
+        padding: 4%;
+        border-bottom: 4px solid orange;
+    }
+    .product .card{
+        border: 2px solid orange;
+        border-radius: 3%;
+        box-shadow: 2px 2px 6px 2px;
+        transition:1s;
+        padding-bottom: auto;
+        margin-top: auto;
+    }
+    .product .card-body{
+        height: 135px;
+        padding: 2%; 
+    }
+
+    .categonav .offcanvas-end {
+        background-color: rgb(242, 246, 250);
+        padding-left: 2%;
+        border-color: black;
+    }
+    .det img {
+        height: 300px;
+        width: 100%;
+    }
+ 
+    .det2 .card-body h5.card-title {
+        font-size: 1rem; /* Adjusts title size */
+        font-weight: bold; /* Makes title bolder */
+        padding-top: 70px;
+      } 
+     
+    .product h1{
+        font-size: 20px;
+    }
+
+    .det .zoom-container {
+        overflow: hidden;
+      }
+      
+      .det .zoom-img {
+        transition: transform 0.5s ease;
+      }
+      
+      .det .zoom-img:hover {
+        transform: scale(1.2); /* Adjust the scale value to control the zoom level */
+      }
+      .detail{
+        border: 2px solid orange !important;
+        box-shadow: 0 0 50px 0 rgb(37, 65, 114);
+    }
+    .det{
+        border-right: none;
+    }
+
+    .det2 img{
+        height: 43px;
+        padding: 7%;
+    
+    }
+
+    .det2{
+        height: 480px;
+        width: 30%;
+        margin-bottom: 2%;
+    }
+
+    .det2 .btn{
+        width: 65px;
+        height: 4vh;
+    }
+
+    .det2 a{
+        color: #000;
+        font-size: 8px;
+    }
+    .det2 h5{
+        color: #000;
+        font-size: 12px;
+    }
+    .det2 p{
+        color: #000;
+        font-size: 12px;
+    }
+
+    .banner img{
+        background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url(../img/onlinestore.jpeg);
+        height: 20vh;
+        width: 100% !important;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+    }
+
+    .carticon {
+        padding-bottom: 10% !important;
+        padding-left: 160px !important;
+    }
+    .alert{
+        padding-bottom: 0% !important;
+    }
+    .alert .strong{
+        padding-left: 0% !important;
+    }
+
+    .star-rating2 {
+        margin-left: 120px;
+      }
+    
+      .star-rating {
+        direction: rtl;
+        font-size: 1.2rem;
+        display: inline-flex;
+        margin-left: 120px;
+      }
+
+}
+

@@ -7,19 +7,20 @@
 
 /* styling navbar */
 .navbar{
-    background-color: rgb(244, 246, 247);
+    background-color: rgb(241, 245, 247);
 
 }
 .navbar-nav .nav-link{
     color: black;
     font-weight: 500;
-    margin-left: 12%;
+    margin-left: 28%;
 }
+
 .navbar-nav .nav-link img{
     border-radius: 100%;
 }
 .dropdown-toggle{
-    margin-left: 15% !important;
+    margin-left: 29% !important;
 }
 
 .dropdown .dropdown-menu{
@@ -28,6 +29,10 @@
 .dropdown .dropdown-menu .dropdown-item:hover{
     background-color: gray !important;
     color: white;
+}
+.navbar .uk{
+    font-size: 10px;
+    padding-bottom: 1.4%;
 }
  /*.collapse form button{
     background-color: black;
@@ -43,10 +48,18 @@
     background-color: rgb(43, 33, 33);
 }
 /* Styling for search bar container */
+
+.recent-order {
+    color: green;
+}
+.old-order {
+    color: orange;
+}
+
 .collapse .search-container {
     float: right;
     margin: 6px;
-    padding-left: 100px;
+    padding-left: 140px;
 }
 
 /* Styling for search input */
@@ -71,7 +84,7 @@
 }
 
 .cart-count{
-    color: rgb(222, 74, 10) !important;
+    color: rgb(243, 111, 55) !important;
 }
 
 /* Styling for search icon inside the button */
@@ -81,36 +94,42 @@
 
 
 
-/* styling carousel */
-.caroimg img{
-    height: 70vh;
+/* Styling for the carousel images */
+.caroimg img {
+    height: 50vh; /* Sets the height to half of 70vh */
+    width: auto;  /* Automatically adjusts the width to maintain aspect ratio */
+    object-fit: cover; /* Ensures the image fills the container without distortion */
 }
-.carousel-control-prev-icon span{
-    font-size: 40px;
-    color: orange;
-}
-.carousel-control-next-icon span{
+
+/* Optionally, style for carousel controls */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: transparent;
     font-size: 40px;
     color: orange !important;
 }
-.carousel-indicators .active{
+
+/* For active indicators */
+.carousel-indicators .active {
     background-color: orange !important;
 }
-/* styling carousel done*/
-
 /* styling content */
 .title{
     text-transform: capitalize;
-    color: orangered;
-    font-weight: 600;
-    font-size: 45px;
+    color: orange;
+    font-weight: 400;
+    font-size: 39px;
+    display: inline-block !important;
+    -webkit-text-stroke: 0.2px rgb(30, 29, 29);
+    padding-left: 40%;
+   
 }
 .title::after{
     content: '';
     display: block;
-    width: 200px;
+    width: 190px;
     height: 4px;
-    background-color: black;
+    background-color: rgb(23, 22, 22);
     margin-left: auto;
     margin-right: auto;
 }
@@ -127,43 +146,69 @@
 }
 
 .home .card .card-body{
-    box-shadow: 5px 10px #f0f0f0;
+    box-shadow: 5px 10px hwb(0 72% 28%);
     height: 50vh;
+    background-color: #e5ecf3;
 }
+
 .home .card{
-    margin-bottom: 2%;
-    margin-top: 3%;
+    margin-bottom: 4%;
+    margin-top: 4%;
 }
 
 .home h1{
     font-size: 26px;
 }
+.home h5{
+    font-size: 20px !important;
+}
+.home p{
+    font-size: 15px !important;
+}
+.home2 h1{
+    font-size: 35px;
+    
+}
 
 .home2 h3{
-    font-size: 23px;
+    font-size: 22px;
+   
+}
+.home2 h5{
+    font-size: 25px;
+    padding-top: 3%;
+   
 }
 
 .home2 .fetureprod{
     height: 35vh;
-    margin-bottom: 15%;
+    margin-bottom: 14%;
+    
 }
 
 .home2 .fetureprod .card-body{
-    height: 28vh;
-    padding-top: 3%;
+    height: 26vh;
+    padding-top: 6px;
+    background-color: #e5ecf3;
 }
 
-.home2 .fetureprod img{
-    height: 36vh;
-    width: 85%;
-    padding-top: 5%;
-    padding-left: 14%;
-   
+.home2 .fetureprod .img2 {
+    height: 35vh;
+    width: 97%;
+    padding-top: 8px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: cover; /* Ensures the image fills the space while maintaining aspect ratio */
+    border-bottom: 1px solid rgb(248, 249, 250);
 }
+
 .home2 a{
     margin-left: 25%;
 }
-
+.home2 .descr{
+    padding-left: 4%;
+}
 
 /* styling content done */
 
@@ -190,6 +235,10 @@
 .footer ul i{
     color: rgb(26, 86, 110);
 }
+.footer img {
+    padding: 5px;
+}
+
 .footer2{
     background: rgb(249, 250, 250);
 }
@@ -197,17 +246,22 @@
     font-weight: 500;
     text-transform: capitalize;
 }
+.footer h6{
+    color: #000;
+}
 /* styling footer done */
 
-/* styling for products page */
+
 .banner img{
     background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url(../img/onlinestore.jpeg);
-    height: 55vh;
+    height: 40vh;
     width: 100% !important;
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
 }
+
+/* styling for products page */
 .caroimg2 img{
     width: 100%;
     height: 70vh;
@@ -217,7 +271,7 @@
 }
 .product .card img{
     height: 35vh;
-    width: 80%;
+    width: 90%;
     padding: 4%;
     border-bottom: 4px solid orange;
 }
@@ -228,9 +282,9 @@
 }
 
 .product .card{
-    border: 2px solid orange;
+    border: 1px solid orange;
     border-radius: 3%;
-    box-shadow: 2px 2px 6px 2px;
+    box-shadow: 0.8px 1px 4px 1px;
     transition:1s;
     padding-bottom: auto;
     margin-top: auto;
@@ -245,11 +299,11 @@
     color: orange;
 }
 .product .page-link:hover{
-    color: rgb(18, 18, 17);  
+    color: rgb(18, 18, 18);  
 }
 
 .product h1{
-    font-size: 21px;
+    font-size: 28px;
 }
 
 .product h5{
@@ -260,16 +314,16 @@
 }
 
 .products .card{
-    border: 2px solid orange;
+    border: 1px solid orange;
     border-radius: 3%;
-    box-shadow: 2px 2px 6px 2px;
+    box-shadow: 0.8px 1px 4px 1px;
     transition:1s;
     padding-bottom: auto;
     margin-top: auto;
 }
 .products .card img{
     height: 35vh;
-    width: 80%;
+    width: 90%;
     padding: 4%;
     border-bottom: 4px solid orange;
 }
@@ -290,12 +344,58 @@
     border-right: 2px solid orange;
 }
 .det img{
-    height: 400px;
-    padding-top: 5%;
+    height: 390px;
+    padding: 7%;
+
 }
+
+.det2 img{
+    height: 100px;
+    padding: 7%;
+}
+
+.det2{
+    height: 60px;
+    width: 55%;
+    margin-bottom: 2%;
+}
+
+.det2 .btn{
+    width: 92px;
+    height: 5vh;
+}
+.det2 a{
+    color: #000;
+    font-size: 10px;
+}
+
+.expanded-card {
+    padding: 0 9px; /* Adds horizontal padding */
+    margin-bottom: 20px; /* Adds space between rows */
+  }
+
+.card .det2{
+    width: 75%; /* Makes sure the card takes the full width of its column */
+    height: 250px; /* Ensures consistent height for cards */
+    margin-bottom: 20px; /* Adds margin below each card */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Adds subtle shadow for better visibility */
+    padding-bottom: 1px;
+  }
+
+  .det2 .card-body h5.card-title {
+    font-size: 1rem; /* Adjusts title size */
+    font-weight: bold; /* Makes title bolder */
+    padding-top: 15px;
+  }
+
+  .card-body p.card-text {
+    font-size: 1rem; /* Slightly bigger text for price */
+    color: #555; /* Adjusts text color */
+  }
+
 .detail{
     border: 2px solid orange !important;
-    box-shadow: 0 0 50px 0 rgb(37, 65, 114);
+    box-shadow: 0 0 9px 0 rgb(37, 65, 114);
 }
 .detail h5{
     font-weight: bold;
@@ -307,6 +407,26 @@
 .detail button{
     font-size: 15px;
 }
+.detail .similarity{
+    margin-right: 30%;
+}
+
+.det .zoom-container {
+    overflow: hidden;
+    position: relative
+  }
+  
+  .det .zoom-img {
+    transition: transform 0.5s ease;
+    position: relative; /* Allows for precise control of positioning */
+    top: 0; /* Aligns the image to the top of the container */
+    left: 0; /* Aligns the image to the left of the container */
+  }
+  
+  .det .zoom-img:hover {
+    transform: scale(1.4); /* Adjust the scale value to control the zoom level */
+    cursor: pointer;
+  }
 
 .card-body p{
     text-transform: capitalize;
@@ -319,6 +439,46 @@
     color: rgb(27, 19, 3);
 }
 /* styling detail done page */
+
+.star-rating {
+    direction: rtl;
+    font-size: 1.5rem;
+    display: inline-flex;
+    margin-left: 580px;
+  }
+.star-rating2 {
+    margin-left: 570px;
+  }
+  
+  .star-rating input[type="radio"] {
+    display: none;
+  }
+  
+  .star-rating label {
+    cursor: pointer;
+    color: #ccc;
+  }
+  
+  .star-rating input[type="radio"]:checked ~ label {
+    color: #f5b301;
+  }
+  
+  .star-rating label:hover,
+  .star-rating label:hover ~ label {
+    color: #f5b301;
+  }
+  .star-rating {
+    color: #ffcc00; /* Gold color for stars */
+  }
+  
+  .checked {
+    color: #ffcc00;
+  }
+  
+  .fa-star, .fa-star-o {
+    font-size: 1.2em;
+  }
+    
 
 /* styling contact page */
 .contact{
@@ -341,6 +501,7 @@
     outline: 2px solid orange;
     padding: 3%;
     margin-top: 3%;
+    background-color: #fcfafa;
 }
 .register button{
     width: 100%;
@@ -349,11 +510,26 @@
 
 /* styling password reset */
 .home2 p{
-    padding-left: 5%;
+    padding-left: 18%;
 }
 
 .home2 h6{
     padding-left: 5%;
+    font-size: 12px;
+    padding-bottom: 5px;
+}
+
+.home2 .sponsor a {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    color: rgb(12, 11, 11);
+    font-weight: 400;
+}
+
+.home2 .social{
+    padding-right: 120px;
 }
 
 /* styling password reset done*/
@@ -393,12 +569,10 @@
 .carticon {
     padding-bottom: 10% !important;
     padding-left: 160px !important;
-    box-sizing: inherit !important;
-    border-color: black !important;
 }
-.carticon .nav-link{
-    box-sizing: inherit !important;
-    border-color: black !important;
+.cartbut form{
+    padding-top: 15% !important;
+    font-weight: 600;
 }
 
 /* styling cart done */
@@ -406,7 +580,11 @@
 /* styling checkout */
 .cart h1{
     text-transform: capitalize;
-    color: red;
+    font-size: 35px;
+    color: orange;
+    padding-top: 10px;
+    display: inline-block !important;
+    -webkit-text-stroke: 0.2px black;
 }
 .total td{
     font-weight: 800;
@@ -417,8 +595,8 @@
 
 /* styling category bar */
 .categonav .bar{
-    height: 8vh !important;
-    background-color: #eaf0f6 !important;
+    height: 8vh;
+    background-color: #e5ecf3 !important;
 }
 
 .categonav a{
@@ -437,6 +615,17 @@
     padding-left: 2%;
     border-color: black;
     padding-top: 5%;
+}
+
+.brand-hover {
+    text-decoration: none; /* Remove underline by default */
+    color: #000; /* Default text color */
+    transition: color 0.3s ease; /* Smooth transition effect */
+}
+
+.brand-hover:hover {
+    color: #3498db; /* Change text color on hover */
+    text-decoration: underline; /* Underline on hover */
 }
 
 /* styling category bar done */
@@ -488,19 +677,54 @@
 }
 .pform form input{
 
-    background-color: orange;
+    background-color: orange; 
 }
 
 /* styling whatsapp icon */
 
 
+.product .titlebar {
+    background-color: none !important;
+    display: inline-block !important;
+    -webkit-text-stroke: 0.2px black;
+    color: #000;
+    width: 18%;
+    margin-left: 41% !important;
+    font-size: 20px;
+    padding-top: 0.9% !important;
+    padding-bottom: 0.4%;
+    position: relative;
+    display: inline-block;
+    color: orange !important;
+    
+}
+
+.product .titlebar::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px; /* Set the thickness of the underline */
+    width: 86%;
+    background-color: black; /* Set the underline color to black */
+    margin-left: 7%;
+}
+
+.dashborad h3{
+    font-size: 30px;
+}
+.dashborad h2{
+    font-size: 20px;
+}
+
+
 /* styling whatsapp icon done */
 
-
 /* styling profile done */
-@media (min-width: 320px) and (max-width: 768px) {
+
+@media (min-width: 320px) and (max-width: 1180px) {
     .caroimg img {
-        height: 40vh;
+        height: 30vh;
     }
     .carousel-control-prev span i,
     .carousel-control-next span i {
@@ -512,6 +736,7 @@
         color: orangered;
         font-weight: 600;
         font-size: 25px;
+       
     }
     .title::after {
         content: '';
@@ -554,16 +779,16 @@
         margin-bottom: 8%;
     }
     .collapse .search-container {
-        float: left;
+        float: right;
         margin: 6px;
-        padding-left: 30px;
+        margin-right: 65px;
     }
     .collapse .search-container input[type=text] {
         width: 200px;
         height: 30px;
         border-radius: 25px;
         border: black;
-        padding-left: 10px;
+        padding-left: 8px;
     }
     .collapse .bi-search {
         background-color: none;
@@ -571,24 +796,23 @@
         border: none;
     }
     .categonav .bar {
-        height: 16vh !important;
-        width: 100%;
+        height: 8vh;
         background-color: #eaf0f6 !important;
     }
     .categonav a {
-        font-size: 13px !important;
+        font-size: 11.5px !important;
         font-style: normal;
         font-weight: 700;
     }
     .categonav span {
-        font-size: 11px !important;
+        font-size: 11.4px !important;
         font-style: normal;
-        font-weight: 500;
+        font-weight: 800;
     }
     .categbckgrd {
         font-size: 11px !important;
         font-style: normal;
-        font-weight: 500;
+        font-weight: 700;
         padding-left: 10% !important;
         background: blue;
     }
@@ -599,42 +823,41 @@
         border-color: black;
         padding-top: 15%;
     }
+    
 
-    .home2 h3 {
-        font-size: 23px;
-    }
-    .home2 .fetureprod {
-        height: 340px;
-        margin-bottom: 2%; 
-        margin-top: 3%;  
+    .home .card .card-body{
+        box-shadow: 5px 10px hwb(0 72% 28%);
+        height: 50vh;
+        background-color: #e5ecf3;
     }
 
-    .home .card .card-body {
-        height: 268px;
-        margin-bottom: 2%;  
+    .home .card img {
+        height: 30vh;
+        width: 95%;
+        padding: 5%;
     }
-
     .home .card{
-        margin-bottom: 3%;
-        margin-top: 6%;
-        height: auto;
-    }
+        margin-bottom: 4% !important;
+        margin-top: 4% !important;
+    }  
     .cart table {
-        width: 100%;
+        width: 98%;
         margin-right: 32%;
     }
     .cart img {
-        width: 33px;
-        height: 2vh;
+        width: 32px;
+        height: 1.9vh !important;
     }
     .cart thead {
         background: orange;
         text-align: center;
-        font-size: 10px;
+        font-size: 10px !important;
+        font-weight: bold !important;
     }
     .item td {
         border: 2px solid orange;
         font-size: 10px;
+        font-weight: bold !important;
     }
     .cartbut button {
         text-transform: capitalize;
@@ -647,36 +870,83 @@
         font-size: 11px;
     }
     .cart .btn {
-        font-size: 10px;
+        font-size: 10px !important;
+        font-weight: bold !important;
     }
     .cart .mb-3 {
-        font-size: 12px;
+        font-size: 11px !important;
+        font-weight: bold !important;
     }
     .cart .total1 {
-        font-size: 12px;
+        font-size: 11px !important;
+        font-weight: bold !important;
+    }
+
+    .cart .titlebar {
+        background-color: none !important;
+        display: inline-block !important;
+        -webkit-text-stroke: 0.2px black;
+        color: #000;
+        width: 18%;
+        margin-left: 25% !important;
+        font-size: 20px !important;
+        padding-top: 3% !important;
+        padding-bottom: 0.4%;
+        
+        display: inline-block;
+        color: orange !important;
+        
+    }
+    
+    .cart .titlebar::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 3px; /* Set the thickness of the underline */
+        width: 86%;
+        background-color: black; /* Set the underline color to black */
+        margin-left: 7%;
+    }
+    .form-control{
+        font-size: 11px !important;
+        font-weight: bold !important;
+        
+    }
+    .servicetype{
+        font-size: 11px !important;
+        font-weight: bold !important;
+        
+    }
+    .servicetype .btn{
+        font-size: 9px !important;
+        width: 38%;
+        height: 10vh;
+        font-weight: bold !important;
+        
     }
     .home2 .fetureprod .card-body {
         height: auto;
-        padding-top: 5%;
+        padding: 5%;
     }
     .home2 .fetureprod {
         height: auto;
-        padding-top: 4%;
+        padding-top: 8% !important;
+        margin-bottom: auto; 
+        margin-top: auto; 
     }
-    .home2 .fetureprod img {
+    
+    .home2 .fetureprod .img2 {
         height: 35vh;
         width: 90%;
-        padding-top: 3%;
-        padding-left: 7.5%;
+        padding-top: 5%;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        object-fit: cover;
     }
     .home2 a {
         margin-left: 35%;
-    }
-    .home .card img {
-        height: 30vh;
-        width: 90%;
-        padding-top: 5%;
-        padding-left: 7.5%;
     }
 
     .home2 .thead-light{
@@ -687,11 +957,54 @@
         font-weight: bold;
     }
 
+    .home2 h3 {
+        font-size: 23px;
+        padding-top: 3%;
+    }
+    .home2 h1 {
+        font-size: 28px;
+        padding-top: 3% !important;
+    }
+    .contact h1 {
+        font-size: 28px;
+        padding-top: 3% !important;
+    }
+    .merchant h4 {
+        
+        padding-top: 4% !important;
+    }
+    .partner h1 {
+        font-size: 28px;
+        padding-top: 4% !important;
+    }
+    .cart h1 {
+        font-size: 28px !important;
+        padding-top: 4% !important;
+    }
+    .alert {
+        width: 100% !important;
+        padding-top: 3% !important;
+        margin-top: 8% !important;
+    }
+    
+
     .product .card img {
         height: 35vh;
-        width: 55%;
+        width: 96%;
         padding: 4%;
         border-bottom: 4px solid orange;
+    }
+    .product .card{
+        border: 1px solid orange;
+        border-radius: 3%;
+        box-shadow: 0.8px 1px 4px 1px;
+        transition:1s;
+        padding-bottom: auto;
+        margin-top: auto;
+    }
+    .product .card-body{
+        height: 135px;
+        padding: 2%; 
     }
 
     .categonav .offcanvas-end {
@@ -700,16 +1013,80 @@
         border-color: black;
     }
     .det img {
-        height: 300px;
+        height: 250px;
         width: 100%;
     }
+ 
+    .det2 .card-body h5.card-title {
+        font-size: 1rem; /* Adjusts title size */
+        font-weight: bold; /* Makes title bolder */
+        padding-top: 70px;
+    } 
+     
     .product h1{
         font-size: 20px;
     }
 
+    .det .zoom-container {
+        overflow: hidden;
+    }
+      
+      .det .zoom-img {
+        transition: transform 0.5s ease;
+      }
+      
+      .det .zoom-img:hover {
+        transform: scale(1.2); /* Adjust the scale value to control the zoom level */
+      }
+      .detail{
+        border: 0.8px solid orange !important;
+        box-shadow: 0 0 50px 0 rgb(37, 65, 114);
+        width: 97% !important;
+        padding-bottom: 5px !important;
+      }
+      .detail img{
+        height: 30vh !important;
+      }
+    .det{
+        border-right: none;
+    }
+
+    .det2{
+        height: 300px !important;
+        margin-bottom: 2%;
+    }
+
+   .detail .det2 .btn{
+        width: 90px !important;
+        height: 4vh !important;
+    }
+
+    .det2 a{
+        color: #000;
+        font-size: 9px;
+        font-weight: bold;
+        padding-bottom: 10px !important;
+    }
+    .det2 .btn{
+        height: 3vh !important;
+    }
+    .det2 img{
+        width: 80% !important;
+        margin-left: 10%;
+    }
+    .detail .det2 h5{
+        color: #000;
+        font-size: 12px;
+    }
+    .det2 p{
+        color: #000;
+        font-size: 11px;
+        margin-bottom: auto;
+    }
+
     .banner img{
         background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url(../img/onlinestore.jpeg);
-        height: 35vh;
+        height: 20vh;
         width: 100% !important;
         background-repeat: no-repeat;
         background-position: center;
@@ -720,6 +1097,100 @@
         padding-bottom: 10% !important;
         padding-left: 160px !important;
     }
+    .alert{
+        padding-bottom: 0% !important;
+    }
+    .alert .strong{
+        padding-left: 0% !important;
+    }
+
+    .star-rating2 {
+        margin-left: 135px;
+      }
+    
+      .star-rating {
+        direction: rtl;
+        font-size: 1.2rem;
+        display: inline-flex;
+        margin-left: 160px;
+      }
+
+      .product .titlebar {
+        background-color: none !important;
+        display: inline-block !important;
+        -webkit-text-stroke: 0.2px black;
+        color: #000;
+        width: 18%;
+        margin-left: 41% !important;
+        font-size: 20px;
+        padding-top: 15% !important;
+        padding-bottom: 0.4%;
+        position: relative;
+        display: inline-block;
+        color: orange !important;
+        
+    }
+    
+    .product .titlebar::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 3px; /* Set the thickness of the underline */
+        width: 86%;
+        background-color: black; /* Set the underline color to black */
+        margin-left: 7%;
+    }
+
+    .title{
+        text-transform: capitalize;
+        color: orange;
+        font-weight: 400;
+        font-size: 39px;
+        display: inline-block !important;
+        -webkit-text-stroke: 0.2px rgb(30, 29, 29);
+        padding-left: 22%;
+        padding-bottom: 3%;
+       
+    }
+    .title::after{
+        content: '';
+        display: block;
+        width: 190px;
+        height: 4px;
+        background-color: rgb(23, 22, 22);
+        margin-left: auto;
+        margin-right: auto;
+    }
     
 
+}
+
+@media (min-width: 1350px) and (max-width: 1368px) {
+    .home2 .fetureprod{
+        height: 27vh;
+        margin-bottom: 10%;
+        
+    }
+
+    .home2 h1{
+        font-size: 35px;
+        padding-top: 30px !important;
+        
+    }
+
+    .home p{
+        font-size: 12px !important;
+    }
+    .title{
+        text-transform: capitalize;
+        color: orange;
+        font-weight: 400;
+        font-size: 39px;
+        display: inline-block !important;
+        -webkit-text-stroke: 0.2px rgb(30, 29, 29);
+        padding-left: 40%;
+        padding-top: 19% !important;
+  
+    }
 }

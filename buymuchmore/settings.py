@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-sj-99#p&&4um7qav$y#*f8mjxuuh#5&%j!@eo9g2gloyxn40!&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['54.158.31.47']
+ALLOWED_HOSTS = ['3.81.206.220']
 
 
 # Application definition
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'main',
+    'social_django',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'buymuchmore.urls'
@@ -143,5 +145,35 @@ EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = 'default from email'
 
 PASSWORD_RESET_TIMEOUT = 14400
+
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
+    'django.contrib.auth.backends.ModelBackend',  # This allows normal Django login
+)
+
+# Social Auth Keys
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '<your-google-client-id>'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '<your-google-client-secret>'
+
+SOCIAL_AUTH_FACEBOOK_KEY = '<1044540223685942>'
+SOCIAL_AUTH_FACEBOOK_SECRET = '<ed10d39480d1cbbc019011f5f4fcd64d>'
+
+# Redirect URLs
+LOGIN_URL = 'signin'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+
+# settings.py
+import os
+
+# Stripe settings
+STRIPE_SECRET_KEY = 'sk_test_51Q6DgrHyBChDrYsXgdzhJFjC3u6QyO6DVI6MZvR27jTsyBaqNHxF2G5xXWreR2T7IHayPNsmUSYk3IijLjTX0x1E00ThDZvdmJ'
+STRIPE_PUBLISHABLE_KEY = 'pk_test_51Q6DgrHyBChDrYsXUo5pF5IQQsVenzSKB0osF2aZB4HsrMA4i5InE0ANQYgBVZ0IGzM2qdnTIGweOXB0FTdovsTp00vT2mKB4F'
+# Webhook secret in settings.py
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+
 
 

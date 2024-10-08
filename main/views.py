@@ -1,20 +1,27 @@
 import uuid
 import json
 import requests
-
-
+import stripe
+import time 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth import logout, login, authenticate, update_session_auth_hash, get_user_model
 from django.contrib.auth.forms import PasswordChangeForm, UserCreationForm, PasswordResetForm, SetPasswordForm
-from django.core.mail import EmailMessage 
+from .forms import ProductForm
+from django.core.mail import EmailMessage, send_mail, EmailMultiAlternatives
 from django.db.models import Q
+from django.db import IntegrityError
 from main.models import *
 from .forms import *
-from .models import Customer, Product, FeatureProduct, Review, Cart, Merchant
-from django.db.models import Sum
+from .models import Customer, Product, FeatureProduct, Review, Cart, Merchant, ProductRating, Payment
+from .models import Order
+from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Count, Case, When, IntegerField, F, Sum, Value
+from django.db.models import Sum   
+from sklearn.cluster import KMeans
+import numpy as np
 from django.conf import settings
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -22,13 +29,20 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_str
-
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 from geopy.distance import geodesic
 from django.http import JsonResponse
 from .utils import find_nearest_location
+import random
+from django.utils.html import strip_tags
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from datetime import timedelta
+from django.views.decorators.csrf import csrf_exempt
+from decimal import Decimal
+from django.contrib.admin.views.decorators import staff_member_required
+
 
 
 
@@ -100,13 +114,21 @@ def subscription_products(request):
 
 
 def detail(request, id, slug):
-    merchant_det = Product.objects.get(pk=id)
+    # Get the specific product or return 404 if not found
+    merchant_det = get_object_or_404(Product, pk=id, slug=slug)
     
-    context ={
-        'merchant_det':merchant_det,
+    # Get similar products by type and randomly select 5
+    similar_products = Product.objects.filter(type=merchant_det.type).exclude(id=id).order_by('?')[:5]  # Randomly limiting to 5 similar products
+
+    # Context data for rendering the template
+    context = {
+        'merchant_det': merchant_det,
+        'similar_products': similar_products,
     }
-    
+
     return render(request, 'detail.html', context)
+
+
 
 def featuredetail(request, id, slug):
     merchant_det1 = Product.objects.get(pk=id)
@@ -117,19 +139,30 @@ def featuredetail(request, id, slug):
     
     return render(request, 'featuredetail.html', context)
 
+
 def contact(request):
     form = ContactForm()
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "your message has been sent successfully!!!")
+
+            # Send email after form submission
+            send_mail(
+                subject='New Contact Form Submission',  # Email subject
+                message=f"You have a new message from {form.cleaned_data['name']}:\n\n{form.cleaned_data['message']}",  # The message content
+                from_email=form.cleaned_data['email'],  # Sender's email
+                recipient_list=['plutronixtechnology@gmail.com'],  # Recipient's email
+                fail_silently=False,  # Raise error if email fails to send
+            )
+
+            messages.success(request, "Your message has been sent successfully!!!")
             return redirect('home')
-        
+
     context = {
-        'form':form,
+        'form': form,
     }
-        
+
     return render(request, 'contact.html', context)
 
 
@@ -139,20 +172,57 @@ def signout(request):
     return redirect('signin')
 
 
+# Helper function to transfer session cart to user's cart after login/registration
+def transfer_session_cart_to_user(request, user):
+    session_cart = request.session.get('cart', {})
+    
+    if session_cart:
+        for item_id, item_data in session_cart.items():
+            main = get_object_or_404(Product, pk=item_id)
+            # Check if the item is already in the user's cart
+            cart_item = Cart.objects.filter(user=user, items=main, paid=False).first()
+            
+            if cart_item:
+                # Update the quantity and amount if item already exists in the cart
+                cart_item.quantity += item_data['quantity']
+                cart_item.amount = cart_item.quantity * cart_item.price
+                cart_item.save()
+            else:
+                # Create a new cart entry for the user
+                Cart.objects.create(
+                    user=user,
+                    items=main,
+                    quantity=item_data['quantity'],
+                    price=item_data['price'],
+                    amount=item_data['amount'],
+                    paid=False
+                )
+        
+        # Clear the session cart after transferring to the user's cart
+        del request.session['cart']
+        request.session.modified = True  # Mark session as modified to ensure changes are saved
+
+# Signin view
 def signin(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
+
         if user:
             login(request, user)
-            messages.success(request, 'login successfully!')
-            return redirect('home')
+            messages.success(request, 'Login successful!')
+
+            # Transfer session cart items to user after login
+            transfer_session_cart_to_user(request, user)
+
+            return redirect('home')  # Redirect to home or wherever you want
         else:
-            messages.error(request, 'username/password is incorrect please try again')
+            messages.error(request, 'Username/password is incorrect. Please try again.')
             return redirect('signin')
-        
+
     return render(request, 'login.html')
+
 
 def merchsignin(request):
     if request.method == 'POST':
@@ -162,7 +232,7 @@ def merchsignin(request):
         if user:
             login(request, user)
             messages.success(request, 'login successfully!')
-            return redirect('home')
+            return redirect('staff_product_list')
         else:
             messages.error(request, 'username/password is incorrect please try again')
             return redirect('merchsignin')
@@ -208,7 +278,7 @@ def register(request):
             # Send verification email
             subject = 'Verify your email address'
             message = f"""
-            Hi {user.first_name},
+            Hi {user.username},
 
             Thank you for registering on our platform. Please click the link below to verify your email address:
 
@@ -223,7 +293,7 @@ def register(request):
             send_mail(subject, message, email_from, recipient_list)
 
             messages.success(request, f'Dear {user.username}, your account is successfully created. Please check your email to verify your account.')
-            return redirect('signin')
+            return redirect('register')
         else:
             # Pass form errors to the template for display
             messages.error(request, form.errors)
@@ -277,7 +347,7 @@ def merchregistration(request):
             # Send verification email
             subject = 'Verify your email address'
             message = f"""
-            Hi {user.first_name},
+            Hi {user.username},
 
             Thank you for registering on our platform. Please click the link below to verify your email address:
 
@@ -292,11 +362,12 @@ def merchregistration(request):
             send_mail(subject, message, email_from, recipient_list)
 
             messages.success(request, f'Dear {user.username}, your account is successfully created. Please check your email to verify your account.')
-            return redirect('merchsignin')
+            return redirect('merchregistration')
         else:
             messages.error(request, form.errors)
 
     return render(request, 'merchregistration.html', {'form': form})
+
 
 def partnerregistration(request):
     form = MerchantForm()
@@ -344,7 +415,7 @@ def partnerregistration(request):
             # Send verification email
             subject = 'Verify your email address'
             message = f"""
-            Hi {user.first_name},
+            Hi {user.username},
 
             Thank you for registering on our platform. Please click the link below to verify your email address:
 
@@ -366,6 +437,9 @@ def partnerregistration(request):
     return render(request, 'partnerregistration.html', {'form': form})
 
 
+
+User = get_user_model()
+
 def verify_email(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
@@ -374,24 +448,37 @@ def verify_email(request, uidb64, token):
         user = None
 
     if user is not None and default_token_generator.check_token(user, token):
+        if User.objects.filter(email=user.email, is_active=True).exists():
+            messages.error(request, 'This email is already associated with another account.')
+            return redirect('signin')  # Ensure the name 'registration' matches the one in urls.py
+
         user.is_active = True
         user.save()
         messages.success(request, 'Your email has been verified successfully.')
-        return redirect('merchsignin')
+        return redirect('signin')
     else:
         messages.error(request, 'The verification link is invalid.')
-        return redirect('merchregistration')
-     
-         
+        return redirect('registration')  # Ensure this name exists
+
+
 @login_required(login_url='signin')
 def profile(request):
-    userprof = Customer.objects.get(user__username=request.user.username)
+    try:
+        # Fetch the customer profile for the logged-in user
+        userprof = Customer.objects.get(user__username=request.user.username)
+        # Fetch the paid cart items for the logged-in user
+        cart = Cart.objects.filter(user=request.user, status='paid')
 
-    context = {
-        'userprof': userprof
-    }
+        context = {
+            'userprof': userprof,
+            'cart': cart,
+        }
 
-    return render(request, 'profile.html', context)
+        return render(request, 'profile.html', context)
+
+    except Customer.DoesNotExist:
+        # If the customer does not exist, redirect to the KYC page
+        return redirect('kyc_upload')  # Make sure 'kyc' is the correct URL pattern for the KYC page
 
 
 @login_required(login_url='signin')
@@ -427,25 +514,55 @@ def profile_update(request):
     return render(request, 'profile_update.html', context)
 
 
+@login_required
 def kyc_upload(request):
-    userprof = Merchant.objects.get(user__username = request.user.username)
+    # Fetch the Merchant profile for the logged-in user
+    userprof = Merchant.objects.get(user__username=request.user.username)
     pform = MerchantProfileForm(instance=request.user.merchant)
+
     if request.method == 'POST':
+        # Handle form data and file uploads
         pform = MerchantProfileForm(request.POST, request.FILES, instance=request.user.merchant)
+        
         if pform.is_valid():
-            user = pform.save()
+            user = pform.save()  # Save the user's updated profile
             new = user.first_name.title()
-            messages.success(request, f"dear {new} your document has been uploaded successfully. Please make your subscription payment and wait for 24 to 48 hours for account validation as a merchant!")
+
+            # Send success message
+            messages.success(request, f"Dear {new}, your document has been uploaded successfully. "
+                                      "Please wait for 24 to 48 hours for account activation as a merchant!")
+
+            # If the user uploaded a file
+            if 'pix' in request.FILES:
+                uploaded_file = request.FILES['pix']
+                
+                # Prepare the email to send the uploaded file
+                email = EmailMessage(
+                    subject="New KYC Document Uploaded",
+                    body=f"Dear Admin,\n\nA new KYC document has been uploaded by {new}.\n\nPlease find the document attached.",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=['plutronixtechnology@gmail.com', 'nostrasam@yahoo.com'],  # Multiple recipients
+                )
+                
+                # Attach the uploaded file
+                email.attach(uploaded_file.name, uploaded_file.read(), uploaded_file.content_type)
+                
+                # Send the email
+                email.send()
+
+            # Redirect back to the KYC upload page after a successful upload
             return redirect('kyc_upload')
         else:
             new = user.first_name.title()
-            messages.error(request, f'dear {new} your document upload generated the follow error: {pform.errors}')
+            # If the form is invalid, display an error message
+            messages.error(request, f"Dear {new}, your document upload generated the following error: {pform.errors}")
             return redirect('kyc_upload')
-        
+
+    # Render the KYC upload form with the user's profile data
     context = {
-        'userprof':userprof
+        'userprof': userprof
     }
-    
+
     return render(request, 'kyc_upload.html', context)
 
 
@@ -475,55 +592,126 @@ def password_update(request):
 
     return render(request, 'password_update.html', context)
 
-@login_required(login_url='signin')
+
 def add_to_cart(request):
     if request.method == 'POST':
         quantity = int(request.POST['quantity'])
         itemsid = request.POST['itemsid']
         main = Product.objects.get(pk=itemsid)
-        cart = Cart.objects.filter(user__username=request.user.username, paid=False)
-        if cart.exists():
+        
+        # Calculate the amount as a float, keeping the precision of price
+        amount = float(main.price) * quantity
+        
+        # For non-logged-in users (new customers)
+        if not request.user.is_authenticated:
+            # Handle the cart in the session for new customers (not logged in)
+            cart = request.session.get('cart', {})
+
+            if itemsid in cart:
+                # If the item is already in the session cart, update its quantity
+                cart[itemsid]['quantity'] += quantity
+                cart[itemsid]['amount'] = float(main.price) * cart[itemsid]['quantity']
+            else:
+                # Add new item to the session cart
+                cart[itemsid] = {
+                    'itemsid': itemsid,
+                    'quantity': quantity,
+                    'price': float(main.price),
+                    'amount': amount
+                }
+            
+            request.session['cart'] = cart  # Save updated cart back to the session
+            messages.success(request, 'Item added to cart. Please register or log in to complete the purchase.')
+            # Redirect non-logged-in users to the sign-in page
+            return redirect('signin')
+
+        # For logged-in users
+        else:
+            # Handle the cart in the database for logged-in users
+            cart = Cart.objects.filter(user=request.user, paid=False)
+
+            # Check if the item is already in the user's cart
             basket = cart.filter(items=main).first()
             if basket:
                 basket.quantity += quantity
-                basket.amount = main.price * basket.quantity
+                basket.amount = basket.quantity * float(main.price)
                 basket.save()
-                messages.success(request, 'One item added to cart')
+                messages.success(request, 'One item added to cart.')
             else:
-                newitem = Cart(user=request.user, items=main, quantity=quantity, price=main.price, amount=str(main.price * quantity), paid=False)
-                newitem.save()
-                messages.success(request, 'One item added to cart')
-        else:
-            newcart = Cart(user=request.user, items=main, quantity=quantity, price=main.price, amount=str(main.price * quantity), paid=False)
-            newcart.save()
-            messages.success(request, 'One item added to cart')
+                # Create a new cart entry for the user
+                Cart.objects.create(
+                    user=request.user,
+                    items=main,
+                    quantity=quantity,
+                    price=float(main.price),
+                    amount=amount,
+                    paid=False
+                )
+                messages.success(request, 'One item added to cart.')
+            
+            # Redirect logged-in users to the product page after adding to the cart
+            return redirect('products')
 
+    # Default redirect in case the request is not POST
     return redirect('products')
 
-@login_required(login_url='signin')       
+
 def cart(request):
-    cart_items = Cart.objects.filter(user__username=request.user.username, paid=False)
-
-    # Calculate total quantity of items in the cart
-    total_quantity = cart_items.aggregate(total_quantity=Sum('quantity'))['total_quantity'] or 0
-
-    for item in cart_items:
-        item.amount = item.price * item.quantity
-        item.save()
+    if request.user.is_authenticated:
+        # User is logged in, retrieve cart from the database
+        cart_items = Cart.objects.filter(user=request.user, paid=False)
         
-    subtotal = sum(item.price * item.quantity for item in cart_items)
-    vat = 0.20 * subtotal
-    total = subtotal + vat
+        # Calculate total quantity and total price for logged-in users
+        total_quantity = cart_items.aggregate(total_quantity=Sum('quantity'))['total_quantity'] or 0
+        subtotal = cart_items.aggregate(subtotal=Sum(F('price') * F('quantity')))['subtotal'] or 0
         
-    context = {
-        'cart': cart_items,
-        'subtotal': subtotal,
-        'vat': vat,
-        'total': total,
-        'total_quantity': total_quantity  # Add total quantity to the context
-    }
-    
+        commision = Decimal('0.08') * Decimal(subtotal)
+        vat = Decimal('0.20') * Decimal(subtotal)
+        total = Decimal(subtotal) + commision + vat
+
+        context = {
+            'cart': cart_items,
+            'subtotal': round(subtotal, 2),
+            'commision': round(commision, 2),
+            'vat': round(vat, 2),
+            'total': round(total, 2),
+            'total_quantity': total_quantity
+        }
+
+    else:
+        # User is not logged in, retrieve cart from the session
+        cart = request.session.get('cart', {})
+        cart_items = []
+        subtotal = Decimal(0)
+        total_quantity = 0
+
+        for item_id, item_data in cart.items():
+            product = Product.objects.get(pk=item_id)
+            amount = Decimal(item_data['price']) * item_data['quantity']
+            cart_items.append({
+                'product': product,
+                'quantity': item_data['quantity'],
+                'price': Decimal(item_data['price']),
+                'amount': round(amount, 2)  # Round to 2 decimal places
+            })
+            subtotal += amount
+            total_quantity += item_data['quantity']
+
+        commision = Decimal('0.08') * Decimal(subtotal)
+        vat = Decimal('0.20') * Decimal(subtotal)
+        total = Decimal(subtotal) + commision + vat
+
+        context = {
+            'cart': cart_items,
+            'subtotal': round(subtotal, 2),
+            'commision': round(commision, 2),
+            'vat': round(vat, 2),
+            'total': round(total, 2),
+            'total_quantity': total_quantity
+        }
+
     return render(request, 'cart.html', context)
+
 
 @login_required(login_url='signin')
 def delete(request):
@@ -545,103 +733,348 @@ def update(request):
         messages.success(request, 'Quantity updated')
         return redirect('cart')
     
-    
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
 @login_required(login_url='signin')
 def checkout(request):
-    userprof = Customer.objects.get(user__username = request.user.username)
-    cart = Cart.objects.filter(user__username = request.user.username, paid=False)
-    for item in cart:
-        item.amount = item.price * item.quantity
-        item.save()
-        
-    subtotal = 0
-    vat = 0
-    total = 0
-    
-    for item in cart:
-        subtotal += item.price * item.quantity
-        vat = 0.20 * subtotal
-        total = subtotal + vat
-        
-    context = {
-        'cart':cart,
-        'subtotal':subtotal,
-        'vat':vat,
-        'total':total,
-        'userprof':userprof
-    }
-    
-    return render(request, 'checkout.html', context)
+    cart_items = Cart.objects.filter(user=request.user, paid=False)
+
+    # Calculate total price
+    subtotal = sum(item.price * item.quantity for item in cart_items)
+    commision = 0.08 * subtotal
+    vat = 0.20 * subtotal
+    total = subtotal + commision + vat
+
+    # Generate unique order number
+    order_number = str(uuid.uuid4())
+
+    try:
+        # Retrieve or create Stripe Customer
+        user_profile = Customer.objects.get(user=request.user)
+        if not user_profile.stripe_customer_id:
+            customer = stripe.Customer.create(
+                email=request.user.email,
+                name=f'{request.user.first_name} {request.user.last_name}',
+            )
+            user_profile.stripe_customer_id = customer.id
+            user_profile.save()
+        else:
+            customer = stripe.Customer.retrieve(user_profile.stripe_customer_id)
+
+        # Create Stripe Checkout Session
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'gbp',
+                    'product_data': {
+                        'name': 'Your Cart Total',
+                    },
+                    'unit_amount': int(total * 100),
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            customer=customer.id,
+            success_url=f'http://3.81.206.220/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
+            cancel_url='http://3.81.206.220/payment/cancelled/',
+            metadata={
+                'user_id': request.user.id,
+                'order_number': order_number,
+            }
+        )
+        return redirect(checkout_session.url, code=303)
+
+    except Exception as e:
+        return render(request, 'checkout_error.html', {'error': str(e)})
 
 
-
-@login_required(login_url='signin')
 def pay(request):
     if request.method == 'POST':
-        api_key = 'sk_test_ddafcabdaed050c9422c8365430f1c50b79f83f1'  # Secret key from paystack
-        curl = 'https://api.paystack.co/transaction/initialize'  # Paystack call url
-        cburl = 'http://54.158.31.47/callback'  # Payment thank you page
-        ref = str(uuid.uuid4())  # Reference number required by paystack as an additional order number
-        profile = Customer.objects.get(user__username=request.user.username)
-        order_no = profile.id  # Main order number
-        total = float(request.POST['total']) * 100  # Total amount to be charged from customer card
-        user = User.objects.get(username=request.user.username)  # Query the user model for customer details
-        email = user.email  # Store customer to send to paystack
-        first_name = request.POST['first_name']  # Collect from the template in case there is no change
-        last_name = request.POST['last_name']  # Collect from the template in case there is no change
-        phone = request.POST['phone']  # Collect from the template in case there is no change
-        add_info = request.POST['add_info']  # Collect from the template in case there is no change
-
-        # Collect data to send to paystack via call
-        headers = {'Authorization': f'Bearer {api_key}'}
-        data = {'reference': ref, 'amount': int(total), 'email': user.email, 'callback_url': cburl,
-                'order_number': order_no, 'currency': 'NGN'}
-
-        # Make a call to paystack
         try:
-            r = requests.post(curl, headers=headers, json=data)
-            r.raise_for_status()  # Raise exception for HTTP errors
-        except requests.exceptions.RequestException as e:
-            messages.error(request, f'Error making payment: {e}')
+            # Generate a unique order number
+            order_number = str(uuid.uuid4()).split('-')[0]  # Use the same order_number everywhere
+
+            # Get total amount in GBP from the form (in pence)
+            total_amount = float(request.POST.get('total', 0)) * 100  # Convert to pence
+
+            # Create Stripe Checkout session
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'gbp',
+                        'product_data': {
+                            'name': 'Your Product Name',
+                        },
+                        'unit_amount': int(total_amount),
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=request.build_absolute_uri('/payment-success/') + f'?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
+                cancel_url=request.build_absolute_uri('/payment-cancelled/'),
+                metadata={
+                    'order_number': order_number,  # Pass order_number in metadata for consistency
+                    'user_id': request.user.id,
+                }
+            )
+
+            # Redirect the user to Stripe's checkout page
+            return redirect(session.url)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=403)
+
+    return render(request, 'checkout.html')
+
+def payment_success(request):
+    session_id = request.GET.get('session_id')
+    
+    # Retrieve the order number from the URL
+    order_number = request.GET.get('order_number')  # Ensure order_number is passed correctly
+
+    if not session_id:
+        return render(request, 'payment_error.html', {'message': 'No session ID provided'})
+
+    try:
+        # Retrieve session and customer from Stripe
+        session = stripe.checkout.Session.retrieve(session_id)
+        customer_data = stripe.Customer.retrieve(session.customer)
+
+        # Retrieve customer based on email, handling multiple objects
+        customers = Customer.objects.filter(email=customer_data.email)
+
+        if customers.exists():
+            userprof = customers.first()  # Use the first customer object
         else:
-            transback = json.loads(r.text)
-            rdurl = transback['data']['authorization_url']
+            userprof = Customer.objects.create(email=customer_data.email, user=request.user)
 
-            account = Payment()
-            account.user = user
-            account.first_name = user.first_name
-            account.last_name = user.last_name
-            account.amount = total / 100
-            account.paid = True
-            account.additional_info = add_info
-            account.pay_code = ref
-            account.save()
+        # Handle cart and order logic
+        cart = Cart.objects.filter(user__email=customer_data.email, paid=False)
 
-            return redirect(rdurl)
+        if not cart.exists():
+            return render(request, 'payment_error.html', {'message': 'No items in the cart'})
 
-    return redirect('checkout')
+        # Calculate total price
+        subtotal = sum(item.price * item.quantity for item in cart)
+        commission_rate = 0.22 if session.metadata.get('service_type', 'premium') == 'premium' else 0.15
+        commission = commission_rate * subtotal
+        vat = 0.20 * subtotal
+        total_price = subtotal + commission + vat
+
+        # Prepare the list of items for the invoice and for the template
+        items_list = []
+        cart_items = []  # List to pass to the template
+        for item in cart:
+            item.paid = True
+            item.order_number = order_number  # Ensure the order_number is consistent
+            item.save()
+
+            product = Product.objects.get(pk=item.items.id)
+            items_list.append(f"""
+                <tr>
+                    <td>{product.model}</td>
+                    <td>{item.quantity}</td>
+                    <td>£{item.price}</td>
+                </tr>
+            """)
+
+            # For rendering in the template
+            cart_items.append({
+                'product': product,
+                'quantity': item.quantity,
+                'price': item.price,
+            })
+
+        # Log the payment to the Payment model
+        Payment.objects.create(
+            user=request.user,
+            first_name=request.user.first_name,
+            last_name=request.user.last_name,
+            amount=int(total_price * 100),  # Convert to pence
+            paid=True,
+            phone=userprof.phone,
+            pay_code=order_number,  # Ensure pay_code is the same as order_number
+            additional_info=f"Order Number: {order_number}, Total: £{total_price:.2f}"
+        )
+
+        # Prepare HTML email content with the table structure
+        email_subject = f'Your Order Confirmation - {order_number}'
+        html_content = f"""
+        <html>
+        <body>
+        <p>Dear {userprof.user.username},</p>
+        <p>Thank you for your purchase! Your order number is: <strong>{order_number}</strong>.</p>
+        <p>Your order includes the following items:</p>
+
+        <table border="1" cellpadding="10" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {''.join(items_list)}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2"><strong>Subtotal</strong></td>
+                    <td><strong>£{subtotal:.2f}</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><strong>Commission</strong></td>
+                    <td><strong>£{commission:.2f}</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><strong>VAT</strong></td>
+                    <td><strong>£{vat:.2f}</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><strong>Total</strong></td>
+                    <td><strong>£{total_price:.2f}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <p>We will notify you once your items are shipped.</p>
+        <p>Please contact us within 15 to 20 minutes of payment confirmation to cancel your order at contactus@buymuchmore.co.uk</p>
+        <p>Thank you for shopping with us!</p>
+        <p>Best regards,<br>Buy Much More Team</p>
+        </body>
+        </html>
+        """
+
+        plain_message = strip_tags(html_content)
+
+        # Send email to the customer
+        send_email_notification(email_subject, plain_message, html_content, [customer_data.email])
+
+        # Send email to the seller or internal team
+        send_email_notification(email_subject, plain_message, html_content, ['plutronixtechnology@gmail.com'])
+
+        # Clear the cart after payment
+        cart.delete()
+
+        # Render success page with order details
+        context = {
+            'userprof': userprof,
+            'customer_email': customer_data.email,
+            'order_number': order_number,  # Pass order_number to template
+            'subtotal': subtotal,
+            'commission': commission,
+            'vat': vat,
+            'total_price': total_price,
+            'cart_items': cart_items,  # Pass cart items to the template
+        }
+
+        return render(request, 'payment_success.html', context)
+
+    except stripe.error.StripeError as e:
+        return render(request, 'payment_error.html', {'message': str(e)})
 
 
-@login_required(login_url='signin')
-def callback(request):
-    userprof = Customer.objects.get(user__username=request.user.username)
-    cart = Cart.objects.filter(user__username=request.user.username, paid=False)
-    cars = []
 
-    for item in cart:
-        item.paid = True
-        item.save()
-        
-        items = Product.objects.get(pk=item.items.id)
-        
+def send_email_notification(subject, plain_message, html_message, recipient_list):
+    email = EmailMultiAlternatives(subject, plain_message, settings.DEFAULT_FROM_EMAIL, recipient_list)
+    email.attach_alternative(html_message, "text/html")
+    email.send()
 
-    context = {
-        'userprof': userprof,
-        'cart': cart,
-        'items': items,
-    }
 
-    return render(request, 'callback.html', context)
+def payment_cancelled(request):
+    # Stripe checkout cancelled page
+    messages.error(request, "Payment was cancelled.")
+    return render(request, 'payment_cancelled.html')
+
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE', '')
+    endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError:
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError:
+        return HttpResponse(status=400)
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        user_email = session['customer_details']['email']
+        order_number = session['metadata'].get('order_number')
+
+        userprof = Customer.objects.get(user__email=user_email)
+        cart = Cart.objects.filter(user__email=user_email, paid=False)
+
+        if not cart.exists():
+            return HttpResponse("No items in the cart", status=404)
+
+        # Commission and total calculations
+        service_type = session['metadata'].get('service_type', 'regular')
+        commission_rate = 0.22 if service_type == 'premium' else 0.15
+        subtotal = sum(item.price * item.quantity for item in cart)
+        commission = commission_rate * subtotal
+        vat = 0.20 * subtotal
+        total_price = subtotal + commission + vat
+
+        # Mark cart items as paid and save order information
+        for item in cart:
+            item.paid = True
+            item.order_number = order_number
+            item.service_type = service_type
+            item.save()
+
+        # Clear the cart after payment
+        cart.delete()
+
+        # Prepare email content
+        items_list = [
+            f"<tr><td>{Product.objects.get(pk=item.items.id).model}</td><td>{item.quantity}</td><td>£{item.price:.2f}</td></tr>"
+            for item in cart
+        ]
+
+        email_subject = f'Your Order Confirmation - {order_number}'
+        html_content = f"""
+        <html>
+        <body>
+        <p>Dear {userprof.user.username},</p>
+        <p>Your order number is: <strong>{order_number}</strong>.</p>
+        <table border="1">
+            <tr><th>Product</th><th>Quantity</th><th>Price</th></tr>
+            {''.join(items_list)}
+        </table>
+        <p>Subtotal: £{subtotal:.2f}</p>
+        <p>Commission: £{commission:.2f}</p>
+        <p>VAT: £{vat:.2f}</p>
+        <p><strong>Total: £{total_price:.2f}</strong></p>
+        <p>Thank you for shopping with us!</p>
+        </body>
+        </html>
+        """
+
+        # Send email to the customer
+        send_email(email_subject, html_content, user_email)
+        # Send email to the admin/seller
+        send_email(email_subject, html_content, 'plutronixtechnology@gmail.com')
+
+        return HttpResponse(status=200)
+
+    return HttpResponse(status=400)
+
+
+def send_email(subject, content, recipient):
+    email = EmailMultiAlternatives(subject, strip_tags(content), settings.DEFAULT_FROM_EMAIL, [recipient])
+    email.attach_alternative(content, "text/html")
+    email.send(fail_silently=False)
 
 
 def search(request):
@@ -742,7 +1175,6 @@ def find_nearest_delivery_service(request, merchant_id):
     return render(request, 'nearest_delivery_service.html', context)
 
 
-
 def merchant_dashboard(request):
     search_query = request.GET.get('search', '')
     merchants = Merchant.objects.filter(company_name__icontains=search_query, email__icontains=search_query, address__icontains=search_query)  # Adjusted the filter field to company_name
@@ -753,5 +1185,300 @@ def merchant_dashboard(request):
     return render(request, 'merchant_dashboard.html', context)
 
 
+# Function to apply K-means clustering
+def cluster_products(products, num_clusters=4):
+    # Extract relevant product features for clustering (e.g., price, quantity, availability)
+    product_features = np.array([[p.price, p.quantity, p.availability] for p in products])
 
+    # Apply K-means clustering
+    kmeans = KMeans(n_clusters=num_clusters, random_state=1)
+    kmeans.fit(product_features)
     
+    # Assign a cluster to each product
+    clustered_products = {i: [] for i in range(num_clusters)}
+    for i, product in enumerate(products):
+        cluster = kmeans.labels_[i]
+        clustered_products[cluster].append(product)
+    
+    return clustered_products
+
+# Fetching similar products
+def get_similar_products(target_product, products, num_clusters=4):
+    clustered_products = cluster_products(products, num_clusters)
+    
+    # Find the cluster of the target product
+    target_cluster = None
+    for cluster, items in clustered_products.items():
+        if target_product in items:
+            target_cluster = cluster
+            break
+
+    if target_cluster is not None:
+        # Return similar products from the same cluster, excluding the target product itself
+        return [p for p in clustered_products[target_cluster] if p != target_product]
+    else:
+        return []
+    
+
+@login_required
+def submit_rating(request, product_id):
+    try:
+        # Fetch the product early to avoid UnboundLocalError
+        product = get_object_or_404(Product, id=product_id)
+        
+        if request.method == 'POST':
+            rating = request.POST.get('rating')
+            
+            if rating is not None:
+                try:
+                    # Convert rating to float
+                    rating = float(rating)
+                    
+                    # Ensure rating is between 0 and 5
+                    if rating < 0 or rating > 5:
+                        messages.error(request, "Invalid rating value. Rating must be between 0 and 5.")
+                        return redirect('detail', id=product.id, slug=product.slug)
+
+                    # Limit rating to one decimal place
+                    rating = round(rating, 1)
+
+                    # Check if the user has already rated the product
+                    existing_rating = ProductRating.objects.filter(user=request.user, product=product).first()
+                    if existing_rating:
+                        messages.error(request, "You have already rated this product.")
+                        return redirect('detail', id=product.id, slug=product.slug)
+
+                    # Ensure the product has an existing rating_value
+                    if product.rating_value is None:
+                        product.rating_value = 0
+                        product.rating_count = 0
+
+                    # Calculate the new average rating
+                    total_rating = product.rating_value * product.rating_count
+                    product.rating_count += 1
+                    product.rating_value = round((total_rating + rating) / product.rating_count, 1)
+                    product.save()
+
+                    # Save the user's rating
+                    ProductRating.objects.create(user=request.user, product=product, rating=rating)
+
+                    messages.success(request, "Thank you for rating the product!")
+                    return redirect('detail', id=product.id, slug=product.slug)
+                except ValueError:
+                    messages.error(request, "Invalid rating format. Please enter a valid number.")
+                    return redirect('detail', id=product.id, slug=product.slug)
+            else:
+                messages.error(request, "Rating not provided.")
+                return redirect('detail', id=product.id, slug=product.slug)
+        else:
+            return HttpResponse("Invalid request method", status=405)
+
+    except Product.DoesNotExist:
+        messages.error(request, "Product not found.")
+        return redirect('product_list')  # Redirect to a product listing page or home page
+    
+    
+    from django.shortcuts import render
+
+def privacy_policy(request):
+    return render(request, 'privacy_policy.html')
+
+def terms_service(request):
+    return render(request, 'terms_service.html')
+
+def deletion_instruction(request):
+    return render(request, 'deletion_instruction.html')
+
+
+# View for staff to create products
+@staff_member_required
+@login_required(login_url='merchsignin')
+def create_product(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save(commit=False)
+            product.seller_name = request.user  # Associate the product with the logged-in staff user
+            product.save()
+            messages.success(request, 'Product successfully created!')
+            return redirect('staff_product_list')  # Redirect to a page listing their products
+    else:
+        form = ProductForm()
+
+    return render(request, 'create_product.html', {'form': form})
+
+
+@staff_member_required
+@login_required
+def staff_product_list(request):
+    # Fetch the products sold by the logged-in staff member
+    products = Product.objects.filter(seller_name=request.user)
+    total_products = products.count()
+
+    product_data = []
+    total_paid_value = 0
+    total_unpaid_value = 0
+    total_value_all_products = 0
+
+    # Get the current time for comparison
+    current_time = timezone.now()
+
+    # Iterate through each product
+    for product in products:
+        # Fetch paid orders related to the product
+        paid_orders = Cart.objects.filter(items=product, paid=True)
+        unpaid_count = product.quantity - paid_orders.count()
+
+        product_paid_value = paid_orders.count() * product.price
+        product_unpaid_value = unpaid_count * product.price
+
+        total_paid_value += product_paid_value
+        total_unpaid_value += product_unpaid_value
+        total_value_for_product = product_paid_value + product_unpaid_value
+        total_value_all_products += total_value_for_product
+
+        # Access the most recent payment date from the Payment model
+        most_recent_payment = Payment.objects.filter(
+            pay_code__in=paid_orders.values_list('order_number', flat=True)
+        ).order_by('-payment_date').first()
+
+        # Use payment_date if a payment exists, otherwise None
+        order_time = most_recent_payment.payment_date if most_recent_payment else None
+
+        # Determine order status color based on the most recent payment
+        if most_recent_payment and order_time:
+            if order_time >= current_time - timezone.timedelta(minutes=5):
+                order_status_color = 'green'  # Most recent payment, use green
+            else:
+                order_status_color = 'orange'  # Older payment, use orange
+        else:
+            order_status_color = 'orange'  # Default to orange if no payment
+
+        # Collect sales data per order and sort by payment date
+        sales_data = []
+        for paid_order in paid_orders:
+            # Get the Payment object for this paid_order
+            payment = Payment.objects.filter(pay_code=paid_order.order_number).first()
+            payment_date = payment.payment_date if payment else None
+            quantity_sold = paid_order.quantity
+            amount_sold = quantity_sold * paid_order.price
+
+            sales_data.append({
+                'order_time': payment_date,
+                'quantity_sold': quantity_sold,
+                'amount_sold': amount_sold,
+            })
+
+        # Make timezone.datetime.min timezone-aware
+        min_aware_datetime = timezone.make_aware(timezone.datetime.min, timezone.get_current_timezone())
+
+        # Sort sales_data by 'order_time' (most recent first)
+        sales_data = sorted(sales_data, key=lambda x: x['order_time'] or min_aware_datetime, reverse=True)
+
+        # Only keep the most recent transaction
+        most_recent_transaction = sales_data[0] if sales_data else None
+
+        product_data.append({
+            'id': product.id,
+            'model': product.model,
+            'quantity': product.quantity,
+            'price': product.price,
+            'uploaded_at': product.uploaded_at,
+            'paid_count': paid_orders.count(),
+            'unpaid_count': unpaid_count,
+            'total_value': total_value_for_product,
+            'order_time': order_time,
+            'status': 'Paid' if paid_orders.exists() else 'Unpaid',
+            'order_status_color': order_status_color,
+            'average_rating': product.get_average_rating(),
+            'rating_count': product.rating_count,
+            'most_recent_transaction': most_recent_transaction,  # Include only the most recent transaction
+        })
+
+    context = {
+        'products': product_data,
+        'total_products': total_products,
+        'total_paid_value': total_paid_value,
+        'total_unpaid_value': total_unpaid_value,
+        'total_value_all_products': total_value_all_products,
+    }
+
+    return render(request, 'staff_product_list.html', context)
+
+
+
+
+def seller_dashboard(request):
+    products = Product.objects.filter(seller=request.user)
+
+    total_products = products.count()
+    total_paid_value = sum([product.price * product.paid_count for product in products])
+    total_unpaid_value = sum([product.price * product.unpaid_count for product in products])
+
+    context = {
+        'products': products,
+        'total_products': total_products,
+        'total_paid_value': total_paid_value,
+        'total_unpaid_value': total_unpaid_value,  # Add unpaid value here
+    }
+    return render(request, 'seller_dashboard.html', context)
+
+
+
+@staff_member_required
+@login_required
+def edit_product(request, id):
+    product = get_object_or_404(Product, id=id)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Product successfully edited!')
+            return redirect('staff_product_list')
+    else:
+        form = ProductForm(instance=product)
+
+    return render(request, 'edit_product.html', {'form': form, 'product': product})
+
+
+
+
+def delete_product(request, id):
+    product = get_object_or_404(Product, id=id)
+    if request.method == 'POST':
+        product.delete()
+        messages.success(request, 'Product successfully deleted!')
+        return redirect('staff_product_list')  # Redirect after successful deletion
+    return render(request, 'delete_product.html', {'product': product})
+
+
+
+@login_required(login_url='signin')
+def cancel_order(request):
+    # Get the user's cart
+    cart = Cart.objects.filter(user__username=request.user.username, paid=True)
+
+    # Check if the cart is empty
+    if not cart.exists():
+        return render(request, 'error.html', {'message': 'No paid orders found to cancel.'})
+
+    # Get the order's created time (assuming you have a timestamp field in your Cart model)
+    order_created_at = cart.first().created_at  # Replace with your actual field
+    now = timezone.now()
+
+    # Check if the order is within the cancellation time limit (30 minutes)
+    if now - order_created_at <= timedelta(minutes=30):
+        # Set the order status to cancelled (you may have a status field in your model)
+        for item in cart:
+            item.paid = False  # Mark as unpaid or you can change the status
+            item.save()
+
+        # Provide feedback to the user
+        return render(request, 'success.html', {'message': 'Your order has been successfully cancelled.'})
+    else:
+        # If the cancellation period has passed
+        return render(request, 'error.html', {'message': 'Cancellation period has expired. You can no longer cancel your order.'})
+
+
+
+

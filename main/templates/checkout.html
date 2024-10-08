@@ -1,72 +1,95 @@
 {% extends 'base.html' %}
 {% load humanize %}
 {% block header %} {% include 'header.html' %} {% endblock header %}
-{% block banner %} {% include 'banner.html' %} {% endblock banner %}
 {% block content %}
 <div class="container mt-5 mb-5">
   <div class="row">
     <div class="col-12 col-md-6 cart">
       <table>
-        <h1 class="text-center">summary</h1>
+        <h1 class="text-center">Summary</h1>
         <thead>
-          <th>item</th>
-          <th>brand</th>
-          <th>color</th>
-          <th>quantity</th>
-          <th>amount</th>
+          <th>Item</th>
+          <th>Brand</th>
+          <th>Color</th>
+          <th>Quantity</th>
+          <th>Amount</th>
         </thead>
         <tbody>
-          {% for item in cart %}
+          {% for item in cart_items %}
             <tr class="item">
-              <td><img src="{{item.items.carimg.url}}" alt="" style="height: 80px;"></td>
-              <td>{{item.items.model}}</td>
-              <td>{{item.items.color}}</td>
-              <td>{{item.quantity}}</td>
-              <td>£{{item.amount|floatformat:2|intcomma}}</td>
+              <td><img src="{{ item.items.carimg.url }}" alt="" style="height: 80px;"></td>
+              <td>{{ item.items.model }}</td>
+              <td>{{ item.items.color }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>£{{ item.amount|floatformat:2|intcomma }}</td>
             </tr>
           {% endfor %}
           <tr class="total">
             <td></td>
             <td></td>
             <td></td>
-            <td class="total1">total =</td>
-            <td class="total1">£{{total|floatformat:2|intcomma}}</td>
+            <td class="total1">Subtotal =</td>
+            <td class="total1">£<span id="subtotal">{{ subtotal|floatformat:2|intcomma }}</span></td>
           </tr>
-          </tbody>
+          <tr class="total">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="total1">VAT (20%) =</td>
+            <td class="total1">£<span id="vat">{{ vat|floatformat:2|intcomma }}</span></td>
+          </tr>
+          <tr class="total">
+            <td></td>
+            <td></td>
+            <td><td class="total1">Commission =</td></td>
+            <td class="total1">£<span id="commission">{{ commission|floatformat:2|intcomma }}</span></td>
+          </tr>
+        </tbody>
       </table>
     </div>
+
     <div class="col-12 col-md-6 pt-5 cart">
-      <form action="{% url 'pay' %}" method="POST"> 
+      <form id="payment-form" action="{% url 'pay' %}" method="POST"> 
         {% csrf_token %}
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">First Name</label>
-          <input type="text" name="first_name" value="{{userprof.first_name}}" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+          <label for="first_name" class="form-label">First Name</label>
+          <input type="text" name="first_name" value="{{ userprof.first_name }}" class="form-control" id="first_name">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Last Name</label>
-          <input type="text" name="last_name" value="{{userprof.last_name}}" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+          <label for="last_name" class="form-label">Last Name</label>
+          <input type="text" name="last_name" value="{{ userprof.last_name }}" class="form-control" id="last_name">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Phone</label>
-          <input type="text" name="phone" value="{{userprof.phone}}" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+          <label for="phone" class="form-label">Phone</label>
+          <input type="text" name="phone" value="{{ userprof.phone }}" class="form-control" id="phone">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Address</label>
-          <input type="text" name="address" value="{{userprof.address}}" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+          <label for="address" class="form-label">Address</label>
+          <input type="text" name="address" value="{{ userprof.address }}" class="form-control" id="address">
         </div>
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Email</label>
-          <input type="email" name="email" value="{{userprof.email}}" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" name="email" value="{{ userprof.email }}" class="form-control" id="email">
         </div>
+
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Additional information</label>
-          <input type="hidden" name="total" value="{{total}}" id="">
-          <input type="text" name="add_info" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+          <label for="service_type" class="form-label">Select Service Type</label>
+          <select name="service_type" id="service_type" class="form-control" onchange="updateTotal()">
+              <option value="regular" {% if service_type == 'regular' %} selected {% endif %}>Regular Delivery Service</option>
+              <option value="premium" {% if service_type == 'premium' %} selected {% endif %}>Premium Delivery Service</option>
+          </select>
         </div>
+
+        <div class="mt-3">
+          <h4>Total: £<span id="totalDisplay">{{ total|floatformat:2|intcomma }}</span></h4>
+        </div>
+        <input type="hidden" name="total" id="totalInput" value="{{ total|floatformat:2 }}">
         <button type="submit" class="btn btn-warning">Pay Now</button>
       </form>
     </div>
   </div>
 </div>
+
+
 {% endblock content %}
 {% block footer %} {% include 'footer.html' %} {% endblock footer %}

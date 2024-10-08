@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% block header %} {% include 'header.html' %} <script>
+    // Refresh the page every 5 minutes (300000 milliseconds)
+    setTimeout(function() {
+        window.location.reload();
+    }, 300000); // 5 minutes
+</script> {% endblock header %}
+{% block content %}
+{% load humanize %}
+
+<div class="container mt-5 dashboard">
+    <h3 class="text-center title">Seller Product Dashboard</h3>
+    <h2>Product Statistics</h2>
+    <p>Total Products: <b>{{ total_products }}</b></p> 
+    <p>Total Value of Paid Products: <b>£{{ total_paid_value|floatformat:2|intcomma }}</b></p> 
+    <p>Total Value of Unpaid Products: <b>£{{ total_unpaid_value|floatformat:2|intcomma }}</b></p>
+    <p>Total Value of All Products: <b>£{{ total_value_all_products|floatformat:2|intcomma }}</b></p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Uploaded At</th>
+                <th>Paid Items</th>
+                <th>Unpaid Items</th>
+                <th>Total Value</th>
+                <th>Order Status</th>
+                <th>Order Time</th>
+                <th>Average Rating</th>
+                <th>Rating Count</th>
+                <th>Most Recent Transaction</th> <!-- New Column for the most recent transaction -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.model }}</td>
+                <td>{{ product.quantity|intcomma }}</td>
+                <td>£{{ product.price|floatformat:2|intcomma }}</td>
+                <td>{{ product.uploaded_at }}</td>
+                <td>{{ product.paid_count|intcomma }}</td>
+                <td>{{ product.unpaid_count|intcomma }}</td>
+                <td>£{{ product.total_value|floatformat:2|intcomma }}</td>
+                <td>
+                    <span class="badge-pill" style="background-color: {{ product.order_status_color }};">
+                        {{ product.status }}
+                    </span>
+                </td>
+                <td>{{ product.order_time|date:"Y-m-d H:i:s" }}</td>
+                <td>{{ product.average_rating|default:"No Ratings Yet" }}</td>
+                <td>{{ product.rating_count|default:0|intcomma }}</td>
+                <td>
+                    {% if product.most_recent_transaction %}
+                        £{{ product.most_recent_transaction.amount_sold|floatformat:2|intcomma }} sold on 
+                        {{ product.most_recent_transaction.order_time|date:"Y-m-d H:i:s" }}
+                    {% else %}
+                        No transactions yet.
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'edit_product' product.id %}" class="btn btn-sm btn-warning">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+    <!-- Charts Section -->
+    <h3 class="text-center mt-5">Product Analysis Overview</h3>
+
+    <div class="row">
+        <!-- Bar Chart: Revenue per Product -->
+        <div class="col-md-6">
+            <h5 class="text-center">Revenue per Product</h5>
+            <canvas id="revenueChart" width="300" height="200"></canvas>
+        </div>
+
+        <!-- Bar Chart: Paid vs Unpaid by Product -->
+        <div class="col-md-6">
+            <h5 class="text-center">Paid vs Unpaid by Product</h5>
+            <canvas id="paidVsUnpaidChart" width="300" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Bar Chart: Total Value of Paid vs Unpaid Products -->
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <h5 class="text-center">Total Value of Paid vs Unpaid Products</h5>
+            <canvas id="totalPaidVsUnpaidChart" width="380" height="150"></canvas>
+        </div>
+    </div>
+
+    <!-- Bar Chart: Total Value for All Products -->
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <h5 class="text-center">Total Value for All Products</h5>
+            <canvas id="totalValueAllProductsChart" width="380" height="150"></canvas>
+        </div>
+    </div>
+
+    <!-- Updated Chart: Rating Count per Product -->
+    <div class="row">
+        <div class="col-md-6">
+            <h5 class="text-center">Rating Count per Product</h5>
+            <canvas id="ratingCountChart" width="300" height="200"></canvas>
+        </div>
+        <div class="col-md-6">
+            <h5 class="text-center">Average Rating per Product</h5>
+            <canvas id="ratingChart" width="300" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Include Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Bar Chart: Revenue per Product
+        var ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+        var revenueChart = new Chart(ctxRevenue, {
+            type: 'bar',
+            data: {
+                labels: [
+                    {% for product in products %} "{{ product.model }}", {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Revenue (£)',
+                    data: [
+                        {% for product in products %} {{ product.total_value }}, {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+
+        // Bar Chart: Paid vs Unpaid Items by Product
+        var ctxPaidVsUnpaid = document.getElementById('paidVsUnpaidChart').getContext('2d');
+        var paidVsUnpaidChart = new Chart(ctxPaidVsUnpaid, {
+            type: 'bar',
+            data: {
+                labels: [
+                    {% for product in products %} "{{ product.model }}", {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Paid Items',
+                    data: [
+                        {% for product in products %} {{ product.paid_count }}, {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Unpaid Items',
+                    data: [
+                        {% for product in products %} {{ product.unpaid_count }}, {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+
+        // Bar Chart: Total Value of Paid vs Unpaid Products
+        var ctxTotalPaidVsUnpaid = document.getElementById('totalPaidVsUnpaidChart').getContext('2d');
+        var totalPaidVsUnpaidChart = new Chart(ctxTotalPaidVsUnpaid, {
+            type: 'bar',
+            data: {
+                labels: ['Paid Products', 'Unpaid Products'],
+                datasets: [{
+                    label: 'Total Value (£)',
+                    data: [{{ total_paid_value }}, {{ total_unpaid_value }}],
+                    backgroundColor: ['rgba(54, 162, 235, 0.2)', 'rgba(255, 99, 132, 0.2)'],
+                    borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+
+        // Bar Chart: Total Value for All Products
+        var ctxTotalValueAllProducts = document.getElementById('totalValueAllProductsChart').getContext('2d');
+        var totalValueAllProductsChart = new Chart(ctxTotalValueAllProducts, {
+            type: 'bar',
+            data: {
+                labels: ['Total Value'],
+                datasets: [{
+                    label: 'Total Value (£)',
+                    data: [{{ total_value_all_products }}],
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+
+        // Updated Chart: Rating Count per Product
+        var ctxRatingCount = document.getElementById('ratingCountChart').getContext('2d');
+        var ratingCountChart = new Chart(ctxRatingCount, {
+            type: 'bar',
+            data: {
+                labels: [
+                    {% for product in products %} "{{ product.model }}", {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Rating Count',
+                    data: [
+                        {% for product in products %} {{ product.rating_count }}, {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                    borderColor: 'rgba(255, 205, 86, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+
+    // Bar Chart: Average Rating per Product
+    var ctxRating = document.getElementById('ratingChart').getContext('2d');
+    var ratingChart = new Chart(ctxRating, {
+        type: 'bar',
+        data: {
+            labels: [
+                {% for product in products %}
+                    "{{ product.model }}",
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Average Rating',
+                data: [
+                    {% for product in products %}
+                        {{ product.average_rating }},
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: true
+        }
+    });
+
+    </script>
+</div>
+{% endblock content %}
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}

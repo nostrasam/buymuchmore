@@ -46,7 +46,7 @@
 
 <nav class="navbar navbar-expand-lg">
     <div class="container">
-      <a class="navbar-brand" href="{% url 'home' %}"><img src="{{info.logo.url}}" style="height: 40px;"></a>
+      <a class="navbar-brand uk" href="{% url 'home' %}"><img src="{{info.logo.url}}" style="height: 40px;">UK</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -57,11 +57,16 @@
          
           {% if user.merchant %}
           <li class="nav-item">
-            <a class="nav-link text-nowrap" href="{% url 'kyc_upload' %}">KYC Verify</a>
+            <a class="nav-link text-nowrap kyc" href="{% url 'kyc_upload' %}">KYC Verify</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-nowrap dashboard" href="{% url 'staff_product_list' %}">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-nowrap create" href="{% url 'create_product' %}">Create Product</a>
           </li>
           {% endif %}
 
-      
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               {% if user.customer %}
@@ -80,13 +85,7 @@
           {% else %}
           
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'signin' %}"> Login</a> 
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-nowrap" href="{% url 'merchregistration' %}">Sell on BuyMuchMore</a>
-          </li>
-          <li class="nav-item partn">
-            <a class="nav-link text-nowrap" href="{% url 'partnerregistration' %}">Partners</a>
+            <a class="nav-link" href="{% url 'signin' %}"> Login </a> 
           </li>
           {% endif %} 
 
@@ -102,11 +101,11 @@
         {% if user.is_authenticated %}
                     {% if user.customer %}
                         <li class="nav-item">
-                            <a class="nav-link text-nowrap" href="{% url 'nearest_locations_for_customer' customer_id=user.customer.id %}">Seller's Locator</a>
+                            <a class="nav-link text-nowrap" href="{% url 'nearest_locations_for_customer' customer_id=user.customer.id %}">Store Locator</a>
                         </li>
                     {% elif user.merchant %}
                         <li class="nav-item">
-                            <a class="nav-link text-nowrap" href="{% url 'nearest_locations_for_merchant' merchant_id=user.merchant.id %}">Delivery Service Locator</a>
+                            <a class="nav-link text-nowrap delivery" href="{% url 'nearest_locations_for_merchant' merchant_id=user.merchant.id %}">Delivery Service Locator</a>
                         </li>
                     {% endif %}
                     {% endif %}
@@ -125,8 +124,6 @@
                         </a>
                     </li>
                 </div>
-                
-
             </div>
           </div>
         </nav>

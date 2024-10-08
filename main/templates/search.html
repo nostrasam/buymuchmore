@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
 {% block header %} {% include 'header.html' %} {% endblock header %}
-{% block banner %} {% include 'banner.html' %} {% endblock banner %}
 {% block content %}
 
 
 {% if items %}
 <div class="container product">
-  <h1 class="text-center text-warning bg-dark pt-1">you searched for {{items}}</h1>
+  <h1 class="text-center text-warning pt-1 titlebar">You searched for {{items}}</h1>
   <div class="row mt-3 mb-4">
     {% for item in searched_item %}
     <div class="col-12 col-md-6 col-lg-3 pt-4 mt-4">

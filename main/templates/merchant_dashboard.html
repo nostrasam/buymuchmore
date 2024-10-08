@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
 
 {% block header %} {% include 'header.html' %} {% endblock header %}
-{% block banner %} {% include 'banner.html' %} {% endblock banner %}
 {% block content %}
 
 <div class="container mb-4 home2">
-    <h3 class="text-center title">Partners & Merchant Dashboard</h3>
+    <h5 class="text-center title">Partners & Merchant Dashboard</h5>
     <div class="row">
         <form method="GET" action="{% url 'merchant_dashboard' %}" class="mb-3">
             <input type="text" name="search" value="{{ search_query }}" placeholder="Search for a merchant..." style="padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;">

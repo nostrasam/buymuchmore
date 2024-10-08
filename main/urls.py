@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from main import views
 from .views import merchregistration, verify_email, find_nearest_seller, find_nearest_delivery_service, find_nearest_delivery_service
@@ -8,7 +8,7 @@ urlpatterns = [
     path('products', views.products, name='products'), 
     path('category/<str:id>/<slug:slug>', views.category, name='category'),
     path('featureitem/<str:id>/<slug:slug>', views.featureitem, name='featureitem'),
-    path('detail/<str:id>/<slug:slug>', views.detail, name='detail'),
+    path('detail/<int:id>/<slug:slug>/', views.detail, name='detail'),
     path('featuredetail/<str:id>/<slug:slug>', views.featuredetail, name='featuredetail'),
     path('contact', views.contact, name='contact'),
     path('signout', views.signout, name='signout'),
@@ -29,7 +29,7 @@ urlpatterns = [
     path('update', views.update, name='update'),
     path('chekout', views.checkout, name='checkout'),
     path('pay', views.pay, name='pay'),
-    path('callback', views.callback, name='callback'),
+   
     path('search', views.search, name='search'),
     path('subscribes', views.subscribes, name='subscribes'),
     path('reset_password/', 
@@ -48,5 +48,27 @@ urlpatterns = [
     path('nearest_locations_for_merchant/<int:merchant_id>/', views.find_nearest_delivery_service, name='nearest_locations_for_merchant'),
     path('find_nearest_delivery_service/<int:merchant_id>/', views.find_nearest_delivery_service, name='find_nearest_delivery_service'),
     path('merchant/dashboard/', views.merchant_dashboard, name='merchant_dashboard'),
+    path('auth/', include('social_django.urls', namespace='social')),
+    path('product/<int:id>/<slug:slug>/', views.detail, name='product_detail'),
+    path('submit-rating/<int:product_id>/', views.submit_rating, name='submit_rating'),
+    path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
+    path('terms_service/', views.terms_service, name='terms_service'),
+    path('deletion_instruction/', views.deletion_instruction, name='deletion_instruction'),
+    path('create-product/', views.create_product, name='create_product'), 
+    path('staff/products/', views.staff_product_list, name='staff_product_list'),
+    path('staff/products/edit/<int:id>/', views.edit_product, name='edit_product'),
+    path('products/edit/<int:id>/', views.edit_product, name='edit_product'),
+    path('staff/products/delete/<int:id>/', views.delete_product, name='delete_product'),
+    path('signin/', views.signin, name='signin'),
+    path('cancel-order/', views.cancel_order, name='cancel_order'),
+    path('stripe/webhook/', views.stripe_webhook, name='stripe_webhook'),
+    path('checkout/', views.checkout, name='checkout'),  # Checkout page to initiate payment
+    path('payment/success/', views.payment_success, name='payment_success'),
+    
+    
+ 
+    
 ]
 

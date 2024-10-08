@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block header %} {% include 'header.html' %} {% endblock header %}
+
+{% block content %}
+<div class="container mt-3 mb-5">
+  <div class="row">
+    <!-- Left Column: User Profile -->
+    <div class="col-12 col-md-3 pavatar">
+      <img src="{{ userprof.pix.url }}" alt="Profile Picture">
+      <h5>{{ userprof.user }}</h5>
+    </div>
+
+    <!-- Middle Column: Payment Details -->
+    <div class="col-12 col-md-6">
+      <h1>Payment Successful!</h1>
+      <p>Thank you for your purchase, {{ customer_email }}!</p>
+      <p><b>Order Number:</b> {{ order_number }}</p>
+      <p><b>Total Paid:</b> £{{ total_price|floatformat:2 }}</p>
+
+      <!-- Order Summary -->
+      <h4 class="mt-4">Order Summary:</h4>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart_items %}
+          <tr>
+            <td>{{ item.product.model }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>£{{ item.price|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2"><b>Subtotal</b></td>
+            <td>£{{ subtotal|floatformat:2 }}</td>
+          </tr>
+          <tr>
+            <td colspan="2"><b>Commission</b></td>
+            <td>£{{ commission|floatformat:2 }}</td>
+          </tr>
+          <tr>
+            <td colspan="2"><b>VAT</b></td>
+            <td>£{{ vat|floatformat:2 }}</td>
+          </tr>
+          <tr>
+            <td colspan="2"><b>Total</b></td>
+            <td><b>£{{ total_price|floatformat:2 }}</b></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <p>Dear {{ userprof.user }}, your order has been received and payment confirmed. We will contact you shortly! Please contact us between 15 and 20 minutes of payment confirmation to cancel your order at contactus@buymuchmore.co.uk. You have 3 working days to contact us if you require a refund based on our return policy! <b>Thanks for your patronage!</b> Check your email for further details.</p>
+    </div>
+
+    <!-- Right Column: Quick Links -->
+    <div class="col-12 col-md-3 plink">
+      <h2 class="text-center">Quick Links</h2>
+      <ul class="list-unstyled pt-3">
+        <li><a href="{% url 'profile' %}"><i class="bi bi-caret-right-fill"></i> Profile</a></li>
+        <li><a href="{% url 'profile_update' %}"><i class="bi bi-caret-right-fill"></i> Profile Update</a></li>
+        <li><a href="{% url 'password_update' %}"><i class="bi bi-caret-right-fill"></i> Password Update</a></li>
+        <li><a href="{% url 'home' %}"><i class="bi bi-caret-right-fill"></i> Home</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}
