@@ -9,7 +9,7 @@
 {% load humanize %}
 
 <div class="container mt-5 dashboard">
-    <h3 class="text-center title">Seller Product Dashboard</h3>
+    <h4 class="text-center title">Seller Product Dashboard</h4>
     <h2>Product Statistics</h2>
     <p>Total Products: <b>{{ total_products }}</b></p> 
     <p>Total Value of Paid Products: <b>£{{ total_paid_value|floatformat:2|intcomma }}</b></p> 
@@ -44,19 +44,20 @@
                 <td>{{ product.unpaid_count|intcomma }}</td>
                 <td>£{{ product.total_value|floatformat:2|intcomma }}</td>
                 <td>
-                    <span class="badge-pill" style="background-color: {{ product.order_status_color }};">
+                    <span class="badge-pill" style="background-color: {{ product.order_status_color }}; padding: 2px 16px; border-radius: 15px; min-width: 50px; display: inline-block;">
                         {{ product.status }}
                     </span>
+                    
                 </td>
                 <td>{{ product.order_time|date:"Y-m-d H:i:s" }}</td>
                 <td>{{ product.average_rating|default:"No Ratings Yet" }}</td>
                 <td>{{ product.rating_count|default:0|intcomma }}</td>
                 <td>
                     {% if product.most_recent_transaction %}
-                        £{{ product.most_recent_transaction.amount_sold|floatformat:2|intcomma }} sold on 
-                        {{ product.most_recent_transaction.order_time|date:"Y-m-d H:i:s" }}
+                        Quantity: {{ product.most_recent_transaction.quantity }} <br>
+                        Time: {{ product.most_recent_transaction.time }}
                     {% else %}
-                        No transactions yet.
+                        No transactions available
                     {% endif %}
                 </td>
                 <td>

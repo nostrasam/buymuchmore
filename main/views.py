@@ -777,8 +777,8 @@ def checkout(request):
             }],
             mode='payment',
             customer=customer.id,
-            success_url=f'http://3.81.206.220/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
-            cancel_url='http://3.81.206.220/payment/cancelled/',
+            success_url=f'http://34.235.159.68/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
+            cancel_url='http://34.235.159.68/payment/cancelled/',
             metadata={
                 'user_id': request.user.id,
                 'order_number': order_number,
@@ -1378,6 +1378,10 @@ def staff_product_list(request):
         # Only keep the most recent transaction
         most_recent_transaction = sales_data[0] if sales_data else None
 
+        # Include the quantity of items and time of the most recent transaction
+        most_recent_quantity = most_recent_transaction['quantity_sold'] if most_recent_transaction else None
+        most_recent_time = most_recent_transaction['order_time'] if most_recent_transaction else None
+
         product_data.append({
             'id': product.id,
             'model': product.model,
@@ -1392,7 +1396,10 @@ def staff_product_list(request):
             'order_status_color': order_status_color,
             'average_rating': product.get_average_rating(),
             'rating_count': product.rating_count,
-            'most_recent_transaction': most_recent_transaction,  # Include only the most recent transaction
+            'most_recent_transaction': {
+                'quantity': most_recent_quantity,
+                'time': most_recent_time
+            } if most_recent_transaction else None,  # Include the most recent transaction with quantity and time
         })
 
     context = {
@@ -1404,8 +1411,6 @@ def staff_product_list(request):
     }
 
     return render(request, 'staff_product_list.html', context)
-
-
 
 
 def seller_dashboard(request):
