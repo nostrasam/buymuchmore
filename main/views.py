@@ -833,8 +833,8 @@ def checkout(request):
                 }],
                 mode='payment',
                 customer=customer.id,
-                success_url=f'http://52.3.108.9/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
-                cancel_url='http://52.3.108.9/payment/cancelled/',
+                success_url=f'http://54.197.16.162/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
+                cancel_url='http://54.197.16.162/payment/cancelled/',
                 metadata={
                     'user_id': request.user.id,
                     'order_number': order_number,
