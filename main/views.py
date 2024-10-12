@@ -995,10 +995,6 @@ def payment_success(request):
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="2"><strong>Subtotal</strong></td>
-                    <td><strong>£{subtotal:.2f}</strong></td>
-                </tr>
-                <tr>
                     <td colspan="2"><strong>Commission</strong></td>
                     <td><strong>£{(base_commission + additional_commission):.2f}</strong></td>
                 </tr>
