@@ -10,9 +10,10 @@
 
 <div class="container mt-5 dashboard">
     <h4 class="text-center title">Seller Product Dashboard</h4>
+
     <h2>Product Statistics</h2>
-    <p>Total Products: <b>{{ total_products }}</b></p> 
-    <p>Total Value of Paid Products: <b>£{{ total_paid_value|floatformat:2|intcomma }}</b></p> 
+    <p>Total Products: <b>{{ total_products }}</b></p>
+    <p>Total Value of Paid Products: <b>£{{ total_paid_value|floatformat:2|intcomma }}</b></p>
     <p>Total Value of Unpaid Products: <b>£{{ total_unpaid_value|floatformat:2|intcomma }}</b></p>
     <p>Total Value of All Products: <b>£{{ total_value_all_products|floatformat:2|intcomma }}</b></p>
 
@@ -27,10 +28,11 @@
                 <th>Unpaid Items</th>
                 <th>Total Value</th>
                 <th>Order Alert</th>
-                <th>Order Time</th>
                 <th>Average Rating</th>
                 <th>Rating Count</th>
-                <th>Most Recent Transaction</th> <!-- New Column for the most recent transaction -->
+                <th>Most Recent Transaction</th>
+                <th>Transaction Invoice Number</th>
+                <th>Edit Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -39,27 +41,41 @@
                 <td>{{ product.model }}</td>
                 <td>{{ product.quantity|intcomma }}</td>
                 <td>£{{ product.price|floatformat:2|intcomma }}</td>
-                <td>{{ product.uploaded_at }}</td>
+                <td>{{ product.uploaded_at|date:"Y-m-d H:i:s" }}</td> <!-- Formatted date -->
                 <td>{{ product.paid_count|intcomma }}</td>
                 <td>{{ product.unpaid_count|intcomma }}</td>
                 <td>£{{ product.total_value|floatformat:2|intcomma }}</td>
                 <td>
-                    <span class="badge-pill" style="background-color: {{ product.order_status_color }}; padding: 2px 16px; border-radius: 15px; min-width: 50px; display: inline-block;">
-                        {{ product.status }}
-                    </span>
-                    
+                    <span class="badge-pill {% if product.order_status_color == 'green' %}blink{% endif %}"
+                        style="background-color: {{ product.order_status_color }}; 
+                               padding: 1.8px 12px; 
+                               border-radius: 15px; 
+                               min-width: 48px; 
+                               display: inline-block; 
+                               color: white; 
+                               font-size: 0.7em;">
+                      {{ product.status }}
+                  </span>
                 </td>
-                <td>{{ product.order_time|date:"Y-m-d H:i:s" }}</td>
+
                 <td>{{ product.average_rating|default:"No Ratings Yet" }}</td>
                 <td>{{ product.rating_count|default:0|intcomma }}</td>
                 <td>
                     {% if product.most_recent_transaction %}
                         Quantity: {{ product.most_recent_transaction.quantity }} <br>
-                        Time: {{ product.most_recent_transaction.time }}
+                        Order Time: {{ product.most_recent_transaction.time|date:"Y-m-d H:i:s" }} 
                     {% else %}
                         No transactions available
                     {% endif %}
                 </td>
+                <td>
+                    {% if product.most_recent_transaction %}
+                        {{ product.most_recent_transaction.pay_code|default:"N/A" }}
+                    {% else %}
+                        No transactions available
+                    {% endif %}
+                </td>
+                
                 <td>
                     <a href="{% url 'edit_product' product.id %}" class="btn btn-sm btn-warning">Edit</a>
                 </td>
@@ -67,7 +83,6 @@
             {% endfor %}
         </tbody>
     </table>
-
 
     <!-- Charts Section -->
     <h3 class="text-center mt-5">Product Analysis Overview</h3>
@@ -101,6 +116,7 @@
             <canvas id="totalValueAllProductsChart" width="380" height="150"></canvas>
         </div>
     </div>
+    
 
     <!-- Updated Chart: Rating Count per Product -->
     <div class="row">

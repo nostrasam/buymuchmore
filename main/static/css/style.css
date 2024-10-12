@@ -62,6 +62,43 @@
     padding-left: 140px;
 }
 
+.blink {
+    animation: blink-animation 1s steps(5, start) infinite;
+}
+
+@keyframes blink-animation {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.payment-logos {
+    display: flex;
+    justify-content: center; /* Centers the logos */
+    align-items: center;
+    gap: 15px; /* Space between the logos */
+    margin-top: 10px;
+}
+
+.payment-logo {
+    width: 40px; /* Adjusts the size of the logos */
+    height: auto;
+}
+
+.footer .payment-logos {
+    display: flex;
+    justify-content: center;  /* Centers the logos */
+    align-items: center;
+    gap: 2px;  /* Spacing between logos */
+
+    padding-right: 25px;
+}
+
+.footer .payment-logo {
+    width: 40px;
+    height: 31px;
+}
+
 /* Styling for search input */
 .collapse .search-container input[type=text] {
     width: 330px;

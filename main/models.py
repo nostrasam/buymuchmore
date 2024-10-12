@@ -3,6 +3,7 @@ from django.contrib.auth.models import User, AbstractBaseUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.conf import settings
 from django.utils import timezone
+from decimal import Decimal
 
 
 
@@ -54,7 +55,7 @@ class Product(models.Model):
     availability = models.CharField(max_length=50)
     address = models.CharField(max_length=200)
     postcode = models.CharField(max_length=100, blank=True, null=True)
-    price = models.FloatField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     promo_price = models.IntegerField(blank=True, null=True)
     telephone1 = models.CharField(max_length=50)
     telephone2 = models.CharField(max_length=50, blank=True, null=True)
@@ -189,7 +190,7 @@ class Merchant(models.Model):
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     items = models.ForeignKey(Product, on_delete=models.CASCADE)  # Correct reference to Product model
-    price = models.IntegerField()  # Price for the individual item
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     order_number = models.CharField(max_length=255, null=True, blank=True)
     quantity = models.IntegerField()  # Quantity of the product in the cart
     paid = models.BooleanField(default=False)  # Whether the cart has been paid for
@@ -213,6 +214,7 @@ class Payment(models.Model):
     paid = models.BooleanField()
     phone = models.CharField(max_length=50)
     pay_code = models.CharField(max_length=50)
+    invoice_number = models.CharField(max_length=255, null=True, blank=True) 
     additional_info = models.TextField()
     payment_date = models.DateTimeField(auto_now_add=True)
     

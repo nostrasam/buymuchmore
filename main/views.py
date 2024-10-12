@@ -42,6 +42,8 @@ from datetime import timedelta
 from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Sum, F
+from decimal import Decimal, ROUND_HALF_UP
 
 
 
@@ -644,7 +646,7 @@ def add_to_cart(request):
                     items=main,
                     quantity=quantity,
                     price=float(main.price),
-                    amount=amount,
+                    amount=float(amount),
                     paid=False
                 )
                 messages.success(request, 'One item added to cart.')
@@ -663,54 +665,75 @@ def cart(request):
         
         # Calculate total quantity and total price for logged-in users
         total_quantity = cart_items.aggregate(total_quantity=Sum('quantity'))['total_quantity'] or 0
-        subtotal = cart_items.aggregate(subtotal=Sum(F('price') * F('quantity')))['subtotal'] or 0
-        
-        commision = Decimal('0.08') * Decimal(subtotal)
-        vat = Decimal('0.20') * Decimal(subtotal)
-        total = Decimal(subtotal) + commision + vat
+        subtotal = cart_items.aggregate(subtotal=Sum(F('price') * F('quantity')))['subtotal'] or Decimal('0.00')
+
+        # Deduct 8% base commission from the subtotal
+        base_commission = (Decimal('0.08') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        subtotal -= base_commission
+
+        # Check delivery service type and apply the respective additional commission
+        service_type = request.POST.get('service_type', 'regular')
+        additional_commission_rate = Decimal('0.08') if service_type == 'regular' else Decimal('0.12')
+        additional_commission = (additional_commission_rate * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        vat = (Decimal('0.20') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        total = (subtotal + base_commission + vat + additional_commission).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
         context = {
             'cart': cart_items,
-            'subtotal': round(subtotal, 2),
-            'commision': round(commision, 2),
-            'vat': round(vat, 2),
-            'total': round(total, 2),
-            'total_quantity': total_quantity
+            'subtotal': subtotal,
+            'base_commission': base_commission,
+            'additional_commission': additional_commission,
+            'vat': vat,
+            'total': total,
+            'total_quantity': total_quantity,
+            'service_type': service_type
         }
 
     else:
         # User is not logged in, retrieve cart from the session
         cart = request.session.get('cart', {})
         cart_items = []
-        subtotal = Decimal(0)
+        subtotal = Decimal('0.00')
         total_quantity = 0
 
         for item_id, item_data in cart.items():
             product = Product.objects.get(pk=item_id)
-            amount = Decimal(item_data['price']) * item_data['quantity']
+            amount = (Decimal(item_data['price']) * Decimal(item_data['quantity'])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             cart_items.append({
                 'product': product,
                 'quantity': item_data['quantity'],
                 'price': Decimal(item_data['price']),
-                'amount': round(amount, 2)  # Round to 2 decimal places
+                'amount': amount
             })
             subtotal += amount
             total_quantity += item_data['quantity']
 
-        commision = Decimal('0.08') * Decimal(subtotal)
-        vat = Decimal('0.20') * Decimal(subtotal)
-        total = Decimal(subtotal) + commision + vat
+        # Deduct 8% base commission from the subtotal
+        base_commission = (Decimal('0.08') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        subtotal -= base_commission
+
+        # Check delivery service type and apply the respective additional commission
+        service_type = request.POST.get('service_type', 'regular')
+        additional_commission_rate = Decimal('0.08') if service_type == 'regular' else Decimal('0.12')
+        additional_commission = (additional_commission_rate * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        vat = (Decimal('0.20') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        total = (subtotal + base_commission + vat + additional_commission).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
         context = {
             'cart': cart_items,
-            'subtotal': round(subtotal, 2),
-            'commision': round(commision, 2),
-            'vat': round(vat, 2),
-            'total': round(total, 2),
-            'total_quantity': total_quantity
+            'subtotal': subtotal,
+            'base_commission': base_commission,
+            'additional_commission': additional_commission,
+            'vat': vat,
+            'total': total,
+            'total_quantity': total_quantity,
+            'service_type': service_type
         }
 
     return render(request, 'cart.html', context)
+
 
 
 @login_required(login_url='signin')
@@ -724,77 +747,114 @@ def delete(request):
 @login_required(login_url='signin')   
 def update(request):
     if request.method == 'POST':
-        qty_item = request.POST['quantid']
-        new_qty = request.POST['quant']
+        qty_item = request.POST.get('quantid')  # Get the cart item ID from POST data
+        new_qty = request.POST.get('quant')     # Get the new quantity from POST data
+
+        # Fetch the cart item based on the provided ID
         newqty = Cart.objects.get(pk=qty_item)
-        newqty.quantity = new_qty
-        newqty.amount = newqty.price * newqty.quantity
+
+        # Convert price and quantity to Decimal to prevent TypeError
+        price = Decimal(newqty.price)          # Ensure price is a Decimal
+        quantity = Decimal(new_qty)            # Convert new quantity to Decimal
+
+        # Safely calculate the new amount
+        newqty.quantity = quantity
+        newqty.amount = price * quantity       # Multiply price and quantity
+
+        # Save the updated cart item
         newqty.save()
+
+        # Display success message and redirect to the cart page
         messages.success(request, 'Quantity updated')
         return redirect('cart')
+
     
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @login_required(login_url='signin')
 def checkout(request):
-    cart_items = Cart.objects.filter(user=request.user, paid=False)
+    if request.method == 'POST':
+        # Retrieve the selected service type from the POST data (default to 'regular')
+        service_type = request.POST.get('service_type', 'regular')
+        
+        # Retrieve the cart items for the logged-in user
+        cart_items = Cart.objects.filter(user=request.user, paid=False)
 
-    # Calculate total price
-    subtotal = sum(item.price * item.quantity for item in cart_items)
-    commision = 0.08 * subtotal
-    vat = 0.20 * subtotal
-    total = subtotal + commision + vat
+        # Calculate subtotal from cart items
+        subtotal = sum(item.price * item.quantity for item in cart_items)
+        subtotal = Decimal(subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-    # Generate unique order number
-    order_number = str(uuid.uuid4())
+        # Deduct 8% base commission from the subtotal
+        base_commission = (Decimal('0.08') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        subtotal -= base_commission
 
-    try:
-        # Retrieve or create Stripe Customer
-        user_profile = Customer.objects.get(user=request.user)
-        if not user_profile.stripe_customer_id:
-            customer = stripe.Customer.create(
-                email=request.user.email,
-                name=f'{request.user.first_name} {request.user.last_name}',
-            )
-            user_profile.stripe_customer_id = customer.id
-            user_profile.save()
-        else:
-            customer = stripe.Customer.retrieve(user_profile.stripe_customer_id)
+        # Set the additional commission rate based on the selected service type
+        additional_commission_rate = Decimal('0.08') if service_type == 'regular' else Decimal('0.12')
+        additional_commission = (additional_commission_rate * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-        # Create Stripe Checkout Session
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': 'gbp',
-                    'product_data': {
-                        'name': 'Your Cart Total',
+        # Calculate VAT
+        vat = (Decimal('0.20') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        # Calculate the final total amount
+        total = (subtotal + base_commission + vat + additional_commission).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        # Generate a unique order number
+        order_number = str(uuid.uuid4())
+
+        try:
+            # Retrieve or create Stripe Customer
+            user_profile = Customer.objects.get(user=request.user)
+            if not user_profile.stripe_customer_id:
+                # Create a new customer in Stripe if they don't exist
+                customer = stripe.Customer.create(
+                    email=request.user.email,
+                    name=f'{request.user.first_name} {request.user.last_name}',
+                )
+                user_profile.stripe_customer_id = customer.id
+                user_profile.save()
+            else:
+                # Retrieve existing customer from Stripe
+                customer = stripe.Customer.retrieve(user_profile.stripe_customer_id)
+
+            # Create Stripe Checkout Session
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'gbp',
+                        'product_data': {
+                            'name': 'Your Cart Total',
+                        },
+                        # Convert the total to pence (multiply by 100) and cast to int
+                        'unit_amount': int(total * 100),  # Stripe expects amounts in pence
                     },
-                    'unit_amount': int(total * 100),
-                },
-                'quantity': 1,
-            }],
-            mode='payment',
-            customer=customer.id,
-            success_url=f'http://34.235.159.68/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
-            cancel_url='http://34.235.159.68/payment/cancelled/',
-            metadata={
-                'user_id': request.user.id,
-                'order_number': order_number,
-            }
-        )
-        return redirect(checkout_session.url, code=303)
+                    'quantity': 1,
+                }],
+                mode='payment',
+                customer=customer.id,
+                success_url=f'http://52.3.108.9/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
+                cancel_url='http://52.3.108.9/payment/cancelled/',
+                metadata={
+                    'user_id': request.user.id,
+                    'order_number': order_number,
+                    'service_type': service_type,  # Save the selected service type in metadata
+                }
+            )
+            return redirect(checkout_session.url, code=303)
 
-    except Exception as e:
-        return render(request, 'checkout_error.html', {'error': str(e)})
+        except Exception as e:
+            return render(request, 'checkout_error.html', {'error': str(e)})
+
+    # If the request method is not POST, redirect to the cart page
+    return redirect('cart')
 
 
 def pay(request):
     if request.method == 'POST':
         try:
             # Generate a unique order number
-            order_number = str(uuid.uuid4()).split('-')[0]  # Use the same order_number everywhere
+            order_number = str(uuid.uuid4()).split('-')[0]
 
             # Get total amount in GBP from the form (in pence)
             total_amount = float(request.POST.get('total', 0)) * 100  # Convert to pence
@@ -816,7 +876,7 @@ def pay(request):
                 success_url=request.build_absolute_uri('/payment-success/') + f'?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
                 cancel_url=request.build_absolute_uri('/payment-cancelled/'),
                 metadata={
-                    'order_number': order_number,  # Pass order_number in metadata for consistency
+                    'order_number': order_number,
                     'user_id': request.user.id,
                 }
             )
@@ -829,11 +889,12 @@ def pay(request):
 
     return render(request, 'checkout.html')
 
+
+
 def payment_success(request):
+    # Retrieve session ID and order number from the URL
     session_id = request.GET.get('session_id')
-    
-    # Retrieve the order number from the URL
-    order_number = request.GET.get('order_number')  # Ensure order_number is passed correctly
+    order_number = request.GET.get('order_number')
 
     if not session_id:
         return render(request, 'payment_error.html', {'message': 'No session ID provided'})
@@ -843,7 +904,7 @@ def payment_success(request):
         session = stripe.checkout.Session.retrieve(session_id)
         customer_data = stripe.Customer.retrieve(session.customer)
 
-        # Retrieve customer based on email, handling multiple objects
+        # Retrieve or create Customer based on email
         customers = Customer.objects.filter(email=customer_data.email)
 
         if customers.exists():
@@ -857,12 +918,24 @@ def payment_success(request):
         if not cart.exists():
             return render(request, 'payment_error.html', {'message': 'No items in the cart'})
 
-        # Calculate total price
+        # Calculate total price based on the service type
+        service_type = session.metadata.get('service_type', 'regular')  # Get service type from metadata
         subtotal = sum(item.price * item.quantity for item in cart)
-        commission_rate = 0.22 if session.metadata.get('service_type', 'premium') == 'premium' else 0.15
-        commission = commission_rate * subtotal
-        vat = 0.20 * subtotal
-        total_price = subtotal + commission + vat
+        subtotal = Decimal(subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        # Deduct 8% base commission from the subtotal
+        base_commission = (Decimal('0.08') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        subtotal -= base_commission
+
+        # Set additional commission rate based on service type
+        additional_commission_rate = Decimal('0.08') if service_type == 'regular' else Decimal('0.12')
+        additional_commission = (additional_commission_rate * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        # Calculate VAT
+        vat = (Decimal('0.20') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        # Calculate final total price
+        total_price = (subtotal + base_commission + vat + additional_commission).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
         # Prepare the list of items for the invoice and for the template
         items_list = []
@@ -927,7 +1000,7 @@ def payment_success(request):
                 </tr>
                 <tr>
                     <td colspan="2"><strong>Commission</strong></td>
-                    <td><strong>£{commission:.2f}</strong></td>
+                    <td><strong>£{(base_commission + additional_commission):.2f}</strong></td>
                 </tr>
                 <tr>
                     <td colspan="2"><strong>VAT</strong></td>
@@ -965,7 +1038,7 @@ def payment_success(request):
             'customer_email': customer_data.email,
             'order_number': order_number,  # Pass order_number to template
             'subtotal': subtotal,
-            'commission': commission,
+            'commission': base_commission + additional_commission,
             'vat': vat,
             'total_price': total_price,
             'cart_items': cart_items,  # Pass cart items to the template
@@ -1329,21 +1402,29 @@ def staff_product_list(request):
         paid_orders = Cart.objects.filter(items=product, paid=True)
         unpaid_count = product.quantity - paid_orders.count()
 
+        # Calculate product paid and unpaid value
         product_paid_value = paid_orders.count() * product.price
         product_unpaid_value = unpaid_count * product.price
 
-        total_paid_value += product_paid_value
+        # Deduct 8% base commission from the paid value
+        base_commission = (Decimal('0.08') * product_paid_value).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        subtotal = product_paid_value - base_commission
+        
+        # Update totals with the commission-deducted subtotal
+        total_paid_value += subtotal
         total_unpaid_value += product_unpaid_value
-        total_value_for_product = product_paid_value + product_unpaid_value
+        total_value_for_product = subtotal + product_unpaid_value
         total_value_all_products += total_value_for_product
 
-        # Access the most recent payment date from the Payment model
+        # Access the most recent payment date and amount from the Payment model
         most_recent_payment = Payment.objects.filter(
             pay_code__in=paid_orders.values_list('order_number', flat=True)
         ).order_by('-payment_date').first()
 
-        # Use payment_date if a payment exists, otherwise None
+        # Use payment_date and amount if a payment exists, otherwise None
         order_time = most_recent_payment.payment_date if most_recent_payment else None
+        recent_amount_paid = most_recent_payment.amount if most_recent_payment else 0  # Capture the recent payment amount
+        invoice_number = most_recent_payment.invoice_number if most_recent_payment else None  # Capture the most recent invoice number
 
         # Determine order status color based on the most recent payment
         if most_recent_payment and order_time:
@@ -1363,11 +1444,16 @@ def staff_product_list(request):
             quantity_sold = paid_order.quantity
             amount_sold = quantity_sold * paid_order.price
 
-            sales_data.append({
-                'order_time': payment_date,
-                'quantity_sold': quantity_sold,
-                'amount_sold': amount_sold,
-            })
+            # Capture payment details
+            if payment:
+                sales_data.append({
+                    'order_time': payment_date,
+                    'quantity_sold': quantity_sold,
+                    'amount_sold': amount_sold,
+                    'payment_amount': payment.amount,  # New field for payment amount
+                    'invoice_number': payment.invoice_number,  # Capture invoice number
+                    'pay_code': payment.pay_code,  # Capture pay code
+                })
 
         # Make timezone.datetime.min timezone-aware
         min_aware_datetime = timezone.make_aware(timezone.datetime.min, timezone.get_current_timezone())
@@ -1381,6 +1467,8 @@ def staff_product_list(request):
         # Include the quantity of items and time of the most recent transaction
         most_recent_quantity = most_recent_transaction['quantity_sold'] if most_recent_transaction else None
         most_recent_time = most_recent_transaction['order_time'] if most_recent_transaction else None
+        most_recent_payment_amount = most_recent_transaction['payment_amount'] if most_recent_transaction else None
+        most_recent_invoice_number = most_recent_transaction['invoice_number'] if most_recent_transaction else None
 
         product_data.append({
             'id': product.id,
@@ -1398,8 +1486,11 @@ def staff_product_list(request):
             'rating_count': product.rating_count,
             'most_recent_transaction': {
                 'quantity': most_recent_quantity,
-                'time': most_recent_time
-            } if most_recent_transaction else None,  # Include the most recent transaction with quantity and time
+                'time': most_recent_time,
+                'payment_amount': most_recent_payment_amount,  # Include recent payment amount
+                'invoice_number': most_recent_invoice_number,  # Include the most recent invoice number
+                'pay_code': most_recent_transaction['pay_code'] if most_recent_transaction else None  # Include pay code
+            } if most_recent_transaction else None,
         })
 
     context = {

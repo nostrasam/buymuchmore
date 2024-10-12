@@ -25,8 +25,8 @@
                 <button type="submit"><i class="bi bi-trash-fill"></i></button>
               </td>
              </form>
-             <td><img src="{{item.items.carimg.url}}" alt="" style="height: 80px;"></td>
-             <td>{{ item.items.model }}</td> <!-- Displays the product model -->
+             <td><img src="{{item.items.carimg.url}}" alt="" style="height: 80px;"></td> <!-- Updated image source -->
+             <td>{{ item.items.model }}</td> <!-- Updated product model -->
              <td>£{{ item.price|floatformat:2|intcomma }}</td> <!-- Displays the price per unit -->
              <form action="{% url 'update' %}" method="POST">
               {% csrf_token %}
@@ -36,7 +36,7 @@
                 <button type="submit" class="btn btn-success">Update</button>
               </td>
              </form>
-             <td>£{{ item.total_amount|floatformat:2|intcomma }}</td> <!-- Displays the total amount (price * quantity) -->
+             <td>£{{ item.amount|floatformat:2|intcomma }}</td> <!-- Displays the total amount (price * quantity) -->
            </tr>
           {% endfor %}
           <tr class="subtot">
@@ -44,11 +44,24 @@
             <td></td>
             <td></td>
             <td></td>
-            <td>Subtotal= </td>
-            <td>£<span id="subtotal">{{subtotal|floatformat:2|intcomma}}</span></td>
+            <td> </td>
+            <span id="subtotal">{{subtotal|floatformat:2|intcomma}}</span>
           </tr>
           <tr class="subtot">
             <td></td>
+            <td></td>
+            <td></td>
+            <td> </td>
+            <span id="base_commission">{{base_commission|floatformat:2|intcomma}}</span>
+          </tr>
+          <tr class="subtot">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Service Type Commission=</td>
+            <td>£<span id="additional_commission">{{additional_commission|floatformat:2|intcomma}}</span></td>
+          </tr>
+          <tr class="subtot">
             <td></td>
             <td></td>
             <td></td>
@@ -56,15 +69,6 @@
             <td>£<span id="vat">{{vat|floatformat:2|intcomma}}</span></td>
           </tr>
           <tr class="subtot">
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>Commission=</td>
-            <td>£<span id="commission">{{commission|floatformat:2|intcomma}}</span></td>
-          </tr>
-          <tr class="subtot">
-            <td></td>
             <td></td>
             <td></td>
             <td></td>
@@ -81,12 +85,13 @@
             <td>
               <form action="{% url 'checkout' %}" method="POST">
                 {% csrf_token %}
-                <label for="service_type" class="servicetype">Select Service Type:</label>
-                <select name="service_type" id="service_type" class="form-control">
-                  <option value="regular" {% if service_type == 'regular' %}selected{% endif %}>Regular </option>
-                  <option value="premium" {% if service_type == 'premium' %}selected{% endif %}>Premium </option>
-                </select>
-                <!-- Pass the total price as hidden field -->
+                <div class="form-group">
+                  <label for="service_type">Select Service Type:</label>
+                  <select name="service_type" id="service_type" class="form-control" style="width: auto; display: inline-block;">
+                    <option value="regular" {% if service_type == 'regular' %}selected{% endif %}>Regular Service Delivery</option>
+                    <option value="premium" {% if service_type == 'premium' %}selected{% endif %}>Premium Service Delivery</option>
+                  </select>
+                </div>
                 <input type="hidden" name="total" value="{{ total }}">
                 <button type="submit" class="btn btn-warning">Checkout</button>
               </form>
@@ -101,23 +106,23 @@
 <script>
   document.getElementById('service_type').addEventListener('change', function() {
     const subtotal = parseFloat(document.getElementById('subtotal').innerText.replace(',', ''));
+    const base_commission = parseFloat(document.getElementById('base_commission').innerText.replace(',', ''));
     const vat = 0.20 * subtotal;
 
     let commissionRate;
     if (this.value === 'premium') {
-      commissionRate = 0.22; // 22% for premium
+      commissionRate = 0.12; // 12% for premium
     } else {
-      commissionRate = 0.15; // 15% for regular
+      commissionRate = 0.08; // 8% for regular
     }
 
-    const commission = commissionRate * subtotal;
-    const total = subtotal + commission + vat;
+    const additional_commission = commissionRate * subtotal;
+    const total = subtotal + base_commission + additional_commission + vat;
 
     // Update commission, vat, and total fields
-    document.getElementById('commission').innerText = commission.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    document.getElementById('vat').innerText = vat.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    document.getElementById('total').innerText = total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    document.getElementById('additional_commission').innerText = additional_commission.toFixed(2);
+    document.getElementById('vat').innerText = vat.toFixed(2);
+    document.getElementById('total').innerText = total.toFixed(2);
   });
 </script>
-{% endblock content %}
-{% block footer %} {% include 'footer.html' %} {% endblock footer %}
+{% endblock %}

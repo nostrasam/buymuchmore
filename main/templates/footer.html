@@ -1,28 +1,35 @@
-
 {% load static %}
 
 <div class="footer mt-5">
     <div class="footer2-container">
       <div class="row">
-        <div class="col-12 col-sm6 col-md-6 col-lg-3 text-center">
+        <div class="col-12 col-sm-6 col-md-6 col-lg-3 text-center">
           <div>
-            <img src="{{info.logo.url}}" alt="">
-            <h4>Scotland concept</h4>
+            <img src="{{info.logo.url}}" alt="Company Logo">
+            <h4>Scotland Concept</h4>
             <ul class="list-unstyled">
               <li><a href="{% url 'privacy_policy' %}">Privacy Policy</a></li>
               <li><a href="{% url 'terms_service' %}">Terms of Service</a></li>
               <li><a href="{% url 'deletion_instruction' %}">Data Deletion Instruction</a></li>
-            </ul>
+              <li></li>
+            </ul>  
+            <div>
+              <p>Accepted Payment Methods:</p>
+              <div class="payment-logos">
+                  <img src="{% static 'images/mastercard.png' %}" alt="Mastercard" class="payment-logo">
+                  <img src="{% static 'images/visa.png' %}" alt="Visa" class="payment-logo">
+                  <img src="{% static 'images/american_express.png' %}" alt="American Express" class="payment-logo">
+                  <img src="{% static 'images/unionpay.png' %}" alt="UnionPay" class="payment-logo">
+              </div>            
+            </div>
           </div>
         </div>
         <div class="col-12 col-sm-6 col-md-6 col-lg-3 text-center">
           <h2>Category</h2>
           <ul class="list-unstyled">
               {% for item in categ %}
-              <li><a class="dropdown-item" href="{% url 'category' item.id item.slug %}">{{item.brand|title}}</a></li>
-              {% endfor %} 
-            </ul>
-          </li>
+              <li><a class="dropdown-item" href="{% url 'category' item.id item.slug %}">{{ item.brand|title }}</a></li>
+              {% endfor %}
           </ul>
         </div>
         <div class="col-12 col-sm-6 col-md-6 col-lg-3 text-center">
@@ -49,7 +56,15 @@
     <div class="container-fluid">
       <div class="row text-center footer2">
         <div class="col-12">
-          <p class="pt-3">&copy;copyright <span>{{info.copyright}}</span> buymuchmore | all rights reserved.</p>
+          <p class="pt-3">&copy; <span>{{info.copyright}}</span> BuyMuchMore | All Rights Reserved.</p>
+          <script type="text/javascript">
+            var tlJsHost = ((window.location.protocol == "https:") ? "https://secure.trust-provider.com/" : "http://www.trustlogo.com/");
+            document.write(unescape("%3Cscript src='" + tlJsHost + "trustlogo/javascript/trustlogo.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script language="JavaScript" type="text/javascript">
+            TrustLogo("https://www.positivessl.com/images/seals/positivessl_trust_seal_sm_124x32.png", "POSDV", "none");
+          </script>
         </div>
       </div>
     </div>
+</div>

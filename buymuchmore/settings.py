@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-sj-99#p&&4um7qav$y#*f8mjxuuh#5&%j!@eo9g2gloyxn40!&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['34.235.159.68']
+ALLOWED_HOSTS = ['52.3.108.9']
 
 
 # Application definition
@@ -127,6 +127,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'home/static')]
 
 
+
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -144,7 +145,7 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = 'default from email'
 
-PASSWORD_RESET_TIMEOUT = 14400
+EMAIL_TIMEOUT = 30  # Set a reasonable timeout (in seconds)
 
 
 AUTHENTICATION_BACKENDS = (
