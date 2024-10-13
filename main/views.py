@@ -493,7 +493,7 @@ def merchprofile(request):
 
     return render(request, 'merchprofile.html', context)
 
-
+@login_required(login_url='signin')
 def profile_update(request):
     userprof = Customer.objects.get(user__username = request.user.username)
     pform = ProfileForm(instance=request.user.customer)
@@ -833,8 +833,8 @@ def checkout(request):
                 }],
                 mode='payment',
                 customer=customer.id,
-                success_url=f'http://54.197.16.162/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
-                cancel_url='http://54.197.16.162/payment/cancelled/',
+                success_url=f'http://buymuchmore.co.uk/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
+                cancel_url='http://buymuchmore.co.uk//payment/cancelled/',
                 metadata={
                     'user_id': request.user.id,
                     'order_number': order_number,
