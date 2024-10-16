@@ -660,80 +660,43 @@ def add_to_cart(request):
 
 def cart(request):
     if request.user.is_authenticated:
-        # User is logged in, retrieve cart from the database
+        # Retrieve cart items for the user
         cart_items = Cart.objects.filter(user=request.user, paid=False)
-        
-        # Calculate total quantity and total price for logged-in users
+
+        # Calculate subtotal and total quantity
         total_quantity = cart_items.aggregate(total_quantity=Sum('quantity'))['total_quantity'] or 0
         subtotal = cart_items.aggregate(subtotal=Sum(F('price') * F('quantity')))['subtotal'] or Decimal('0.00')
 
-        # Deduct 8% base commission from the subtotal
-        base_commission = (Decimal('0.08') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        subtotal -= base_commission
+        # Internal base commission (hidden from the customer)
+        base_commission = (Decimal('0.095') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        subtotal_for_customer = subtotal  # This is what the customer sees
 
-        # Check delivery service type and apply the respective additional commission
+        # Check selected service type
         service_type = request.POST.get('service_type', 'regular')
         additional_commission_rate = Decimal('0.08') if service_type == 'regular' else Decimal('0.12')
-        additional_commission = (additional_commission_rate * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        additional_commission = (additional_commission_rate * subtotal_for_customer).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-        vat = (Decimal('0.20') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        total = (subtotal + base_commission + vat + additional_commission).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        # Calculate VAT
+        vat = (Decimal('0.20') * subtotal_for_customer).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        # Total for customer
+        total_for_customer = (subtotal_for_customer + additional_commission + vat).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
         context = {
             'cart': cart_items,
-            'subtotal': subtotal,
-            'base_commission': base_commission,
+            'subtotal': subtotal_for_customer,
+            'base_commission': base_commission,  # Hidden from customer
             'additional_commission': additional_commission,
             'vat': vat,
-            'total': total,
+            'total': total_for_customer,
             'total_quantity': total_quantity,
             'service_type': service_type
         }
 
-    else:
-        # User is not logged in, retrieve cart from the session
-        cart = request.session.get('cart', {})
-        cart_items = []
-        subtotal = Decimal('0.00')
-        total_quantity = 0
-
-        for item_id, item_data in cart.items():
-            product = Product.objects.get(pk=item_id)
-            amount = (Decimal(item_data['price']) * Decimal(item_data['quantity'])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-            cart_items.append({
-                'product': product,
-                'quantity': item_data['quantity'],
-                'price': Decimal(item_data['price']),
-                'amount': amount
-            })
-            subtotal += amount
-            total_quantity += item_data['quantity']
-
-        # Deduct 8% base commission from the subtotal
-        base_commission = (Decimal('0.08') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        subtotal -= base_commission
-
-        # Check delivery service type and apply the respective additional commission
-        service_type = request.POST.get('service_type', 'regular')
-        additional_commission_rate = Decimal('0.08') if service_type == 'regular' else Decimal('0.12')
-        additional_commission = (additional_commission_rate * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-
-        vat = (Decimal('0.20') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        total = (subtotal + base_commission + vat + additional_commission).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-
-        context = {
-            'cart': cart_items,
-            'subtotal': subtotal,
-            'base_commission': base_commission,
-            'additional_commission': additional_commission,
-            'vat': vat,
-            'total': total,
-            'total_quantity': total_quantity,
-            'service_type': service_type
-        }
-
-    return render(request, 'cart.html', context)
-
+        return render(request, 'cart.html', context)
+    
+    # If user is not authenticated, redirect to login page or show a message
+    return render(request, 'login.html', {'error': 'You need to be logged in to view your cart.'})
 
 
 @login_required(login_url='signin')
@@ -772,41 +735,40 @@ def update(request):
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+
 @login_required(login_url='signin')
 def checkout(request):
     if request.method == 'POST':
-        # Retrieve the selected service type from the POST data (default to 'regular')
         service_type = request.POST.get('service_type', 'regular')
-        
-        # Retrieve the cart items for the logged-in user
-        cart_items = Cart.objects.filter(user=request.user, paid=False)
 
-        # Calculate subtotal from cart items
+        # Retrieve user's cart items
+        cart_items = Cart.objects.filter(user=request.user, paid=False)
+        
+        # Calculate subtotal
         subtotal = sum(item.price * item.quantity for item in cart_items)
         subtotal = Decimal(subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        
+        # Internal base commission (not shown to customer)
+        base_commission = (Decimal('0.095') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        subtotal_for_customer = subtotal
 
-        # Deduct 8% base commission from the subtotal
-        base_commission = (Decimal('0.08') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        subtotal -= base_commission
-
-        # Set the additional commission rate based on the selected service type
+        # Calculate additional commission based on service type
         additional_commission_rate = Decimal('0.08') if service_type == 'regular' else Decimal('0.12')
-        additional_commission = (additional_commission_rate * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        additional_commission = (additional_commission_rate * subtotal_for_customer).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
         # Calculate VAT
-        vat = (Decimal('0.20') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        vat = (Decimal('0.20') * subtotal_for_customer).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-        # Calculate the final total amount
-        total = (subtotal + base_commission + vat + additional_commission).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        # Total to charge the customer
+        total_for_customer = (subtotal_for_customer + additional_commission + vat).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-        # Generate a unique order number
+        # Unique order number
         order_number = str(uuid.uuid4())
 
         try:
-            # Retrieve or create Stripe Customer
+            # Stripe customer retrieval/creation
             user_profile = Customer.objects.get(user=request.user)
             if not user_profile.stripe_customer_id:
-                # Create a new customer in Stripe if they don't exist
                 customer = stripe.Customer.create(
                     email=request.user.email,
                     name=f'{request.user.first_name} {request.user.last_name}',
@@ -814,10 +776,9 @@ def checkout(request):
                 user_profile.stripe_customer_id = customer.id
                 user_profile.save()
             else:
-                # Retrieve existing customer from Stripe
                 customer = stripe.Customer.retrieve(user_profile.stripe_customer_id)
 
-            # Create Stripe Checkout Session
+            # Create Stripe checkout session
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
                 line_items=[{
@@ -826,19 +787,18 @@ def checkout(request):
                         'product_data': {
                             'name': 'Your Cart Total',
                         },
-                        # Convert the total to pence (multiply by 100) and cast to int
-                        'unit_amount': int(total * 100),  # Stripe expects amounts in pence
+                        'unit_amount': int(total_for_customer * 100),  # Stripe expects the amount in pence
                     },
                     'quantity': 1,
                 }],
                 mode='payment',
                 customer=customer.id,
                 success_url=f'http://buymuchmore.co.uk/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
-                cancel_url='http://buymuchmore.co.uk//payment/cancelled/',
+                cancel_url='http://buymuchmore.co.uk/payment/cancelled/',
                 metadata={
                     'user_id': request.user.id,
                     'order_number': order_number,
-                    'service_type': service_type,  # Save the selected service type in metadata
+                    'service_type': service_type,  # Save service type
                 }
             )
             return redirect(checkout_session.url, code=303)
@@ -846,7 +806,6 @@ def checkout(request):
         except Exception as e:
             return render(request, 'checkout_error.html', {'error': str(e)})
 
-    # If the request method is not POST, redirect to the cart page
     return redirect('cart')
 
 
@@ -923,8 +882,9 @@ def payment_success(request):
         subtotal = sum(item.price * item.quantity for item in cart)
         subtotal = Decimal(subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-        # Deduct 8% base commission from the subtotal
-        base_commission = (Decimal('0.08') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        # Deduct 0.095% base commission from the subtotal
+        base_commission_rate = Decimal('0.00095')  # Change to 0.095%
+        base_commission = (base_commission_rate * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         subtotal -= base_commission
 
         # Set additional commission rate based on service type
@@ -936,6 +896,9 @@ def payment_success(request):
 
         # Calculate final total price
         total_price = (subtotal + base_commission + vat + additional_commission).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        # Retrieve the exact total amount Stripe charged (in pence)
+        stripe_total_amount = Decimal(session.amount_total) / Decimal(100)  # Convert from pence to pounds
 
         # Prepare the list of items for the invoice and for the template
         items_list = []
@@ -966,11 +929,11 @@ def payment_success(request):
             user=request.user,
             first_name=request.user.first_name,
             last_name=request.user.last_name,
-            amount=int(total_price * 100),  # Convert to pence
+            amount=session.amount_total,  # Store the exact amount Stripe charged (in pence)
             paid=True,
             phone=userprof.phone,
             pay_code=order_number,  # Ensure pay_code is the same as order_number
-            additional_info=f"Order Number: {order_number}, Total: £{total_price:.2f}"
+            additional_info=f"Order Number: {order_number}, Total: £{stripe_total_amount:.2f}"
         )
 
         # Prepare HTML email content with the table structure
@@ -1004,7 +967,7 @@ def payment_success(request):
                 </tr>
                 <tr>
                     <td colspan="2"><strong>Total</strong></td>
-                    <td><strong>£{total_price:.2f}</strong></td>
+                    <td><strong>£{stripe_total_amount:.2f}</strong></td>  <!-- Display the exact total passed to Stripe -->
                 </tr>
             </tfoot>
         </table>
@@ -1036,7 +999,7 @@ def payment_success(request):
             'subtotal': subtotal,
             'commission': base_commission + additional_commission,
             'vat': vat,
-            'total_price': total_price,
+            'total_price': stripe_total_amount,  # Use the Stripe total amount for the display
             'cart_items': cart_items,  # Pass cart items to the template
         }
 
@@ -1358,6 +1321,9 @@ def terms_service(request):
 def deletion_instruction(request):
     return render(request, 'deletion_instruction.html')
 
+def user_manual(request):
+    return render(request, 'user_manual.html')
+
 
 # View for staff to create products
 @staff_member_required
@@ -1402,11 +1368,19 @@ def staff_product_list(request):
         product_paid_value = paid_orders.count() * product.price
         product_unpaid_value = unpaid_count * product.price
 
-        # Deduct 8% base commission from the paid value
-        base_commission = (Decimal('0.08') * product_paid_value).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        # Deduct 9.5% base commission from the paid value
+        base_commission = (Decimal('0.095') * product_paid_value).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         subtotal = product_paid_value - base_commission
-        
-        # Update totals with the commission-deducted subtotal
+
+        # Deduct service type commission (e.g., 8% for regular or 12% for premium)
+        service_type_commission = (Decimal('0.08') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        subtotal -= service_type_commission
+
+        # Deduct VAT (20%) from the subtotal
+        vat = (Decimal('0.20') * subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        subtotal -= vat
+
+        # Update totals with the deductions applied
         total_paid_value += subtotal
         total_unpaid_value += product_unpaid_value
         total_value_for_product = subtotal + product_unpaid_value
@@ -1419,7 +1393,7 @@ def staff_product_list(request):
 
         # Use payment_date and amount if a payment exists, otherwise None
         order_time = most_recent_payment.payment_date if most_recent_payment else None
-        recent_amount_paid = most_recent_payment.amount if most_recent_payment else 0  # Capture the recent payment amount
+        recent_amount_paid = most_recent_payment.amount / 100 if most_recent_payment else 0  # Convert to pounds
         invoice_number = most_recent_payment.invoice_number if most_recent_payment else None  # Capture the most recent invoice number
 
         # Determine order status color based on the most recent payment
@@ -1446,7 +1420,7 @@ def staff_product_list(request):
                     'order_time': payment_date,
                     'quantity_sold': quantity_sold,
                     'amount_sold': amount_sold,
-                    'payment_amount': payment.amount,  # New field for payment amount
+                    'payment_amount': payment.amount / 100,  # Convert to pounds
                     'invoice_number': payment.invoice_number,  # Capture invoice number
                     'pay_code': payment.pay_code,  # Capture pay code
                 })
@@ -1483,7 +1457,7 @@ def staff_product_list(request):
             'most_recent_transaction': {
                 'quantity': most_recent_quantity,
                 'time': most_recent_time,
-                'payment_amount': most_recent_payment_amount,  # Include recent payment amount
+                'payment_amount': most_recent_payment_amount,  # Include recent payment amount (in pounds)
                 'invoice_number': most_recent_invoice_number,  # Include the most recent invoice number
                 'pay_code': most_recent_transaction['pay_code'] if most_recent_transaction else None  # Include pay code
             } if most_recent_transaction else None,
@@ -1495,25 +1469,10 @@ def staff_product_list(request):
         'total_paid_value': total_paid_value,
         'total_unpaid_value': total_unpaid_value,
         'total_value_all_products': total_value_all_products,
+        'most_recent_transaction': most_recent_transaction,
     }
 
     return render(request, 'staff_product_list.html', context)
-
-
-def seller_dashboard(request):
-    products = Product.objects.filter(seller=request.user)
-
-    total_products = products.count()
-    total_paid_value = sum([product.price * product.paid_count for product in products])
-    total_unpaid_value = sum([product.price * product.unpaid_count for product in products])
-
-    context = {
-        'products': products,
-        'total_products': total_products,
-        'total_paid_value': total_paid_value,
-        'total_unpaid_value': total_unpaid_value,  # Add unpaid value here
-    }
-    return render(request, 'seller_dashboard.html', context)
 
 
 

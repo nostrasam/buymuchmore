@@ -22,16 +22,17 @@
             <tr>
                 <th>Product</th>
                 <th>Quantity</th>
-                <th>Price</th>
-                <th>Created Date</th>
-                <th>Paid Items</th>
-                <th>Unpaid Items</th>
-                <th>Total Value</th>
+                <th>Price (£)</th>
+                <th>Uploaded At</th>
+                <th>Paid Orders</th>
+                <th>Unpaid Orders</th>
+                <th>Total Value (£)</th>
                 <th>Order Alert</th>
                 <th>Average Rating</th>
                 <th>Rating Count</th>
-                <th>Most Recent Transaction</th>
-                <th>Transaction Invoice Number</th>
+                <th>Recent Transaction</th>
+                <th>Invoice Number</th>
+                <th>Payment Amount</th>
                 <th>Edit Actions</th>
             </tr>
         </thead>
@@ -41,7 +42,7 @@
                 <td>{{ product.model }}</td>
                 <td>{{ product.quantity|intcomma }}</td>
                 <td>£{{ product.price|floatformat:2|intcomma }}</td>
-                <td>{{ product.uploaded_at|date:"Y-m-d H:i:s" }}</td> <!-- Formatted date -->
+                <td>{{ product.uploaded_at|date:"Y-m-d H:i:s" }}</td>
                 <td>{{ product.paid_count|intcomma }}</td>
                 <td>{{ product.unpaid_count|intcomma }}</td>
                 <td>£{{ product.total_value|floatformat:2|intcomma }}</td>
@@ -54,10 +55,9 @@
                                display: inline-block; 
                                color: white; 
                                font-size: 0.7em;">
-                      {{ product.status }}
-                  </span>
+                        {{ product.status }}
+                    </span>
                 </td>
-
                 <td>{{ product.average_rating|default:"No Ratings Yet" }}</td>
                 <td>{{ product.rating_count|default:0|intcomma }}</td>
                 <td>
@@ -75,7 +75,13 @@
                         No transactions available
                     {% endif %}
                 </td>
-                
+                <td>
+                    {% if product.most_recent_transaction %}
+                        £{{ product.most_recent_transaction.payment_amount|floatformat:2 }}<br>
+                    {% else %}
+                        No recent transactions.
+                    {% endif %}
+                </td>
                 <td>
                     <a href="{% url 'edit_product' product.id %}" class="btn btn-sm btn-warning">Edit</a>
                 </td>
@@ -83,6 +89,7 @@
             {% endfor %}
         </tbody>
     </table>
+    
 
     <!-- Charts Section -->
     <h3 class="text-center mt-5">Product Analysis Overview</h3>
