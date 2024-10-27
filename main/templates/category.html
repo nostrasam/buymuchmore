@@ -10,7 +10,7 @@
       <div class="card text-center">
         <a href="{% url 'detail' merchant.id merchant.slug %}"><img src="{{merchant.carimg.url}}" class="card-img-top" alt="..."><p>View more</p></a> 
         <div class="card-body">
-          <h5 class="card-title">{{merchant.type|title}}</h5>
+      
           <h5 class="card-title">{{merchant.model}}</h5>
           <p class="card-text">£{{merchant.price|floatformat:2}}</p>
           <form action="{% url 'add_to_cart' %}" method="POST"> 

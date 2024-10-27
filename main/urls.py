@@ -67,6 +67,7 @@ urlpatterns = [
     path('stripe/webhook/', views.stripe_webhook, name='stripe_webhook'),
     path('checkout/', views.checkout, name='checkout'),  # Checkout page to initiate payment
     path('payment/success/', views.payment_success, name='payment_success'),
+    path('reg_success/', views.reg_success, name='reg_success'),
     
     
  

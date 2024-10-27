@@ -37,23 +37,28 @@
           {% endfor %}
         </tbody>
         <tfoot>
+          <!-- Display accurate service-type commission calculated -->
           <tr>
-            <td colspan="2"><b>Commission</b></td>
-            <td>£{{ commission|floatformat:2 }}</td>
+            <td colspan="2">Delivery Fee({{ service_type|title }} Rate)</td>
+            <td id="commission">£{{ commission|floatformat:2 }}</td>
           </tr>
+          <!-- Only show VAT row if VAT is applicable -->
+          
           <tr>
             <td colspan="2"><b>VAT</b></td>
-            <td>£{{ vat|floatformat:2 }}</td>
+            <td id="vat">£{{ vat|floatformat:2 }}</td>
           </tr>
+         
           <tr>
             <td colspan="2"><b>Total</b></td>
-            <td><b>£{{ total_price|floatformat:2 }}</b></td>
+            <td id="totalDisplay"><b>£{{ total_price|floatformat:2 }}</b></td>
           </tr>
         </tfoot>
       </table>
 
       <p>Dear {{ userprof.user }}, your order has been received and payment confirmed. We will contact you shortly! Please contact us between 15 and 20 minutes of payment confirmation to cancel your order at contactus@buymuchmore.co.uk. You have 3 working days to contact us if you require a refund based on our return policy! 
-        <b>Thanks for your patronage!</b> Check your email for further details.</p> <p>Please take your time to rate our product, if you have not already rated them!</p>
+        <b>Thanks for your patronage!</b> Check your email for further details.</p> 
+      <p>Please take your time to rate our product if you have not already rated them!</p>
     </div>
 
     <!-- Right Column: Quick Links -->
@@ -68,6 +73,28 @@
     </div>
   </div>
 </div>
+
+<script>
+  function updateTotal() {
+      const vatElement = document.getElementById("vat");
+      const commissionElement = document.getElementById("commission");
+      const subtotal = parseFloat(document.getElementById("subtotal").innerText.replace(',', '')) || 0;
+      const commission = parseFloat(commissionElement.innerText.replace(',', '')) || 0;
+
+      let total = subtotal + commission;
+      
+      // Add VAT only if it exists
+      if (vatElement) {
+          const vat = parseFloat(vatElement.innerText.replace(',', '')) || 0;
+          total += vat;
+      }
+
+      // Update display with formatted total
+      document.getElementById("totalDisplay").innerText = total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  
+  document.addEventListener("DOMContentLoaded", updateTotal);
+</script>
 {% endblock content %}
 
 {% block footer %} {% include 'footer.html' %} {% endblock footer %}

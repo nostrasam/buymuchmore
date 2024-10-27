@@ -59,8 +59,7 @@ class ProductForm(forms.ModelForm):
             'type', 'model', 'slug', 'description', 'condition', 'color',
             'quantity', 'kilogram', 'availability', 'address', 'postcode',
             'price', 'promo_price', 'telephone1', 'telephone2', 'seller_name',
-            'website', 'message', 'carimg', 
-        ]
+            'website', 'message', 'carimg', 'is_vat_exempt',]
 
         # Adding widgets for better UI/UX and validation
         widgets = {
@@ -82,6 +81,7 @@ class ProductForm(forms.ModelForm):
             'website': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Seller Website'}),
             'message': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Additional Message'}),
             'carimg': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'is_vat_exempt': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
         labels = {
@@ -103,6 +103,7 @@ class ProductForm(forms.ModelForm):
             'website': 'Website URL',
             'message': 'Message',
             'carimg': 'Product Image',
+            'is_vat_exempt': 'VAT Exempt (0%). Please ensure not to check the box for none exempted products',  # Label for the VAT exemption checkbox
         }
 
     # Overriding the form's save method to ensure the seller is set correctly

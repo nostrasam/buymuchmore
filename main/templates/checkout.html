@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load humanize %}
+
 {% block header %} {% include 'header.html' %} {% endblock header %}
 {% block content %}
 <div class="container mt-5 mb-5">
@@ -21,7 +21,7 @@
               <td>{{ item.items.model }}</td>
               <td>{{ item.items.color }}</td>
               <td>{{ item.quantity }}</td>
-              <td>£{{ item.amount|floatformat:2|intcomma }}</td>
+              <td>£{{ item.amount|floatformat:2 }}</td>
             </tr>
           {% endfor %}
           <tr class="total">
@@ -29,20 +29,30 @@
             <td></td>
             <td></td>
             <td class="total1">Subtotal =</td>
-            <td class="total1">£<span id="subtotal">{{ subtotal|floatformat:2|intcomma }}</span></td>
+            <td class="total1">£<span id="subtotal">{{ subtotal|floatformat:2 }}</span></td>
           </tr>
+          {% if not vat_exempt %}
           <tr class="total">
             <td></td>
             <td></td>
             <td></td>
             <td class="total1">VAT (20%) =</td>
-            <td class="total1">£<span id="vat">{{ vat|floatformat:2|intcomma }}</span></td>
+            <td class="total1">£<span id="vat">{{ vat|floatformat:2 }}</span></td>
+          </tr>
+          {% endif %}
+          <tr class="total">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="total1">Commission =</td>
+            <td class="total1">£<span id="commission">{{ commission|floatformat:2 }}</span></td>
           </tr>
           <tr class="total">
             <td></td>
             <td></td>
-            <td><td class="total1">Commission =</td></td>
-            <td class="total1">£<span id="commission">{{ commission|floatformat:2|intcomma }}</span></td>
+            <td></td>
+            <td class="total1">Total =</td>
+            <td class="total1">£<span id="total">{{ total|floatformat:2 }}</span></td>
           </tr>
         </tbody>
       </table>
@@ -51,45 +61,47 @@
     <div class="col-12 col-md-6 pt-5 cart">
       <form id="payment-form" action="{% url 'pay' %}" method="POST"> 
         {% csrf_token %}
-        <div class="mb-3">
-          <label for="first_name" class="form-label">First Name</label>
-          <input type="text" name="first_name" value="{{ userprof.first_name }}" class="form-control" id="first_name">
-        </div>
-        <div class="mb-3">
-          <label for="last_name" class="form-label">Last Name</label>
-          <input type="text" name="last_name" value="{{ userprof.last_name }}" class="form-control" id="last_name">
-        </div>
-        <div class="mb-3">
-          <label for="phone" class="form-label">Phone</label>
-          <input type="text" name="phone" value="{{ userprof.phone }}" class="form-control" id="phone">
-        </div>
-        <div class="mb-3">
-          <label for="address" class="form-label">Address</label>
-          <input type="text" name="address" value="{{ userprof.address }}" class="form-control" id="address">
-        </div>
-        <div class="mb-3">
-          <label for="email" class="form-label">Email</label>
-          <input type="email" name="email" value="{{ userprof.email }}" class="form-control" id="email">
-        </div>
-
-        <div class="mb-3">
-          <label for="service_type" class="form-label">Select Service Type</label>
-          <select name="service_type" id="service_type" class="form-control" onchange="updateTotal()">
-              <option value="regular" {% if service_type == 'regular' %} selected {% endif %}>Regular Delivery Service</option>
-              <option value="premium" {% if service_type == 'premium' %} selected {% endif %}>Premium Delivery Service</option>
-          </select>
-        </div>
-
+        <!-- Customer Information Fields -->
         <div class="mt-3">
-          <h4>Total: £<span id="totalDisplay">{{ total|floatformat:2|intcomma }}</span></h4>
+          <tr class="subtot">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>VAT =</td>
+            <td>£<span id="vatDisplay">{{ vat|floatformat:2 }}</span></td>
+          </tr>
+          <tr class="subtot">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Total =</td>
+            <td>£<span id="totalDisplay">{{ total|floatformat:2 }}</span></td>
+          </tr>
+          <input type="hidden" name="total" id="totalInput" value="{{ total|floatformat:2 }}">
         </div>
-        <input type="hidden" name="total" id="totalInput" value="{{ total|floatformat:2 }}">
         <button type="submit" class="btn btn-warning">Pay Now</button>
       </form>
     </div>
   </div>
 </div>
 
+<script>
+  function updateTotal() {
+      const vatElement = document.getElementById("vat");
+      const subtotal = parseFloat(document.getElementById("subtotal").innerText.replace(',', ''));
+      const commission = parseFloat(document.getElementById("commission").innerText.replace(',', ''));
 
+      let total = subtotal + commission;
+      if (vatElement) {
+          const vat = parseFloat(vatElement.innerText.replace(',', ''));
+          total += vat;
+      }
+
+      document.getElementById("totalDisplay").innerText = total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById("totalInput").value = total.toFixed(2);
+  }
+  
+  document.addEventListener("DOMContentLoaded", updateTotal);
+</script>
 {% endblock content %}
 {% block footer %} {% include 'footer.html' %} {% endblock footer %}

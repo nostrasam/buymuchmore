@@ -67,6 +67,7 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     rating_value = models.FloatField(default=0.0)
     rating_count = models.PositiveIntegerField(default=0)
+    is_vat_exempt = models.BooleanField(default=False, help_text="Select if this product is VAT exempt (0%).")
     total_views = models.PositiveIntegerField(default=0)  # Total views for the product
     total_customers = models.PositiveIntegerField(default=1)  # Total unique customers for the product, default is 1 to avoid division by zero
     

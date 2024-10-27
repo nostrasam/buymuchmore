@@ -15,6 +15,7 @@
     <p>Total Products: <b>{{ total_products }}</b></p>
     <p>Total Value of Paid Products: <b>£{{ total_paid_value|floatformat:2|intcomma }}</b></p>
     <p>Total Value of Unpaid Products: <b>£{{ total_unpaid_value|floatformat:2|intcomma }}</b></p>
+    <p>Outstanding Revenue: <b>£{{ actual_payment|floatformat:2|intcomma }}</b></p>
     <p>Total Value of All Products: <b>£{{ total_value_all_products|floatformat:2|intcomma }}</b></p>
 
     <table class="table table-striped">
@@ -77,7 +78,7 @@
                 </td>
                 <td>
                     {% if product.most_recent_transaction %}
-                        £{{ product.most_recent_transaction.payment_amount|floatformat:2 }}<br>
+                        £{{ product.most_recent_transaction.payment_amount }}<br>
                     {% else %}
                         No recent transactions.
                     {% endif %}
