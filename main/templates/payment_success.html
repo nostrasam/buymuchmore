@@ -56,9 +56,13 @@
         </tfoot>
       </table>
 
-      <p>Dear {{ userprof.user }}, your order has been received and payment confirmed. We will contact you shortly! Please contact us between 15 and 20 minutes of payment confirmation to cancel your order at contactus@buymuchmore.co.uk. You have 3 working days to contact us if you require a refund based on our return policy! 
-        <b>Thanks for your patronage!</b> Check your email for further details.</p> 
+      <p>Dear {{ userprof.user }}, your order has been received and payment confirmed. We will contact you shortly! <b>Thanks for your patronage!</b> Check your email for further details.</p> 
       <p>Please take your time to rate our product if you have not already rated them!</p>
+      <p>To cancel your order, please click the <b>"Cancel Order"</b> button within <b>5 minutes</b> of placing the order. You will then have <b>30 minutes</b> to confirm the cancellation request via your email to initiate a refund in accordance with our refund policy. Please check <b>your email</b> to <b>validate</b> your order cancellation.</p>      <form method="POST" action="{% url 'cancel_order' %}">
+        {% csrf_token %}
+        <input type="hidden" name="order_number" value="{{ order_number }}">
+        <button type="submit" class="btn btn-danger">Cancel Order</button>
+    </form>
     </div>
 
     <!-- Right Column: Quick Links -->

@@ -137,12 +137,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'plutronixtechnology@gmail.com'
-EMAIL_HOST_PASSWORD = 'ndksvkvhljoeyywu'
+EMAIL_HOST_USER = 'buymuchmoree@gmail.com'
+EMAIL_HOST_PASSWORD = 'ptvdsmdvswcyrikr'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-DEFAULT_FROM_EMAIL = 'default from email'
+DEFAULT_FROM_EMAIL = 'BuyMuchMore from email'
 
 EMAIL_TIMEOUT = 30  # Set a reasonable timeout (in seconds)
 

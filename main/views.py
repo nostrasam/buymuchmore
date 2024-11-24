@@ -45,6 +45,11 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Sum, F
 from decimal import Decimal, ROUND_HALF_UP
 from django.http import HttpResponseRedirect
+from datetime import datetime, timedelta
+from django.utils.timezone import make_aware, get_current_timezone
+from django.utils.http import urlencode
+from django.core.signing import Signer, BadSignature, SignatureExpired, TimestampSigner
+
 
 
 
@@ -155,7 +160,7 @@ def contact(request):
                 subject='New Contact Form Submission',  # Email subject
                 message=f"You have a new message from {form.cleaned_data['name']}:\n\n{form.cleaned_data['message']}",  # The message content
                 from_email=form.cleaned_data['email'],  # Sender's email
-                recipient_list=['plutronixtechnology@gmail.com'],  # Recipient's email
+                recipient_list=['buymuchmoree@gmail.com'],  # Recipient's email
                 fail_silently=False,  # Raise error if email fails to send
             )
 
@@ -544,7 +549,7 @@ def kyc_upload(request):
                     subject="New KYC Document Uploaded",
                     body=f"Dear Admin,\n\nA new KYC document has been uploaded by {new}.\n\nPlease find the document attached.",
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=['plutronixtechnology@gmail.com', 'nostrasam@yahoo.com'],  # Multiple recipients
+                    to=['buymuchmoree@gmail.com', 'nostrasam@yahoo.com'],  # Multiple recipients
                 )
                 
                 # Attach the uploaded file
@@ -680,7 +685,6 @@ def add_to_cart(request):
 
 
 
-
 def calculate_cart_totals(cart_items, service_type):
     subtotal = Decimal('0.00')
     total_vat = Decimal('0.00')
@@ -719,10 +723,18 @@ def calculate_cart_totals(cart_items, service_type):
 @login_required(login_url='signin')
 def cart(request):
     if request.user.is_authenticated:
+        # Fetch all unpaid cart items for the logged-in user
         cart_items = Cart.objects.filter(user=request.user, paid=False)
+        
+        # Get the selected service type or default to 'regular'
         service_type = request.POST.get('service_type', 'regular')
+        
+        # Calculate cart totals
         totals = calculate_cart_totals(cart_items, service_type)
-
+        
+        # Identify canceled orders
+        canceled_orders = Cart.objects.filter(user=request.user, paid=False, status='canceled')
+        
         context = {
             'cart': cart_items,
             'subtotal': totals['subtotal'],
@@ -733,10 +745,12 @@ def cart(request):
             'total_quantity': cart_items.aggregate(total_quantity=Sum('quantity'))['total_quantity'] or 0,
             'service_type': service_type,
             'is_vat_exempt': totals['is_vat_exempt'],
+            'canceled_orders': canceled_orders,  # Include canceled orders in the context
         }
         
         return render(request, 'cart.html', context)
     
+    # Redirect to login page if the user is not authenticated
     return render(request, 'login.html', {'error': 'You need to be logged in to view your cart.'})
 
 
@@ -748,6 +762,7 @@ def delete(request):
         Cart.objects.filter(pk=del_item).delete()
         messages.success(request, 'One item deleted')
         return redirect('cart')
+    
 
 @login_required(login_url='signin')   
 def update(request):
@@ -883,22 +898,24 @@ def payment_success(request):
         return render(request, 'payment_error.html', {'message': 'No session ID provided'})
 
     try:
+        # Retrieve Stripe session and customer data
         session = stripe.checkout.Session.retrieve(session_id)
         customer_data = stripe.Customer.retrieve(session.customer)
         customers = Customer.objects.filter(email=customer_data.email)
         userprof = customers.first() if customers.exists() else Customer.objects.create(email=customer_data.email, user=request.user)
 
+        # Get cart items
         cart = Cart.objects.filter(user__email=customer_data.email, paid=False)
         if not cart.exists():
             return render(request, 'payment_error.html', {'message': 'No items in the cart'})
 
         service_type = session.metadata.get('service_type', 'regular')
         totals = calculate_cart_totals(cart, service_type)
-
         stripe_total_amount = Decimal(session.amount_total) / Decimal(100)
-        items_list = []
         cart_items = []
+        items_list = []
 
+        # Process cart items
         for item in cart:
             item.paid = True
             item.order_number = order_number
@@ -908,6 +925,7 @@ def payment_success(request):
             items_list.append(f"<tr><td>{product.model}</td><td>{item.quantity}</td><td>£{item.price}</td></tr>")
             cart_items.append({'product': product, 'quantity': item.quantity, 'price': item.price})
 
+        # Record the payment
         Payment.objects.create(
             user=request.user,
             first_name=request.user.first_name,
@@ -919,7 +937,7 @@ def payment_success(request):
             additional_info=f"Order Number: {order_number}, Total: £{stripe_total_amount:.2f}"
         )
 
-        # Prepare HTML email content with the table structure
+        # Prepare email content
         email_subject = f'Your Order Confirmation - {order_number}'
         html_content = f"""
         <html>
@@ -927,7 +945,6 @@ def payment_success(request):
         <p>Dear {userprof.user.username},</p>
         <p>Thank you for your purchase! Your order number is: <strong>{order_number}</strong>.</p>
         <p>Your order includes the following items:</p>
-
         <table border="1" cellpadding="10" cellspacing="0">
             <thead>
                 <tr>
@@ -954,27 +971,29 @@ def payment_success(request):
                 </tr>
             </tfoot>
         </table>
-
         <p>We will notify you once your items are shipped.</p>
-        <p>Please contact us within 15 to 20 minutes of payment confirmation to cancel your order at contactus@buymuchmore.co.uk</p>
+        <p>Please contact us within 30 minutes of payment confirmation to cancel your order at contactus@buymuchmore.co.uk</p>
         <p>Thank you for shopping with us!</p>
         <p>Best regards,<br>Buy Much More Team</p>
         </body>
         </html>
         """
-
         plain_message = strip_tags(html_content)
 
-        # Send email to the customer
+        # Send emails
         send_email_notification(email_subject, plain_message, html_content, [customer_data.email])
-
-        # Send email to the seller or internal team
-        send_email_notification(email_subject, plain_message, html_content, ['plutronixtechnology@gmail.com'])
+        send_email_notification(email_subject, plain_message, html_content, ['buymuchmoree@gmail.com'])
 
         # Clear the cart after payment
         cart.delete()
 
-        # Render success page with order details
+        # Set up cancellation context
+        current_time = datetime.now()
+        order_time = session.created  # Assuming 'created' is a Unix timestamp
+        cancellation_deadline = datetime.fromtimestamp(order_time) + timedelta(minutes=30)
+        can_cancel = current_time <= cancellation_deadline
+
+        # Render success page
         context = {
             'userprof': userprof,
             'customer_email': customer_data.email,
@@ -985,14 +1004,15 @@ def payment_success(request):
             'total_price': stripe_total_amount,
             'cart_items': cart_items,
             'service_type': service_type,
-            'is_vat_exempt': totals.get('is_vat_exempt', False)  # Adjust based on your VAT exemption check
+            'is_vat_exempt': totals.get('is_vat_exempt', False),
+            'can_cancel': can_cancel,  
+            'cancel_deadline': cancellation_deadline.strftime('%Y-%m-%d %H:%M:%S')  
         }
 
         return render(request, 'payment_success.html', context)
 
     except stripe.error.StripeError as e:
         return render(request, 'payment_error.html', {'message': str(e)})
-
 
 
 
@@ -1082,7 +1102,7 @@ def stripe_webhook(request):
         # Send email to the customer
         send_email(email_subject, html_content, user_email)
         # Send email to the admin/seller
-        send_email(email_subject, html_content, 'plutronixtechnology@gmail.com')
+        send_email(email_subject, html_content, 'buymuchmoree@gmail.com')
 
         return HttpResponse(status=200)
 
@@ -1203,40 +1223,102 @@ def merchant_dashboard(request):
     return render(request, 'merchant_dashboard.html', context)
 
 
-# Function to apply K-means clustering
-def cluster_products(products, num_clusters=4):
-    # Extract relevant product features for clustering (e.g., price, quantity, availability)
-    product_features = np.array([[p.price, p.quantity, p.availability] for p in products])
+# Function to apply K-means clustering based on price and availability
+def cluster_product(products, num_clusters=4):
+    # Filter products to only include those that are available
+    available_products = [p for p in products if p.availability.lower() == 'yes']
+    
+    # Use price only for clustering since availability is already filtered
+    product_features = np.array([[p.price] for p in available_products])
 
-    # Apply K-means clustering
-    kmeans = KMeans(n_clusters=num_clusters, random_state=1)
-    kmeans.fit(product_features)
-    
-    # Assign a cluster to each product
-    clustered_products = {i: [] for i in range(num_clusters)}
-    for i, product in enumerate(products):
-        cluster = kmeans.labels_[i]
-        clustered_products[cluster].append(product)
-    
-    return clustered_products
+    # Apply K-means clustering if there are enough products, otherwise skip clustering
+    if len(available_products) >= num_clusters:
+        kmeans = KMeans(n_clusters=num_clusters, random_state=1)
+        kmeans.fit(product_features)
+        
+        # Group products by cluster
+        clustered_product = {i: [] for i in range(num_clusters)}
+        for i, product in enumerate(available_products):
+            cluster = kmeans.labels_[i]
+            clustered_product[cluster].append(product)
+    else:
+        # If fewer products than clusters, treat each product as its own "cluster"
+        clustered_product = {i: [p] for i, p in enumerate(available_products)}
 
-# Fetching similar products
-def get_similar_products(target_product, products, num_clusters=4):
-    clustered_products = cluster_products(products, num_clusters)
+    return clustered_product
+
+# Fetching similar products based on cluster and lowest price
+def get_similar_product(target_product, products, num_clusters=4):
+    clustered_product = cluster_product(products, num_clusters)
     
-    # Find the cluster of the target product
+    # Identify target product's cluster
     target_cluster = None
-    for cluster, items in clustered_products.items():
+    for cluster, items in clustered_product.items():
         if target_product in items:
             target_cluster = cluster
             break
 
     if target_cluster is not None:
-        # Return similar products from the same cluster, excluding the target product itself
-        return [p for p in clustered_products[target_cluster] if p != target_product]
+        # Get similar products from the same cluster, excluding the target product itself
+        similar_products = [p for p in clustered_product[target_cluster] if p != target_product]
+        
+        # Sort similar products by price (ascending order) to prioritize the lowest priced products
+        similar_products.sort(key=lambda x: x.price)
+        
+        # Limit the display to a maximum of 4 items
+        return similar_products[:4]
     else:
         return []
+ 
+
+
+def cluster_product_by_category(products, target_category, num_clusters=4):
+    """
+    Clusters products by price for a specific category.
+    """
+    # Filter products by target category and availability
+    category_products = [p for p in products if p.type == target_category and p.availability.lower() == 'yes']
     
+    # If no products are available in the category, return empty clusters
+    if not category_products:
+        return {i: [] for i in range(num_clusters)}
+
+    # Use price as the feature for clustering
+    product_features = np.array([[p.price] for p in category_products])
+
+    # Apply K-means clustering if there are enough products; otherwise, treat each as its own cluster
+    if len(category_products) >= num_clusters:
+        kmeans = KMeans(n_clusters=num_clusters, random_state=1)
+        kmeans.fit(product_features)
+        
+        # Group products by cluster
+        clustered_product = {i: [] for i in range(num_clusters)}
+        for i, product in enumerate(category_products):
+            cluster = kmeans.labels_[i]
+            clustered_product[cluster].append(product)
+    else:
+        # If fewer products than clusters, treat each product as its own "cluster"
+        clustered_product = {i: [p] for i, p in enumerate(category_products)}
+
+    return clustered_product
+
+
+def get_similar_lower_price_products(target_product, products, num_display=4, sort_desc=False):
+    """
+    Fetches random products in the same category as the target product with the lowest prices.
+    """
+    # Filter products by the same category
+    category_products = [p for p in products if p.type == target_product.type and p != target_product]
+
+    # Sort products by price (ascending by default)
+    category_products.sort(key=lambda x: x.price, reverse=sort_desc)
+    
+    # Select a subset of the products (randomly shuffled if desired)
+    random.shuffle(category_products)
+
+    # Return up to the specified number of products
+    return category_products[:num_display]
+
 
 @login_required
 def submit_rating(request, product_id):
@@ -1332,10 +1414,10 @@ def create_product(request):
     return render(request, 'create_product.html', {'form': form})
 
 
+
 @staff_member_required
 @login_required
 def staff_product_list(request):
-    # Fetch the products sold by the logged-in staff member
     products = Product.objects.filter(seller_name=request.user)
     total_products = products.count()
 
@@ -1343,75 +1425,71 @@ def staff_product_list(request):
     total_paid_value = 0
     total_unpaid_value = 0
     total_value_all_products = 0
-    total_transaction_outstanding_balance = 0  # Initialize the total outstanding balance
+    total_transaction_outstanding_balance = 0
     actual_payment = 0
+    total_transaction_count = 0  # To track total transaction count
 
-    # Get the current time for comparison
     current_time = timezone.now()
 
-    # Iterate through each product
     for product in products:
-        # Fetch paid orders related to the product
         paid_orders = Cart.objects.filter(items=product, paid=True)
         unpaid_count = product.quantity - paid_orders.count()
+        canceled_orders = Cart.objects.filter(items=product, paid=False, canceled=True)
 
-        # Calculate product paid and unpaid value
         product_paid_value = paid_orders.count() * product.price
         product_unpaid_value = unpaid_count * product.price
 
-        # Deduct 8% base commission from the paid value
         base_commission = (Decimal('0.08') * product_paid_value).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         subtotal = product_paid_value - base_commission
-        
-        # Update totals with the commission-deducted subtotal
+
         total_paid_value += subtotal
         total_unpaid_value += product_unpaid_value
 
-        # Calculate total value for the product (paid + unpaid)
-        total_value_for_product = subtotal + product_unpaid_value
+        # Calculate total value for the product
+        total_value_for_product = product.quantity * product.price
         total_value_all_products += total_value_for_product
 
-        # Calculate the latest transaction value
         latest_transaction = product.price * product.quantity
-        
-        # Calculate the outstanding balance for this product
         transaction_outstanding_balance = latest_transaction - subtotal
         total_transaction_outstanding_balance += transaction_outstanding_balance
         
-        # Calculate actual payment: total unpaid value - total paid value
-        actual_payment = total_paid_value - total_unpaid_value
+        payment_deduction = total_paid_value + total_unpaid_value
 
-        # Access the most recent payment date and amount from the Payment model
+        actual_payment = total_value_all_products - payment_deduction
+
+        # Increment the transaction count
+        total_transaction_count += paid_orders.count()
+
         most_recent_payment = Payment.objects.filter(
             pay_code__in=paid_orders.values_list('order_number', flat=True)
         ).order_by('-payment_date').first()
 
-        # Use payment_date and amount if a payment exists, otherwise None
-        order_time = most_recent_payment.payment_date if most_recent_payment else None
-        recent_amount_paid = most_recent_payment.amount if most_recent_payment else '0'  # Capture the recent payment amount
-        invoice_number = most_recent_payment.invoice_number if most_recent_payment else None  # Capture the most recent invoice number
+        most_recent_canceled_order = canceled_orders.order_by('-cancellation_time').first()
 
-        # Ensure amount is formatted with a decimal point (last two digits as cents)
-        if recent_amount_paid:
-            # Convert amount to a string if necessary
-            recent_amount_paid = str(recent_amount_paid)
+        # Determine order status and blinking logic
+        order_status_color = 'orange'
+        order_status_text = 'Pending'
+        blink = False
 
-            # Add decimal point if necessary, ensuring the last two digits are cents
-            if len(recent_amount_paid) > 2:
-                recent_amount_paid = f"{recent_amount_paid[:-2]}.{recent_amount_paid[-2:]}"
+        if most_recent_canceled_order:
+            if most_recent_canceled_order.cancellation_time >= current_time - timezone.timedelta(minutes=5):
+                order_status_color = 'red'
+                order_status_text = 'Cancel'
+                blink = True
             else:
-                recent_amount_paid = f"0.{recent_amount_paid.zfill(2)}"  # Handle cases where the amount is less than 1 unit
-
-        # Determine order status color based on the most recent payment
-        if most_recent_payment and order_time:
-            if order_time >= current_time - timezone.timedelta(minutes=5):
-                order_status_color = 'green'  # Most recent payment, use green
+                order_status_color = 'orange'
+                order_status_text = 'Pending'
+                blink = False
+        elif most_recent_payment:
+            if most_recent_payment.payment_date >= current_time - timezone.timedelta(minutes=5):
+                order_status_color = 'green'
+                order_status_text = 'Paid'
+                blink = True
             else:
-                order_status_color = 'orange'  # Older payment, use orange
-        else:
-            order_status_color = 'orange'  # Default to orange if no payment
+                order_status_color = 'orange'
+                order_status_text = 'Pending'
+                blink = False
 
-        # Collect sales data per order and sort by payment date
         sales_data = []
         for paid_order in paid_orders:
             payment = Payment.objects.filter(pay_code=paid_order.order_number).first()
@@ -1424,24 +1502,15 @@ def staff_product_list(request):
                     'order_time': payment_date,
                     'quantity_sold': quantity_sold,
                     'amount_sold': amount_sold,
-                    'payment_amount': payment.amount,  # New field for payment amount
-                    'invoice_number': payment.invoice_number,  # Capture invoice number
-                    'pay_code': payment.pay_code,  # Capture pay code
+                    'payment_amount': payment.amount,
+                    'invoice_number': payment.invoice_number,
+                    'pay_code': payment.pay_code,
                 })
 
         min_aware_datetime = timezone.make_aware(timezone.datetime.min, timezone.get_current_timezone())
-
-        # Sort sales_data by 'order_time' (most recent first)
         sales_data = sorted(sales_data, key=lambda x: x['order_time'] or min_aware_datetime, reverse=True)
 
-        # Only keep the most recent transaction
         most_recent_transaction = sales_data[0] if sales_data else None
-
-        # Include the quantity of items and time of the most recent transaction
-        most_recent_quantity = most_recent_transaction['quantity_sold'] if most_recent_transaction else None
-        most_recent_time = most_recent_transaction['order_time'] if most_recent_transaction else None
-        most_recent_payment_amount = most_recent_transaction['payment_amount'] if most_recent_transaction else None
-        most_recent_invoice_number = most_recent_transaction['invoice_number'] if most_recent_transaction else None
 
         product_data.append({
             'id': product.id,
@@ -1451,18 +1520,20 @@ def staff_product_list(request):
             'uploaded_at': product.uploaded_at,
             'paid_count': paid_orders.count(),
             'unpaid_count': unpaid_count,
+            'canceled_count': canceled_orders.count(),
             'total_value': total_value_for_product,
-            'order_time': order_time,
-            'status': 'Paid' if paid_orders.exists() else 'Unpaid',
             'order_status_color': order_status_color,
+            'order_status_text': order_status_text,
+            'status': order_status_text,
+            'blink': blink,
             'average_rating': product.get_average_rating(),
             'rating_count': product.rating_count,
             'most_recent_transaction': {
-                'quantity': most_recent_quantity,
-                'time': most_recent_time,
-                'payment_amount': recent_amount_paid,  # Ensure the amount is formatted
-                'invoice_number': most_recent_invoice_number,  # Include the most recent invoice number
-                'pay_code': most_recent_transaction['pay_code'] if most_recent_transaction else None  # Include pay code
+                'quantity': most_recent_transaction['quantity_sold'] if most_recent_transaction else None,
+                'time': most_recent_transaction['order_time'] if most_recent_transaction else None,
+                'payment_amount': most_recent_transaction['amount_sold'] if most_recent_transaction else None,
+                'invoice_number': most_recent_transaction['invoice_number'] if most_recent_transaction else None,
+                'pay_code': most_recent_transaction['pay_code'] if most_recent_transaction else None,
             } if most_recent_transaction else None,
         })
 
@@ -1472,12 +1543,12 @@ def staff_product_list(request):
         'total_paid_value': total_paid_value,
         'total_unpaid_value': total_unpaid_value,
         'total_value_all_products': total_value_all_products,
-        'transaction_outstanding_balance': total_transaction_outstanding_balance,  # Corrected total outstanding balance
-        'actual_payment': actual_payment  # Display actual payment balance
+        'transaction_outstanding_balance': total_transaction_outstanding_balance,
+        'actual_payment': actual_payment,  # Actual payment now matches the aggregate total
+        'total_transaction_count': total_transaction_count,  # Total transaction count for the seller
     }
 
     return render(request, 'staff_product_list.html', context)
-
 
 
 @staff_member_required
@@ -1497,7 +1568,6 @@ def edit_product(request, id):
 
 
 
-
 def delete_product(request, id):
     product = get_object_or_404(Product, id=id)
     if request.method == 'POST':
@@ -1508,32 +1578,76 @@ def delete_product(request, id):
 
 
 
-@login_required(login_url='signin')
+@login_required
 def cancel_order(request):
-    # Get the user's cart
-    cart = Cart.objects.filter(user__username=request.user.username, paid=True)
+    if request.method == 'POST':
+        order_number = request.POST.get('order_number')
+        cart_items = Cart.objects.filter(order_number=order_number, user=request.user, paid=True)
 
-    # Check if the cart is empty
-    if not cart.exists():
-        return render(request, 'error.html', {'message': 'No paid orders found to cancel.'})
+        # Check if the order exists and is valid for cancellation
+        if not cart_items.exists():
+            return render(request, 'error.html', {'message': 'Order not found or already canceled.'})
 
-    # Get the order's created time (assuming you have a timestamp field in your Cart model)
-    order_created_at = cart.first().created_at  # Replace with your actual field
-    now = timezone.now()
+        first_item = cart_items.first()
+        if now() - first_item.created_at > timedelta(minutes=30):
+            return render(request, 'error.html', {'message': 'Cancellation period has expired.'})
 
-    # Check if the order is within the cancellation time limit (30 minutes)
-    if now - order_created_at <= timedelta(minutes=30):
-        # Set the order status to cancelled (you may have a status field in your model)
-        for item in cart:
-            item.paid = False  # Mark as unpaid or you can change the status
+        # Generate a secure cancellation link
+        signer = TimestampSigner()
+        try:
+            cancel_token = signer.sign(order_number)
+            cancel_url = f"{request.build_absolute_uri(reverse('cancel-confirm'))}?{urlencode({'token': cancel_token})}"
+        except Exception as e:
+            return render(request, 'error.html', {'message': f'Error generating cancellation link: {str(e)}'})
+
+        # Send the cancellation link email
+        recipient_list = ['buymuchmoree@gmail.com']
+        if request.user.email:  # Include the user's email if available
+            recipient_list.append(request.user.email)
+
+        send_mail(
+            subject=f"Order Cancellation Link: {order_number}",
+            message=(
+                f"Use the link below to confirm the cancellation of your order:\n"
+                f"{cancel_url}\n\n"
+                "Note: This link will expire in 30 minutes. Please note that refunds may take 12 to 24 hours to be processed and reflected in your account."
+            ),
+            from_email='noreply@buymuchmore.co.uk',
+            recipient_list=recipient_list,
+        )
+
+        return render(request, 'success.html', {'message': 'Cancellation link has been sent to your email. You have 30 minutes to confirm your cancellation request.'})
+
+    # Handle invalid request method
+    return render(request, 'error.html', {'message': 'Invalid request.'})
+
+@login_required
+def confirm_cancel_order(request):
+    token = request.GET.get('token')
+    signer = TimestampSigner()
+
+    try:
+        # Verify and decode the token
+        order_number = signer.unsign(token, max_age=1800)  # 30-minute expiration
+        cart_items = Cart.objects.filter(order_number=order_number, user=request.user, paid=True)
+
+        # Ensure the order exists and mark it as canceled
+        if not cart_items.exists():
+            return render(request, 'error.html', {'message': 'Invalid or already canceled order.'})
+
+        for item in cart_items:
+            item.paid = False
+            item.canceled = True
+            item.cancellation_time = now()
             item.save()
 
-        # Provide feedback to the user
-        return render(request, 'success.html', {'message': 'Your order has been successfully cancelled.'})
-    else:
-        # If the cancellation period has passed
-        return render(request, 'error.html', {'message': 'Cancellation period has expired. You can no longer cancel your order.'})
+        return render(request, 'success.html', {'message': 'Your order has been successfully canceled.'})
 
-
-
+    except SignatureExpired:
+        return render(request, 'error.html', {'message': 'The cancellation link has expired.'})
+    except BadSignature:
+        return render(request, 'error.html', {'message': 'Invalid cancellation link.'})
+    except Exception as e:
+        return render(request, 'error.html', {'message': f'An error occurred: {str(e)}'})
+    
 

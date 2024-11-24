@@ -1,7 +1,8 @@
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from main import views
-from .views import merchregistration, verify_email, find_nearest_seller, find_nearest_delivery_service, find_nearest_delivery_service
+from .views import merchregistration, verify_email, find_nearest_seller, find_nearest_delivery_service, find_nearest_delivery_service, cancel_order, confirm_cancel_order
+
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -29,7 +30,6 @@ urlpatterns = [
     path('update', views.update, name='update'),
     path('chekout', views.checkout, name='checkout'),
     path('pay', views.pay, name='pay'),
-   
     path('search', views.search, name='search'),
     path('subscribes', views.subscribes, name='subscribes'),
     path('reset_password/', 
@@ -68,9 +68,9 @@ urlpatterns = [
     path('checkout/', views.checkout, name='checkout'),  # Checkout page to initiate payment
     path('payment/success/', views.payment_success, name='payment_success'),
     path('reg_success/', views.reg_success, name='reg_success'),
+    path('cancel-order/', cancel_order, name='cancel-order'),
+    path('cancel-confirm/', confirm_cancel_order, name='cancel-confirm'),
     
-    
- 
     
 ]
 

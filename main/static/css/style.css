@@ -72,7 +72,6 @@
     50% { opacity: 0; }
     100% { opacity: 1; }
 }
-
 .payment-logos {
     display: flex;
     justify-content: center; /* Centers the logos */

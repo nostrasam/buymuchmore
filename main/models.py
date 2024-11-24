@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.conf import settings
 from django.utils import timezone
 from decimal import Decimal
+from django.utils.timezone import now
 
 
 
@@ -70,6 +71,7 @@ class Product(models.Model):
     is_vat_exempt = models.BooleanField(default=False, help_text="Select if this product is VAT exempt (0%).")
     total_views = models.PositiveIntegerField(default=0)  # Total views for the product
     total_customers = models.PositiveIntegerField(default=1)  # Total unique customers for the product, default is 1 to avoid division by zero
+    
     
 
     # New method to get views per customer
@@ -198,6 +200,9 @@ class Cart(models.Model):
     amount = models.CharField(max_length=50)  # You can calculate total amount dynamically if needed
     status = models.CharField(max_length=20, blank=True, null=True)  # Status of the cart (optional)
     order_time = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=now)
+    canceled = models.BooleanField(default=False)
+    cancellation_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.items.model} ({self.user.username})"  # Display the product's model and the user
@@ -280,5 +285,6 @@ class Checkout(models.Model):
 
 class Order(models.Model):
     order_id = models.CharField(max_length=100)
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name="orders")
     created_at = models.DateTimeField(default=timezone.now)
     order_time = models.DateTimeField(default=timezone.now)

@@ -3,7 +3,7 @@
     // Refresh the page every 5 minutes (300000 milliseconds)
     setTimeout(function() {
         window.location.reload();
-    }, 300000); // 5 minutes
+    }, 180000); // 5 minutes
 </script> {% endblock header %}
 {% block content %}
 {% load humanize %}
@@ -13,9 +13,10 @@
 
     <h2>Product Statistics</h2>
     <p>Total Products: <b>{{ total_products }}</b></p>
+    <p>Total Transactions: <b>{{ total_transaction_count }}</b></p>
     <p>Total Value of Paid Products: <b>£{{ total_paid_value|floatformat:2|intcomma }}</b></p>
     <p>Total Value of Unpaid Products: <b>£{{ total_unpaid_value|floatformat:2|intcomma }}</b></p>
-    <p>Outstanding Revenue: <b>£{{ actual_payment|floatformat:2|intcomma }}</b></p>
+    <p>Total Commission Debited: <b>£{{ actual_payment|floatformat:2|intcomma }}</b></p>
     <p>Total Value of All Products: <b>£{{ total_value_all_products|floatformat:2|intcomma }}</b></p>
 
     <table class="table table-striped">
@@ -34,6 +35,8 @@
                 <th>Recent Transaction</th>
                 <th>Invoice Number</th>
                 <th>Payment Amount</th>
+                <th>Canceled Orders</th>
+                <th>Status</th>
                 <th>Edit Actions</th>
             </tr>
         </thead>
@@ -48,17 +51,19 @@
                 <td>{{ product.unpaid_count|intcomma }}</td>
                 <td>£{{ product.total_value|floatformat:2|intcomma }}</td>
                 <td>
-                    <span class="badge-pill {% if product.order_status_color == 'green' %}blink{% endif %}"
-                        style="background-color: {{ product.order_status_color }}; 
-                               padding: 1.8px 12px; 
-                               border-radius: 15px; 
-                               min-width: 48px; 
-                               display: inline-block; 
-                               color: white; 
+                    <span 
+                        class="badge-pill {% if product.blink %}blink{% endif %}"
+                        style="background-color: {{ product.order_status_color }};
+                               padding: 1.8px 12px;
+                               border-radius: 15px;
+                               min-width: 48px;
+                               display: inline-block;
+                               color: white;
                                font-size: 0.7em;">
-                        {{ product.status }}
+                        {{ product.order_status_text }}
                     </span>
-                </td>
+                </td>                
+                
                 <td>{{ product.average_rating|default:"No Ratings Yet" }}</td>
                 <td>{{ product.rating_count|default:0|intcomma }}</td>
                 <td>
@@ -83,6 +88,8 @@
                         No recent transactions.
                     {% endif %}
                 </td>
+                <td>{{ product.canceled_count }}</td>
+                <td>{{ product.status }}</td>
                 <td>
                     <a href="{% url 'edit_product' product.id %}" class="btn btn-sm btn-warning">Edit</a>
                 </td>
@@ -92,51 +99,53 @@
     </table>
     
 
-    <!-- Charts Section -->
-    <h3 class="text-center mt-5">Product Analysis Overview</h3>
+   <!-- Charts Section -->
+<h3 class="text-center mt-5">Product Analysis Overview</h3>
 
-    <div class="row">
-        <!-- Bar Chart: Revenue per Product -->
-        <div class="col-md-6">
-            <h5 class="text-center">Revenue per Product</h5>
-            <canvas id="revenueChart" width="300" height="200"></canvas>
-        </div>
-
-        <!-- Bar Chart: Paid vs Unpaid by Product -->
-        <div class="col-md-6">
-            <h5 class="text-center">Paid vs Unpaid by Product</h5>
-            <canvas id="paidVsUnpaidChart" width="300" height="200"></canvas>
-        </div>
+<div class="row">
+    <!-- Bar Chart: Revenue per Product -->
+    <div class="col-md-6">
+        <h5 class="text-center">Revenue per Product</h5>
+        <canvas id="revenueChart" width="300" height="200"></canvas>
     </div>
 
+    <!-- Bar Chart: Paid vs Unpaid by Product -->
+    <div class="col-md-6">
+        <h5 class="text-center">Paid vs Unpaid by Product</h5>
+        <canvas id="paidVsUnpaidChart" width="300" height="200"></canvas>
+    </div>
+</div>
+
+<!-- Row: Total Value of Paid vs Unpaid Products and Total Value for All Products vs Commission Paid -->
+<div class="row mt-5">
     <!-- Bar Chart: Total Value of Paid vs Unpaid Products -->
-    <div class="row mt-5">
-        <div class="col-md-12">
-            <h5 class="text-center">Total Value of Paid vs Unpaid Products</h5>
-            <canvas id="totalPaidVsUnpaidChart" width="380" height="150"></canvas>
-        </div>
+    <div class="col-md-6">
+        <h5 class="text-center">Total Value of Paid vs Unpaid Products</h5>
+        <canvas id="totalPaidVsUnpaidChart" width="300" height="200"></canvas>
     </div>
 
-    <!-- Bar Chart: Total Value for All Products -->
-    <div class="row mt-5">
-        <div class="col-md-12">
-            <h5 class="text-center">Total Value for All Products</h5>
-            <canvas id="totalValueAllProductsChart" width="380" height="150"></canvas>
-        </div>
+    <!-- Bar Chart: Total Value for All Products vs Commission Paid -->
+    <div class="col-md-6">
+        <h5 class="text-center">Total Value for All Products vs Commission Debited</h5>
+        <canvas id="totalValueAllProductsChart" width="300" height="200"></canvas>
     </div>
-    
+</div>
 
+<!-- Space between rows -->
+<div class="row mt-5">
     <!-- Updated Chart: Rating Count per Product -->
-    <div class="row">
-        <div class="col-md-6">
-            <h5 class="text-center">Rating Count per Product</h5>
-            <canvas id="ratingCountChart" width="300" height="200"></canvas>
-        </div>
-        <div class="col-md-6">
-            <h5 class="text-center">Average Rating per Product</h5>
-            <canvas id="ratingChart" width="300" height="200"></canvas>
-        </div>
+    <div class="col-md-6">
+        <h5 class="text-center">Rating Count per Product</h5>
+        <canvas id="ratingCountChart" width="300" height="200"></canvas>
     </div>
+
+    <!-- Updated Chart: Average Rating per Product -->
+    <div class="col-md-6">
+        <h5 class="text-center">Average Rating per Product</h5>
+        <canvas id="ratingChart" width="300" height="200"></canvas>
+    </div>
+</div>
+
 
     <!-- Include Chart.js from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -221,26 +230,38 @@
             }
         });
 
-        // Bar Chart: Total Value for All Products
-        var ctxTotalValueAllProducts = document.getElementById('totalValueAllProductsChart').getContext('2d');
-        var totalValueAllProductsChart = new Chart(ctxTotalValueAllProducts, {
-            type: 'bar',
-            data: {
-                labels: ['Total Value'],
-                datasets: [{
-                    label: 'Total Value (£)',
-                    data: [{{ total_value_all_products }}],
-                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                    borderColor: 'rgba(153, 102, 255, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: { y: { beginAtZero: true } },
-                responsive: true,
-                maintainAspectRatio: true
+// Bar Chart: Total Value for All Products vs Commission Debited
+var ctxTotalValueAllProducts = document.getElementById('totalValueAllProductsChart').getContext('2d');
+var totalValueAllProductsChart = new Chart(ctxTotalValueAllProducts, {
+    type: 'bar',
+    data: {
+        labels: ['Total Value', 'Commission Debited'], // Two bars for comparison
+        datasets: [{
+            label: 'Amount (£)',
+            data: [{{ total_value_all_products }}, {{ actual_payment }}], 
+            backgroundColor: [
+                'rgba(75, 192, 192, 0.2)', // Total Value color
+                'rgba(255, 99, 132, 0.2)'  // Commission Paid color
+            ],
+            borderColor: [
+                'rgba(75, 192, 192, 1)', // Total Value border color
+                'rgba(255, 99, 132, 1)'  // Commission Paid border color
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
             }
-        });
+        },
+        responsive: true,
+        maintainAspectRatio: true
+    }
+});
+
+
 
         // Updated Chart: Rating Count per Product
         var ctxRatingCount = document.getElementById('ratingCountChart').getContext('2d');

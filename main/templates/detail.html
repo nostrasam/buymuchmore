@@ -103,6 +103,31 @@
   </div>
 </div>
 
+<!-- Competitively Priced Products Section -->
+<div class="container mt-4 mb-4">
+  <div class="card detail">
+    <h6 class="mt-4 text-center">Products with Competitive Prices</h6>
+    <div class="container">
+      <div class="row justify-content-center justify-content-lg-start g-4">
+        {% for product in similar_products|slice:":4" %}
+        <div class="col-12 col-md-6 col-lg-3 d-flex justify-content-center">
+          <div class="card det2 text-center">
+            <img src="{{ product.carimg.url }}" class="card-img-top" alt="{{ product.model }}" style="max-height: 80px;">
+            <div class="card-body">
+              <h5 class="card-title">{{ product.model }}</h5>
+              <p class="card-text">£{{ product.price }}</p>
+              <a href="{% url 'product_detail' product.id product.slug %}" class="btn btn-warning">View Details</a>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-muted text-center">No competitively priced products available.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock content %}
 
 {% block footer %} 
