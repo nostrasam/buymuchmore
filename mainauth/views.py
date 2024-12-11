@@ -11,6 +11,8 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from .tasks import user_reset_password_send_email_task
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken,BlacklistedToken
 
 
 # Create your views here.
@@ -53,9 +55,9 @@ class CustomUserVerifyEmailView(APIView):
         verification.verification_token = None
         verification.save()
 
-        vendor_profile = CustomUserVerification.objects.get(user=verification.user)
-        vendor_profile.is_active = True
-        vendor_profile.save()
+        user_profile = CustomUserVerification.objects.get(user=verification.user)
+        user_profile.is_active = True
+        user_profile.save()
 
         return Response({'message': 'Email verified successfully'}, status=200)
 
@@ -96,10 +98,33 @@ class PasswordResetView(APIView):
 
 
 
-class PasswordConfirmView(APIView):
+class PasswordResetConfirmView(APIView):
     def post(self, request):
         serializer = PasswordConfirmSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response({'message': 'Password reset successful.'}, status=status.HTTP_200_OK)
         return Response (serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+class LogoutSingleSessionView(APIView):
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response({'message':'User has been logged out'},status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({'message':'An error occured'},status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+class LogoutAllSessionsView(APIView):
+    def post(self, request):
+        tokens = OutstandingToken.objects.filter(user_id=request.user.id)
+        for token in tokens:
+            t, _ = BlacklistedToken.objects.get_or_create(token=token)
+
+        return Response({'message':'User has been logged out from all devices'},status=status.HTTP_205_RESET_CONTENT)

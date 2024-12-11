@@ -5,16 +5,15 @@ from mainauth.models import CustomUser
 class Merchant(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     company_name = models.CharField(max_length=50, blank=True, null=True)
-    company_registration = models.CharField(max_length=50, blank=True, null=True)
     company_email = models.EmailField(max_length=254)
-    bio = models.TextField()
+    company_phone_number1 = models.CharField(max_length=50)
+    company_phone_number2 = models.CharField(max_length=50,blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
     address = models.CharField(max_length=150)
-    company_phone_number = models.CharField(max_length=50)
     postcode = models.CharField(max_length=100, blank=True, null=True)
     coverage_zones = models.CharField(max_length=50, blank=True, null=True)
     operating_hours = models.IntegerField(blank=True, null=True)
     service_rates = models.IntegerField(blank=True, null=True)
-    vehicle_types = models.CharField(max_length=100, blank=True, null=True)
     availability = models.CharField(max_length=50, choices=[
         ('Available', 'Available'),
         ('Not Available', 'Not Available')
@@ -26,6 +25,7 @@ class Merchant(models.Model):
         ('Manufacturing', 'Manufacturing'),
         ('Trading', 'Trading')
     ],)
+    company_registration_kyc = models.BooleanField(default=False)
     logo = models.ImageField(upload_to='merchant')
     latitude = models.FloatField(default=0.0)
     longitude = models.FloatField(default=0.0)
@@ -33,3 +33,15 @@ class Merchant(models.Model):
     
     def __str__(self):
         return self.user.username
+    
+
+class Merchant_KYC_Upload(models.Model):
+    merchant = models.ForeignKey(Merchant,on_delete=models.CASCADE)
+    tax_document = models.ImageField(upload_to='media/images')
+    registration_document = models.ImageField(upload_to='media/images')
+    
+    def __str__(self):
+        return f'{self.merchant.company_name}||{self.merchant.company_email}'
+
+
+

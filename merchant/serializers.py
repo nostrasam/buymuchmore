@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from product.models import Product
 
 # create serializers here
 
@@ -23,5 +24,54 @@ class MerchantSerializer(serializers.ModelSerializer):
 
         validated_data['user'] = user
         return super().create(validated_data)
+   
+    
 
 
+class MerchantAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('name','slug','description','subcategory','merchant','model','condition','color','quantity','availability','kilogram',
+                  'address','postcode','price','promo_price','front_img','side_img','closeup_img',
+                  'is_vat_exempt',)
+        read_only_fields = ('merchant','slug',)
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        try:
+            merchant = Merchant.objects.get(user=user)
+        except:
+            raise serializers.ValidationError('Merchant profile does not exist for the current user')
+
+        validated_data['merchant'] = merchant
+        return super().create(validated_data)
+
+    def update(self,instance, validated_data):
+        user = self.context['request'].user
+        try:
+            merchant = Merchant.objects.get(user=user)
+        except:
+            raise serializers.ValidationError('Merchant profile does not exist for the current user')
+
+        validated_data['merchant'] = merchant
+        return super().update(instance, validated_data)
+
+
+
+
+class MerchantKYCUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Merchant_KYC_Upload
+        fields = ('merchant','tax_document','registration_document',)
+        read_only_fields = ('merchant',)
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+
+        try:
+            merchant = Merchant.objects.get(user=user)
+        except:
+            raise serializers.ValidationError('Merchant profile does not exist for the current user')
+
+        validated_data['merchant'] = merchant
+        return super().create(validated_data)

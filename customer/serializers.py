@@ -5,5 +5,5 @@ from .models import Customer
 class CustomerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ('address','pix',)
+        fields = ('address','cusstomer_image',)
 

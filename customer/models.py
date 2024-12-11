@@ -5,7 +5,7 @@ from mainauth.models import CustomUser
 class Customer(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     address = models.CharField(max_length=150)
-    pix = models.ImageField(upload_to='media/images')
+    customer_picture = models.ImageField(upload_to='media/images',blank=True, null=True)
     
     
     def __str__(self):

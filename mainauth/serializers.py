@@ -93,6 +93,8 @@ class PasswordResetSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('No user found with this email address.')
         return email
 
+
+
 class PasswordConfirmSerializer(serializers.Serializer):
     uidb64 = serializers.CharField(required=True)
     token = serializers.CharField(required=True)
