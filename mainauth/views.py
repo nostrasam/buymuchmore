@@ -13,6 +13,7 @@ from .tasks import user_reset_password_send_email_task
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken,BlacklistedToken
+from cart.models import Cart
 
 
 # Create your views here.
@@ -33,6 +34,26 @@ class UserRegistrationView(APIView):
 
 class CustomUserLoginView(TokenObtainPairView):
     serializer_class = CustomUserLoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request,*args,**kwargs)
+        user = self.serializer_class.Meta.model.objects.get(email=request.data['email'])
+
+        # Check for anonymous cart and merge it
+        cart_id = request.session.get('cart_id')
+        if cart_id:
+
+            try:
+                anonymous_cart = Cart.objects.get(cart_id=cart_id,user=None)
+                user_cart,created = Cart.objects.get_or_create(user=user)
+                user_cart.merge_items(anonymous_cart)
+                del request.session['cart_id']  # Clear the session cart_id
+            except Cart.DoesNotExist:
+                pass  # No anonymous cart found
+
+        return response
+
+
 
 
 

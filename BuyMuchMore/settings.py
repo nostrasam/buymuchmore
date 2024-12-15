@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'product.apps.ProductConfig',
     'customer.apps.CustomerConfig',
     'merchant.apps.MerchantConfig',
+    'cart.apps.CartConfig',
 
     
     # 3rd party apps

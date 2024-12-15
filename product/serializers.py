@@ -36,7 +36,7 @@ class ViewProductSerializer(serializers.ModelSerializer):
 
 class SingleSubCategorySerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source = 'category.name', read_only = True)
-    subcategory_products = ViewProductSerializer(many=True)
+    subcateg_products = ViewProductSerializer(many=True)
     class Meta:
         model = Subcategory
         fields = ('name', 'category_name', 'subcategory_slug','description', 'subcateg_products')
@@ -61,6 +61,16 @@ class SingleProductSerializer(serializers.ModelSerializer):
                   'address','postcode','price','promo_price','front_img','side_img','closeup_img',
                   'is_vat_exempt','total_views','total_customers',)
         read_only_fields = ('slug','subcategory',)
+
+
+class CartProductSerializer(serializers.ModelSerializer):
+    merchant_name = serializers.CharField(source = 'merchant.company_name', read_only = True)
+    class Meta:
+        model = Product
+        fields = ('name','slug','subcategory','merchant_name',
+                  'address','price','promo_price','front_img',
+                  'is_vat_exempt',)
+        read_only_fields = ()
 
 
 class ReviewProductSerializer(serializers.ModelSerializer):
