@@ -32,32 +32,9 @@ class UserRegistrationView(APIView):
 
 
 
-class CustomUserLoginView(TokenObtainPairView):
-    serializer_class = CustomUserLoginSerializer
-
-    def post(self, request, *args, **kwargs):
-        response = super().post(request,*args,**kwargs)
-        user = self.serializer_class.Meta.model.objects.get(email=request.data['email'])
-
-        # Check for anonymous cart and merge it
-        cart_id = request.session.get('cart_id')
-        if cart_id:
-
-            try:
-                anonymous_cart = Cart.objects.get(cart_id=cart_id,user=None)
-                user_cart,created = Cart.objects.get_or_create(user=user)
-                user_cart.merge_items(anonymous_cart)
-                del request.session['cart_id']  # Clear the session cart_id
-            except Cart.DoesNotExist:
-                pass  # No anonymous cart found
-
-        return response
 
 
-
-
-
-class CustomUserVerifyEmailView(APIView):
+class CustomUserVerificationView(APIView):
     def get(self, request):
         token = request.GET.get('token')
         if not token:
@@ -76,11 +53,53 @@ class CustomUserVerifyEmailView(APIView):
         verification.verification_token = None
         verification.save()
 
-        user_profile = CustomUserVerification.objects.get(user=verification.user)
+        user_profile = CustomUser.objects.get(user=verification.user)
         user_profile.is_active = True
         user_profile.save()
 
         return Response({'message': 'Email verified successfully'}, status=200)
+
+
+
+class CustomUserLoginView(TokenObtainPairView):
+    serializer_class = CustomUserLoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        user = self.serializer_class.Meta.model.objects.get(email=request.data['email'])
+        
+        # Check for anonymous cart and merge it
+        cart_id = request.session.get('cart_id')
+        if cart_id:
+
+            try:
+                anonymous_cart = Cart.objects.get(cart_id=cart_id,user=None)
+                user_cart,created = Cart.objects.get_or_create(user=user)
+                user_cart.merge_items(anonymous_cart)
+                del request.session['cart_id']  # Clear the session cart_id
+            except Cart.DoesNotExist:
+                pass  # No anonymous cart found
+
+        def get_response(self):
+            response = super().get_response()
+
+            # Determine the user's role
+            role = None
+            if hasattr(self.user, 'customer'):  # Check if the user has a Customer profile
+                role = 'customer'
+            elif hasattr(self.user, 'merchant'):  # Check if the user has a Merchant profile
+                role = 'merchant'
+
+            # Add role information to the response data
+            response.data['user'] = {
+                'id': str(self.user.id),
+                'email': self.user.email,
+                'role': role,
+            }
+
+            return response
+
+
+
 
 
 class ResendEmailVerificationView(APIView):

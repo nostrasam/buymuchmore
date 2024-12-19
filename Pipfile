@@ -10,6 +10,9 @@ celery = "*"
 redis = "*"
 djangorestframework-simplejwt = "*"
 pillow = "*"
+django-leaflet = "*"
+geopy = "*"
+psycopg2 = "*"
 
 [dev-packages]
 

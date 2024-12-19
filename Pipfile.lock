@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "cd72118975b1035089c33f932a0ff1584c916642ea11b9af640561b444a75cc7"
+            "sha256": "650253bb0b28921daa114661e064ceb118e803c99b415b3686d014f02a333ce3"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -97,6 +97,15 @@
             "markers": "python_version >= '3.10'",
             "version": "==5.1.4"
         },
+        "django-leaflet": {
+            "hashes": [
+                "sha256:914d973a30730eafec4cd822e7107bbd71a6d2e0106b6e919fd9eea67bbcbc5c",
+                "sha256:fb2b75f84aff60d4058659300f31a711554c65d128bade5fa8088637fb0751f7"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+            "version": "==0.31.0"
+        },
         "djangorestframework": {
             "hashes": [
                 "sha256:2b8871b062ba1aefc2de01f773875441a961fefbf79f5eed1e32b2f096944b20",
@@ -114,6 +123,23 @@
             "index": "pypi",
             "markers": "python_version >= '3.8'",
             "version": "==5.3.1"
+        },
+        "geographiclib": {
+            "hashes": [
+                "sha256:6b7225248e45ff7edcee32becc4e0a1504c606ac5ee163a5656d482e0cd38734",
+                "sha256:f7f41c85dc3e1c2d3d935ec86660dc3b2c848c83e17f9a9e51ba9d5146a15859"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==2.0"
+        },
+        "geopy": {
+            "hashes": [
+                "sha256:50283d8e7ad07d89be5cb027338c6365a32044df3ae2556ad3f52f4840b3d0d1",
+                "sha256:ae8b4bc5c1131820f4d75fce9d4aaaca0c85189b3aa5d64c3dcaf5e3b7b882a7"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.7'",
+            "version": "==2.4.1"
         },
         "kombu": {
             "hashes": [
@@ -213,6 +239,22 @@
             "markers": "python_full_version >= '3.7.0'",
             "version": "==3.0.48"
         },
+        "psycopg2": {
+            "hashes": [
+                "sha256:0435034157049f6846e95103bd8f5a668788dd913a7c30162ca9503fdf542cb4",
+                "sha256:12ec0b40b0273f95296233e8750441339298e6a572f7039da5b260e3c8b60e11",
+                "sha256:47c4f9875125344f4c2b870e41b6aad585901318068acd01de93f3677a6522c2",
+                "sha256:4a579d6243da40a7b3182e0430493dbd55950c493d8c68f4eec0b302f6bbf20e",
+                "sha256:5df2b672140f95adb453af93a7d669d7a7bf0a56bcd26f1502329166f4a61716",
+                "sha256:65a63d7ab0e067e2cdb3cf266de39663203d38d6a8ed97f5ca0cb315c73fe067",
+                "sha256:88138c8dedcbfa96408023ea2b0c369eda40fe5d75002c0964c78f46f11fa442",
+                "sha256:9d5b3b94b79a844a986d029eee38998232451119ad653aea42bb9220a8c5066b",
+                "sha256:c6f7b8561225f9e711a9c47087388a97fdc948211c10a4bccbf0ba68ab7b3b5a"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+            "version": "==2.9.10"
+        },
         "pyjwt": {
             "hashes": [
                 "sha256:3cc5772eb20009233caf06e9d8a0577824723b44e6648ee0a2aedb6cf9381953",
@@ -248,18 +290,18 @@
         },
         "sqlparse": {
             "hashes": [
-                "sha256:9e37b35e16d1cc652a2545f0997c1deb23ea28fa1f3eefe609eee3063c3b105f",
-                "sha256:e99bc85c78160918c3e1d9230834ab8d80fc06c59d03f8db2618f65f65dda55e"
+                "sha256:09f67787f56a0b16ecdbde1bfc7f5d9c3371ca683cfeaa8e6ff60b4807ec9272",
+                "sha256:cf2196ed3418f3ba5de6af7e82c694a9fbdbfecccdfc72e281548517081f16ca"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==0.5.2"
+            "version": "==0.5.3"
         },
         "tzdata": {
             "hashes": [
                 "sha256:7d85cc416e9382e69095b7bdf4afd9e3880418a2413feec7069d533d6b4e31cc",
                 "sha256:a48093786cdcde33cad18c2555e8532f34422074448fbc874186f0abd79565cd"
             ],
-            "markers": "sys_platform == 'win32'",
+            "markers": "python_version >= '2'",
             "version": "==2024.2"
         },
         "vine": {

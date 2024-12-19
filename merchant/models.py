@@ -1,6 +1,12 @@
 from django.db import models
+from django.contrib.gis.db import models
+from django.contrib.gis.geos import Point
 from mainauth.models import CustomUser
+from geopy.geocoders import Nominatim
+
 # Create your models here.
+
+geolocator = Nominatim(user_agent='location')
 
 class Merchant(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
@@ -27,12 +33,19 @@ class Merchant(models.Model):
     ],)
     company_registration_kyc = models.BooleanField(default=False)
     logo = models.ImageField(upload_to='merchant')
-    latitude = models.FloatField(default=0.0)
-    longitude = models.FloatField(default=0.0)
-    
-    
+    location = models.PointField(geography=True,null=True,blank=True)
+
+    def save(self, *args, **kwargs):
+        g = geolocator.geocode(self.address)
+        lat = g.latitude
+        lng = g.longitude
+        self.location = Point(lng,lat)
+        
+        super().save(*args,**kwargs)
+
+
     def __str__(self):
-        return self.user.username
+        return f"{self.company_name}||{self.company_email}"
     
 
 class Merchant_KYC_Upload(models.Model):
