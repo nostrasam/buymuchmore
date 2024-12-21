@@ -8,7 +8,7 @@ class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItems
         fields = ('id','cart','product_cartitem','price','quantity','subtotal_price',)
-        read_only_fields = ('cart',)
+        read_only_fields = ('cart','id','price','subtotal_price','product_cartitem',)
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -17,7 +17,7 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ('cart_id','user','total_amount','status',)
-        read_only_fields = ('cart_id','user','status',)
+        read_only_fields = ('cart_id','user','status','total_amount',)
 
     # Calculate the total sum of products
         def get_total_amount(self,obj):

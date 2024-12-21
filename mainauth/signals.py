@@ -20,12 +20,3 @@ from customer.models import Customer
         
 #         if instance.email:
 #             user_register_send_email_task.delay(instance.email,verification_url)
-
-
-@receiver(post_save,sender=CustomUserVerification)
-def create_customer_profile(sender, created, instance, **kwargs):
-    # Only trigger on updates, not creation
-    if created:
-            Customer.objects.create(user=instance)
-            print(f"CustomerProfile created for user {instance.first_name}{instance.last_name}")
-

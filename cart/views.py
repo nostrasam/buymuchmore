@@ -54,6 +54,21 @@ class CartView(APIView):
         serializer = CartSerializer(cart)
         return Response(serializer.data)
     
+    
+    def put(self,request,item_id):
+        cart = self.get_cart(request)
+
+        try:
+            cart_item = CartItems.objects.get(cart=cart, id=item_id)
+            serializer = CartItemSerializer(cart_item,data=request.data)
+            if serializer.is_valid():
+                return Response({'message':'Product quantity has been updated'},status=status.HTTP_200_OK)
+            return Response({'message':'Error in updating Product Quantity'},status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"error": "Item not found in cart."}, status=status.HTTP_404_NOT_FOUND)
+
+
+    
     def delete(self, request,item_id):
         cart = self.get_cart(request)
 

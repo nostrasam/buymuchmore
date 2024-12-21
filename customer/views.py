@@ -5,9 +5,8 @@ from rest_framework.generics import *
 
 # Create your views here.
 
-class CustomerProfileView(RetrieveUpdateDestroyAPIView):   
+class CustomerProfileView(RetrieveUpdateAPIView):   
     serializer_class = CustomerProfileSerializer
-    queryset = Customer.objects.all()
 
     def get_object(self):
         customer = Customer.objects.get(user = self.request.user)
@@ -15,6 +14,3 @@ class CustomerProfileView(RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         serializer.save(user=self.request.user)
-
-    def perform_destroy(self, instance):
-        instance.delete()

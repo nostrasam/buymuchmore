@@ -14,6 +14,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken,BlacklistedToken
 from cart.models import Cart
+from customer.models import Customer
 
 
 # Create your views here.
@@ -30,6 +31,25 @@ class UserRegistrationView(APIView):
             return Response({'user':serializer.data, 'message': 'User Created Successfully'}, status = status.HTTP_201_CREATED)
         return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
+
+
+
+class ResendEmailVerificationView(APIView):
+    def post(self, request,*args,**kwargs):
+        user = self.request.user
+        try:
+            customuser = CustomUser.objects.filter(email=user.email)
+            if customuser.is_active:
+                return Response({'message':'User has already verified this account successfully'})
+        except CustomUser.DoesNotExist:
+            return Response({'message':'Email not found, Please register firstv'})
+        
+        token = CustomUserVerification.objects.get(user=user).verification_token
+
+        verification_url = f"https://buymuchmore.com/mainauth/{reverse('verify', args=[token])}"
+        user_register_send_email_task.delay(user.email,verification_url)
+        return Response({'message':'Verification email has been resent'})
+    
 
 
 
@@ -56,8 +76,13 @@ class CustomUserVerificationView(APIView):
         user_profile = CustomUser.objects.get(user=verification.user)
         user_profile.is_active = True
         user_profile.save()
+        
+        if user_profile.is_active:
+            Customer.objects.create(user=user_profile)
 
-        return Response({'message': 'Email verified successfully'}, status=200)
+        return Response({'message': 'Email verified successfully'}, status=status.HTTP_200_OK)
+
+
 
 
 
@@ -83,40 +108,22 @@ class CustomUserLoginView(TokenObtainPairView):
             response = super().get_response()
 
             # Determine the user's role
-            role = None
+            user_role = None
             if hasattr(self.user, 'customer'):  # Check if the user has a Customer profile
-                role = 'customer'
+                user_role = 'customer'
             elif hasattr(self.user, 'merchant'):  # Check if the user has a Merchant profile
-                role = 'merchant'
+                user_role = 'merchant'
 
-            # Add role information to the response data
             response.data['user'] = {
                 'id': str(self.user.id),
                 'email': self.user.email,
-                'role': role,
+                'role': user_role,
             }
 
             return response
 
 
 
-
-
-class ResendEmailVerificationView(APIView):
-    def post(self, request,*args,**kwargs):
-        user = self.request.user
-        try:
-            customuser = CustomUser.objects.filter(email=user.email)
-            if customuser.is_active:
-                return Response({'message':'User has already verified this account successfully'})
-        except CustomUser.DoesNotExist:
-            return Response({'message':'Email not found, Please register firstv'})
-        
-        token = CustomUserVerification.objects.get(user=user).verification_token
-
-        verification_url = f"https://buymuchmore.com/mainauth/{reverse('verify', args=[token])}"
-        user_register_send_email_task.delay(user.email,verification_url)
-        return Response({'message':'Verification email has been resent'})
 
 
 class PasswordResetView(APIView):

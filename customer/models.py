@@ -13,6 +13,7 @@ class Customer(models.Model):
     address = models.CharField(max_length=150)
     customer_picture = models.ImageField(upload_to='media/images',blank=True, null=True)
     location = models.PointField(geography=True,null=True,blank=True)
+    security_pin = models.CharField(max_length=4,null=True,blank=True)
 
     def save(self, *args, **kwargs):
         g = geolocator.geocode(self.address)

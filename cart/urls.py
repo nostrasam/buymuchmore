@@ -5,6 +5,6 @@ urlpatterns = [
     # View and manage the cart (GET, POST)
     path('cart/', CartView.as_view(), name='cart'),
     
-    # Delete an item from the cart item_id
+    # Delete and update an item from the cart
     path('cart/<int:item_id>/', CartView.as_view(), name='cart-item-delete'),
 ]
