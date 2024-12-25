@@ -13,7 +13,7 @@ class CategoryListSerializer(serializers.ModelSerializer):
 
 
 
-class SubcategorySerializer(serializers.Modelserializers):
+class SubcategorySerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source = 'category.name', read_only = True)
     class Meta:
         model = Subcategory
@@ -26,7 +26,7 @@ class ViewProductSerializer(serializers.ModelSerializer):
     merchant_name = serializers.CharField(source = 'merchant.company_name', read_only = True)
     class Meta:
         model = Product
-        fields = ('name','slug','description','subcategory','merchant_name',
+        fields = ('name','product_slug','description','subcategory','merchant_name',
                   'address','postcode','price','promo_price','front_img',
                   'is_vat_exempt',)
         read_only_fields = ()
@@ -53,21 +53,11 @@ class SingleCategorySerializer(serializers.ModelSerializer):
 
 
 
-class SingleProductSerializer(serializers.ModelSerializer):
-    merchant_name = serializers.CharField(source = 'vendor.brand_name', read_only = True)
-    class Meta:
-        model = Product
-        fields = ('name','slug','description','subcategory','merchant_name','model','condition','color','quantity','availability','kilogram',
-                  'address','postcode','price','promo_price','front_img','side_img','closeup_img',
-                  'is_vat_exempt','total_views','total_customers',)
-        read_only_fields = ('slug','subcategory',)
-
-
 class CartProductSerializer(serializers.ModelSerializer):
     merchant_name = serializers.CharField(source = 'merchant.company_name', read_only = True)
     class Meta:
         model = Product
-        fields = ('name','slug','subcategory','merchant_name',
+        fields = ('name','product_slug','subcategory','merchant_name',
                   'address','price','promo_price','front_img',
                   'is_vat_exempt',)
         read_only_fields = ()
@@ -111,3 +101,20 @@ class RatingProductSerializer(serializers.ModelSerializer):
         validated_data['customer'] = customer
         validated_data['product'] = product
         return super().create(validated_data) 
+
+
+
+class SingleProductSerializer(serializers.ModelSerializer):
+    merchant_name = serializers.CharField(source = 'vendor.brand_name', read_only = True)
+    rating_product = RatingProductSerializer(many=True)
+    review_product = ReviewProductSerializer(many=True)
+
+    class Meta:
+        model = Product
+        fields = ('name','product_slug','description','subcategory','merchant_name','model','condition','color','quantity','availability','kilogram',
+                  'address','postcode','price','promo_price','front_img','side_img','closeup_img',
+                  'is_vat_exempt','total_views','total_customers','rating_product','review_product',)
+        read_only_fields = ('slug','subcategory',)
+
+    
+

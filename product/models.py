@@ -13,7 +13,7 @@ class Category(models.Model):
     category_img = models.ImageField(upload_to='media/images')
 
     def save(self, *args, **kwargs):
-        slug_name = f"++{self.name}++"
+        slug_name = f"category++{self.name}++{Category.objects.count()+1}"
         self.category_slug = slugify(slug_name)
 
         super().save(*args,**kwargs)
@@ -33,7 +33,7 @@ class Subcategory(models.Model):
     subcategory_img = models.ImageField(upload_to='media/images')
 
     def save(self, *args, **kwargs):
-        slug_name = f"{self.category.name}--{self.name}"
+        slug_name = f"subcategory++{self.category.name}--{self.name}++"
         self.subcategory_slug = slugify(slug_name)
 
         super().save(*args,**kwargs)
@@ -48,7 +48,7 @@ class Product(models.Model):
     subcategory = models.ForeignKey(Subcategory,on_delete=models.CASCADE, related_name='subcateg_products')
     merchant = models.ForeignKey(Merchant, on_delete=models.CASCADE,related_name='product_merchant') 
     model = models.CharField(max_length=50)
-    slug = models.SlugField(unique=True,max_length=150)
+    product_slug = models.SlugField(unique=True,max_length=150)
     description = models.TextField(max_length=300, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     promo_price = models.IntegerField(blank=True, null=True)
@@ -56,9 +56,7 @@ class Product(models.Model):
     color = models.CharField(max_length=50)
     quantity = models.IntegerField()
     kilogram = models.FloatField()
-    availability = models.CharField(max_length=50)
-    address = models.CharField(max_length=200)
-    postcode = models.CharField(max_length=100, blank=True, null=True)
+    availability = models.BooleanField(default=True)
     front_img = models.ImageField(upload_to='media/images',blank=True, null=True)
     side_img = models.ImageField(upload_to='media/images',blank=True, null=True)
     closeup_img = models.ImageField(upload_to='media/images',blank=True, null=True)
@@ -67,28 +65,31 @@ class Product(models.Model):
     is_vat_exempt = models.BooleanField(default=False, help_text="Select if this product is VAT exempt (0%).")
     total_views = models.PositiveIntegerField(default=0)  # Total views for the product
     total_customers = models.PositiveIntegerField(default=1)  # Total unique customers for the product, default is 1 to avoid division by zero
+    discount = models.BooleanField(default=False)
     
     
-
-    # New method to get views per customer
-    def get_views_per_customer(self):
-        if self.total_customers > 0:
-            return self.total_views / self.total_customers
-        return 0.0
     # Existing get_average_rating method
     def get_average_rating(self):
         if self.rating_count > 0:
             return self.rating_value / self.rating_count
         return 0.0
     
+    # method to return related objects in a single product view
+    def get_similar_products(self):
+        related_products = Product.objects.filter(subcategory=self.subcategory).exclude(slug=self.slug)
+        return related_products
+    
     def save(self, *args, **kwargs):
-        slug_name = f"{self.subcategory.name}|-|{self.merchant.company_name}+{self.name}"
-        self.subcategory_slug = slugify(slug_name)
+        slug_name = f"product++{self.subcategory.name}|-|{self.merchant.company_name}++{self.name}"
+        self.product_slug_slug = slugify(slug_name)
+
+        if self.promo_price and (self.promo_price < self.price):
+            self.discount = True
 
         super().save(*args,**kwargs)
 
     def __str__(self):
-        return self.model
+        return f'{self.name}||{self.merchant.company_name}||{self.description[:10]}'
     
 
 

@@ -1,0 +1,44 @@
+# Ignore virtual environment
+venv/
+.env/
+ENV/
+.venv/
+env/
+/Pipfile.lock
+
+# Ignore SQLite database file
+db.sqlite3
+
+
+# Ignore local settings (e.g., secret keys, database configurations)
+/local_settings.py
+
+# Ignore environment file
+/.env
+
+# Ignore static files (if served by a CDN or not version-controlled)
+/staticfiles/
+
+# Ignore media files (user-uploaded content)
+/media/
+
+# Ignore IDE or editor specific files
+/.vscode/
+/.idea/
+*.pyc
+.pytest_cache/
+*.swp
+.history/
+.coverage
+.coveragerc
+*.log
+pip-log.txt
+pip-delete-this-directory.txt
+
+
+# Ignore operating system files
+.DS_Store
+Thumbs.db
+
+# funny stuff 
+dump.rdb

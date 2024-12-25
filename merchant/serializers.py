@@ -7,9 +7,9 @@ from product.models import Product
 class MerchantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Merchant
-        fields = ('user','company_name','company_registration','company_email','bio',
-                  'address','company_phone_number','postcode','coverage_zones','operating_hours',
-                  'service_rates','vehicle_types','availability','business_sector',
+        fields = ('user','company_name','company_email','bio',
+                  'address','company_phone_number1','company_phone_number2','postcode','coverage_zones','operating_hours',
+                  'service_rates','availability','business_sector',
                   'logo',
                   )
         read_only_fields = ('user',)
@@ -75,3 +75,6 @@ class MerchantKYCUploadSerializer(serializers.ModelSerializer):
 
         validated_data['merchant'] = merchant
         return super().create(validated_data)
+    
+
+

@@ -21,4 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('buymuchmore_auth/', include('mainauth.urls')),
     path('buymuchmore_merchant/',include('merchant.urls')),
+    path('buymuchmore_products/',include('product.urls')),
+    path('buymuchmore_customer/',include('customer.urls')),
+    path('buymuchmore_partner/',include('customer.urls')),
 ]

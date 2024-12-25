@@ -90,7 +90,7 @@ class CustomUserLoginView(TokenObtainPairView):
     serializer_class = CustomUserLoginSerializer
 
     def post(self, request, *args, **kwargs):
-        user = self.serializer_class.Meta.model.objects.get(email=request.data['email'])
+        user = CustomUser.objects.get(email=request.data['email'])
         
         # Check for anonymous cart and merge it
         cart_id = request.session.get('cart_id')
@@ -104,25 +104,22 @@ class CustomUserLoginView(TokenObtainPairView):
             except Cart.DoesNotExist:
                 pass  # No anonymous cart found
 
-        def get_response(self):
-            response = super().get_response()
+        # Use normal token response
+        response = super().post(request, *args, **kwargs)
 
-            # Determine the user's role
-            user_role = None
-            if hasattr(self.user, 'customer'):  # Check if the user has a Customer profile
-                user_role = 'customer'
-            elif hasattr(self.user, 'merchant'):  # Check if the user has a Merchant profile
-                user_role = 'merchant'
+        # Determine the user's role
+        user_role = None
+        if hasattr(user, 'customer'):  # Check if the user has a Customer profile
+            user_role = 'customer'
+        elif hasattr(user, 'merchant'):  # Check if the user has a Merchant profile
+            user_role = 'merchant'
 
-            response.data['user'] = {
-                'id': str(self.user.id),
-                'email': self.user.email,
-                'role': user_role,
-            }
+        response.data['user'] = {
+            'email': user.email,
+            'role': user_role,
+        }
 
-            return response
-
-
+        return response
 
 
 

@@ -19,10 +19,33 @@ class Customer(models.Model):
         g = geolocator.geocode(self.address)
         lat = g.latitude
         lng = g.longitude
-        self.location = Point(lng,lat)
+        self.location = Point(lng,lat,srid=4326)
         
         super().save(*args,**kwargs)
     
     
     def __str__(self):
         return f"{self.user.first_name}{self.user.last_name}||{self.user.email}"
+    
+
+
+class ShippingInfo(models.Model):
+    customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
+    shipping_address = models.CharField(max_length=150)
+    shipping_location = models.PointField(geography=True,null=True,blank=True)
+
+    def save(self, *args, **kwargs):
+        g = geolocator.geocode(self.shipping_address)
+        lat = g.latitude
+        lng = g.longitude
+        self.shipping_location = Point(lng,lat,srid=4326)
+
+        super().save(*args,**kwargs)
+        
+    
+    def __str__(self):
+        return f"{self.customer.user.first_name}||{self.customer.user.last_name}"
+
+    
+
+    

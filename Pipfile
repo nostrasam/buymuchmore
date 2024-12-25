@@ -13,6 +13,12 @@ pillow = "*"
 django-leaflet = "*"
 geopy = "*"
 psycopg2 = "*"
+whitenoise = "*"
+gunicorn = "*"
+django-cors-headers = "*"
+pytest-django = "*"
+dj-database-url = "*"
+python-decouple = "*"
 
 [dev-packages]
 
