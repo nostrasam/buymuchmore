@@ -142,7 +142,7 @@ EMAIL_HOST_PASSWORD = 'ptvdsmdvswcyrikr'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-DEFAULT_FROM_EMAIL = 'BuyMuchMore from email'
+DEFAULT_FROM_EMAIL = 'ShopMuchMore from email'
 
 EMAIL_TIMEOUT = 30  # Set a reasonable timeout (in seconds)
 
