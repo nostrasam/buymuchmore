@@ -62,6 +62,7 @@ class Product(models.Model):
     telephone2 = models.CharField(max_length=50, blank=True, null=True)
     seller_name = models.CharField(max_length=100)
     website = models.CharField(max_length=50, blank=True, null=True)
+    seller_email = models.CharField(max_length=50, blank=True, null=True)
     message = models.TextField(blank=True, null=True)
     carimg = models.ImageField(upload_to='carimg')
     uploaded_at = models.DateTimeField(auto_now_add=True)

@@ -833,8 +833,8 @@ def checkout(request):
                 }],
                 mode='payment',
                 customer=customer.id,
-                success_url=f'http://buymuchmore.co.uk/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
-                cancel_url='http://buymuchmore.co.uk/payment/cancelled/',
+                success_url=f'http://shopmuchmore.co.uk/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
+                cancel_url='http://shopmuchmore.co.uk/payment/cancelled/',
                 metadata={
                     'user_id': request.user.id,
                     'order_number': order_number,
@@ -937,7 +937,7 @@ def payment_success(request):
             additional_info=f"Order Number: {order_number}, Total: £{stripe_total_amount:.2f}"
         )
 
-        # Prepare email content
+        # Prepare email content for the customer
         email_subject = f'Your Order Confirmation - {order_number}'
         html_content = f"""
         <html>
@@ -980,8 +980,26 @@ def payment_success(request):
         """
         plain_message = strip_tags(html_content)
 
-        # Send emails
+        # Send email to the customer
         send_email_notification(email_subject, plain_message, html_content, [customer_data.email])
+
+        # Notify each seller or merchant
+        for item in cart:
+            product = item.items
+            # Fetch seller email from the Merchant Registration table
+            seller_email = product.seller.merchant_registration.email  # Ensure the relationship exists and is correct
+            if seller_email:
+                seller_subject = f'Order Alert - {order_number}'
+                seller_message = f"""
+                Dear {product.seller.name},
+                You have received a new order for your product "{product.model}".
+                Order Number: {order_number}
+                Quantity: {item.quantity}
+                Price: £{item.price}
+                """
+                send_email_notification(seller_subject, seller_message, seller_message, [seller_email])
+
+        # Send a copy to admin
         send_email_notification(email_subject, plain_message, html_content, ['buymuchmoree@gmail.com'])
 
         # Clear the cart after payment
@@ -1005,8 +1023,8 @@ def payment_success(request):
             'cart_items': cart_items,
             'service_type': service_type,
             'is_vat_exempt': totals.get('is_vat_exempt', False),
-            'can_cancel': can_cancel,  
-            'cancel_deadline': cancellation_deadline.strftime('%Y-%m-%d %H:%M:%S')  
+            'can_cancel': can_cancel,
+            'cancel_deadline': cancellation_deadline.strftime('%Y-%m-%d %H:%M:%S')
         }
 
         return render(request, 'payment_success.html', context)

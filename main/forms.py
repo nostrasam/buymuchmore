@@ -59,7 +59,7 @@ class ProductForm(forms.ModelForm):
             'type', 'model', 'slug', 'description', 'condition', 'color',
             'quantity', 'kilogram', 'availability', 'address', 'postcode',
             'price', 'promo_price', 'telephone1', 'telephone2', 'seller_name',
-            'website', 'message', 'carimg', 'is_vat_exempt',]
+            'seller_email', 'website', 'message', 'carimg', 'is_vat_exempt',]
 
         # Adding widgets for better UI/UX and validation
         widgets = {
@@ -78,6 +78,7 @@ class ProductForm(forms.ModelForm):
             'telephone1': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Primary Contact Number'}),
             'telephone2': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Secondary Contact Number'}),
             'seller_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Seller Name'}),
+            'seller_emial': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Seller Name'}),
             'website': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Seller Website'}),
             'message': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Additional Message'}),
             'carimg': forms.ClearableFileInput(attrs={'class': 'form-control'}),
@@ -100,6 +101,7 @@ class ProductForm(forms.ModelForm):
             'telephone1': 'Primary Phone',
             'telephone2': 'Secondary Phone',
             'seller_name': 'Seller Name',
+            'seller_email': 'Seller Email',
             'website': 'Website URL',
             'message': 'Message',
             'carimg': 'Product Image',
