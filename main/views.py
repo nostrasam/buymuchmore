@@ -1705,7 +1705,7 @@ SUPPORT_MESSAGE = (
 PRODUCT_KEYWORDS = ["i want to buy", "i need to buy", "i need", "i am looking for", "please provide me with", "buy", "purchase", "order"]
 PRODUCT_DETAILS_KEYWORDS = ["yes", "tell me more", "show details", "show ingredients"]
 RECIPE_KEYWORDS = ["i need recipe", "i need ingredients", "i am looking for", "please provide me with", "recipe", "ingredient", "how to cook", "how do i prepare", "i need ingredients and recipe for", "how to prepare"]
-SUPPORT_KEYWORDS = ["product availability", "i am frustrated", "store hours", "return policies", "how to use a product", "troubleshooting issues with a product", "order status", "pricing", "delivery times", "billing inquiries", "complaints about a product or service", "how to access specific features or functions of a product or service", "i have challenges with my order", "i need help", "issue", "problem", "challenge", "help", "customer support", "frustrating", "not happy"]
+SUPPORT_KEYWORDS = ["product availability", "i am frustrated", "i need assistant", "i need help", "store hours", "return policies", "how to use a product", "troubleshooting issues with a product", "order status", "pricing", "delivery times", "billing inquiries", "complaints about a product or service", "how to access specific features or functions of a product or service", "i have challenges with my order", "issue", "problem", "challenge", "help", "customer support", "frustrating", "not happy"]
 
 # Store last requested product globally
 user_last_product_request = {}
