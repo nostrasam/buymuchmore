@@ -11,7 +11,7 @@ class CategoryAdmin(admin.ModelAdmin):
     
 class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug':('model',)}
-    list_display = ['id', 'type', 'model', 'price', 'description', 'telephone1', 'telephone2', 'seller_name', 'uploaded_at', 'updated_at']
+    list_display = ['id', 'type', 'model', 'price', 'description', 'telephone1', 'telephone2', 'seller_name', 'uploaded_at', 'updated_at', 'ingredients', 'instructions']
     
 
 class FeatureItemAdmin(admin.ModelAdmin):
@@ -22,6 +22,9 @@ class SubscriptionAdmin(admin.ModelAdmin):
     
 class CartAdmin(admin.ModelAdmin):
     list_display = ['id', 'user', 'items', 'amount']
+    
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'ingredients', 'instruction']
     
 class PaymentAdmin(admin.ModelAdmin):
     list_display = [
@@ -92,6 +95,7 @@ admin.site.register(Payment, PaymentAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Subscribe, SubscribeAdmin)
 admin.site.register(Order)
+
 
 
 

@@ -49,6 +49,7 @@ from datetime import datetime, timedelta
 from django.utils.timezone import make_aware, get_current_timezone
 from django.utils.http import urlencode
 from django.core.signing import Signer, BadSignature, SignatureExpired, TimestampSigner
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -833,8 +834,8 @@ def checkout(request):
                 }],
                 mode='payment',
                 customer=customer.id,
-                success_url=f'http://shopmuchmore.co.uk/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
-                cancel_url='http://shopmuchmore.co.uk/payment/cancelled/',
+                success_url=f'http://54.197.16.162/payment/success/?session_id={{CHECKOUT_SESSION_ID}}&order_number={order_number}',
+                cancel_url='http://54.197.16.162/payment/cancelled/',
                 metadata={
                     'user_id': request.user.id,
                     'order_number': order_number,
@@ -1668,4 +1669,127 @@ def confirm_cancel_order(request):
     except Exception as e:
         return render(request, 'error.html', {'message': f'An error occurred: {str(e)}'})
     
+    
 
+# Predefined chatbot responses
+WELCOME_MESSAGE = "Welcome to Shop Much More! 😊 How may I assist you today?"
+
+GREETING_RESPONSES = [
+    "Hello! How can I assist you today?",
+    "Hi there! Looking for something specific?",
+    "Hey! What can I help you find today?"
+]
+
+NO_PRODUCT_RESPONSES = [
+    "I'm sorry, I couldn't find that product. Can you try another keyword?",
+    "Oops! That item isn't available. Try searching for something else.",
+    "We don’t seem to have that, but I can suggest similar products!"
+]
+
+PRODUCT_FOUND_RESPONSES = [
+    "Here are some products that match your search:",
+    "I found these products for you:",
+    "Take a look at these options:"
+]
+
+RECIPE_PROMPT = "Would you like to see the ingredients and preparation instructions for this food item? 🍽️ (Yes/No)"
+
+CROSS_SELL_PROMPT = "Customers who bought this also purchased:"
+
+SUPPORT_MESSAGE = (
+    "If your inquiry is not related to products or recipes, please contact our customer support team. "
+    "📞 Call us at +44 777 004 1335 or ✉️ email contact@shopmuchmore.co.uk - for further assistance."
+)
+
+# Keywords for identifying user intent
+PRODUCT_KEYWORDS = ["i want to buy", "i need to buy", "i need", "i am looking for", "please provide me with", "buy", "purchase", "order"]
+PRODUCT_DETAILS_KEYWORDS = ["yes", "tell me more", "show details", "show ingredients"]
+RECIPE_KEYWORDS = ["i need recipe", "i need ingredients", "i am looking for", "please provide me with", "recipe", "ingredient", "how to cook", "how do i prepare", "i need ingredients and recipe for", "how to prepare"]
+SUPPORT_KEYWORDS = ["product availability", "i am frustrated", "store hours", "return policies", "how to use a product", "troubleshooting issues with a product", "order status", "pricing", "delivery times", "billing inquiries", "complaints about a product or service", "how to access specific features or functions of a product or service", "i have challenges with my order", "i need help", "issue", "problem", "challenge", "help", "customer support", "frustrating", "not happy"]
+
+# Store last requested product globally
+user_last_product_request = {}
+
+@csrf_exempt
+def chatbot(request):
+    global user_last_product_request
+    
+    if request.method == "POST":
+        data = json.loads(request.body)
+        user_message = data.get("message", "").lower()
+
+        # Initial greeting detection
+        if user_message in ["hi", "hello", "hey", "good morning", "good afternoon", "good evening"]:
+            return JsonResponse({"response": f"{WELCOME_MESSAGE}\n{random.choice(GREETING_RESPONSES)}"})
+
+        # Product search intent detection (e.g., "I want to buy rice")
+        if any(keyword in user_message for keyword in PRODUCT_KEYWORDS):
+            for keyword in PRODUCT_KEYWORDS:
+                user_message = user_message.replace(keyword, "").strip()
+
+            # Search for the product in the database
+            products = Product.objects.filter(model__icontains=user_message)[:3]
+
+            if products.exists():
+                user_last_product_request[request.session.session_key] = user_message  # Store last requested product
+
+                response = random.choice(PRODUCT_FOUND_RESPONSES) + "\n"
+                for product in products:
+                    response += f"- {product.model} (£{product.price})\n  ⭐ {product.rating_value}/5 - {product.description}\n\n"
+                
+                # Ask if user wants ingredients & instructions for food items
+                if "rice" in user_message or "pasta" in user_message or "soup" in user_message:  # Add more food items
+                    response += f"{RECIPE_PROMPT}\n"
+
+                # Cross-selling: Suggest similar products
+                related_products = Product.objects.exclude(model__icontains=user_message)[:2]
+                if related_products.exists():
+                    response += f"\n{CROSS_SELL_PROMPT}\n"
+                    for product in related_products:
+                        response += f"- {product.model} (£{product.price})\n"
+                
+                response += "\nWould you like to know more about any of these products? (Yes/No)"
+            else:
+                response = random.choice(NO_PRODUCT_RESPONSES)
+
+            return JsonResponse({"response": response})
+
+        # User response to "Would you like to know more about any of these products?"
+        if user_message in PRODUCT_DETAILS_KEYWORDS:
+            last_product = user_last_product_request.get(request.session.session_key)
+
+            if last_product:
+                product = Product.objects.filter(model__icontains=last_product).first()
+
+                if product:
+                    response = f"Here’s more information about **{product.model}**:\n"
+                    response += f"🍽️ Ingredients: {product.ingredients}\n📖 Instructions: {product.instructions}"
+                else:
+                    response = "I couldn't find detailed information for that product. Please try another one."
+            else:
+                response = "I couldn't recall your last product search. Can you please specify the product again?"
+
+            return JsonResponse({"response": response})
+
+        # Recipe search intent detection
+        if any(keyword in user_message for keyword in RECIPE_KEYWORDS):
+            for keyword in RECIPE_KEYWORDS:
+                user_message = user_message.replace(keyword, "").strip()
+
+            # Search for recipe in the database
+            recipe = Product.objects.filter(model__icontains=user_message).first()
+
+            if recipe:
+                response = f"Here’s a recipe for you:\n\n"
+                response += f"{recipe.model}\n🍽️ Ingredients: {recipe.ingredients}\n📖 - Instructions: {recipe.instructions}"
+            else:
+                response = "I'm sorry, I couldn't find that recipe in our database. Try another meal."
+
+            return JsonResponse({"response": response})
+
+        # Support-related queries
+        if any(keyword in user_message for keyword in SUPPORT_KEYWORDS):
+            return JsonResponse({"response": SUPPORT_MESSAGE})
+
+        # Default response for unrecognized inputs
+        return JsonResponse({"response": "I'm sorry, I didn't understand that. Can you ask about a product, recipe, or support?"})

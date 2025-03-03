@@ -72,8 +72,9 @@ class Product(models.Model):
     is_vat_exempt = models.BooleanField(default=False, help_text="Select if this product is VAT exempt (0%).")
     total_views = models.PositiveIntegerField(default=0)  # Total views for the product
     total_customers = models.PositiveIntegerField(default=1)  # Total unique customers for the product, default is 1 to avoid division by zero
-    
-    
+    ingredients = models.TextField()
+    instructions = models.TextField()
+
 
     # New method to get views per customer
     def get_views_per_customer(self):
@@ -289,3 +290,5 @@ class Order(models.Model):
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name="orders")
     created_at = models.DateTimeField(default=timezone.now)
     order_time = models.DateTimeField(default=timezone.now)
+    
+

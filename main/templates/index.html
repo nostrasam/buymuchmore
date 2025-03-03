@@ -4,18 +4,20 @@
 {% block content %}
 
 <div class="container mb4 home2">
-  <h3 class="text-center title">featured products</h3>
+  <h3 class="text-center title">Featured Products</h3>
   <div class="row row-cols-1 row-cols-md-4 g-5">
     {% for item in categs %}
     <div class="col fetureprod">
       <div class="card">
-        <a href="{% url 'featureitem' item.id item.slug %}" class="img2"><img src="{{ item.pix.url }}" class="card-img-top" alt="..."></a>
+        <a href="{% url 'featureitem' item.id item.slug %}" class="img2">
+          <img src="{{ item.pix.url }}" class="card-img-top" alt="{{ item.brands }}">
+        </a>
         <div class="card-body">
           <h5 class="card-title">{{ item.brands|title }}</h5>
           <p class="card-text descr">{{ item.description }}</p>
           <h6 class="card-title sponsor">
-            Sponsored - <a href="{{ item.website }}" target="_blank" style="display: inline; margin: 0; padding: 0;">{{ item.sponsorname }} <i class="bi bi-box-arrow-in-up-right"></i></a>
-        </h6>
+            Sponsored - <a href="{{ item.website }}" target="_blank">{{ item.sponsorname }} <i class="bi bi-box-arrow-in-up-right"></i></a>
+          </h6>
           <a href="{% url 'featureitem' item.id item.slug %}" class="btn btn-warning">View More</a> 
         </div>
       </div>
@@ -28,10 +30,12 @@
   <div class="row">
     {% for item in categ %}
     <div class="col-md-6">
-      <div class="card " data-aos="fade-right">
+      <div class="card" data-aos="fade-right">
         <div class="row g-0 catcard">
           <div class="col-md-6 motor">
-            <a href="{% url 'category' item.id item.slug %}" class="img2"><img src="{{ item.pix.url }}" class="card-img-top" alt="..."></a>
+            <a href="{% url 'category' item.id item.slug %}" class="img2">
+              <img src="{{ item.pix.url }}" class="card-img-top" alt="{{ item.brand }}">
+            </a>
           </div>
           <div class="col-md-6">
             <div class="card-body">
@@ -47,5 +51,5 @@
   </div>
 </div>
 
-  {% endblock content %}
-  {% block footer %} {% include 'footer.html' %} {% endblock footer %}
+{% endblock content %}
+{% block footer %} {% include 'footer.html' %} {% endblock footer %}
